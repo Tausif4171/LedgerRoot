@@ -1,0 +1,15 @@
+node_modules/
+.next/
+.next-live/
+dist/
+.env
+.env.*.local
+*.tsbuildinfo
+coverage/
+test-results/
+playwright-report/
+.cache/
+.DS_Store
+*.log
+.vercel/
+docs/demo/page@*.webm

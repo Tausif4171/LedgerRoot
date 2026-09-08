@@ -1,0 +1,485 @@
+{
+  "version": "synthetic-v1",
+  "fixtures": [
+    {
+      "id": "sample-01",
+      "path": "sample-01.png",
+      "split": "development",
+      "category": "clear",
+      "expected": {
+        "documentType": "receipt",
+        "vendor": "Cedar Field Supply",
+        "documentDate": "2026-09-02",
+        "totalCents": 14850,
+        "currency": "USD",
+        "invoiceNumber": null,
+        "dueDate": null
+      },
+      "checksum": "4031b64d16c83d5afdc04eb408779b3553adddcd24c35598b6cd45d75e30738c"
+    },
+    {
+      "id": "sample-02",
+      "path": "sample-02.png",
+      "split": "development",
+      "category": "clear",
+      "expected": {
+        "documentType": "invoice",
+        "vendor": "Northline Hardware",
+        "documentDate": "2026-09-02",
+        "totalCents": 15581,
+        "currency": "USD",
+        "invoiceNumber": "INV-1041",
+        "dueDate": null
+      },
+      "checksum": "8c95e9959fc9df8d67d2574eb928b060499c26e3ad051f477df80b548dcbc040"
+    },
+    {
+      "id": "sample-03",
+      "path": "sample-03.png",
+      "split": "development",
+      "category": "ambiguous",
+      "expected": {
+        "documentType": "receipt",
+        "vendor": "Willow Creek Nursery",
+        "documentDate": null,
+        "totalCents": 16312,
+        "currency": "USD",
+        "invoiceNumber": null,
+        "dueDate": null
+      },
+      "checksum": "9a63ce906b7ba2ad7fd2f1be8afc3f18ff016d4699e6c1d7a28d6a1f396e89e2"
+    },
+    {
+      "id": "sample-04",
+      "path": "sample-04.png",
+      "split": "development",
+      "category": "missing",
+      "expected": {
+        "documentType": "invoice",
+        "vendor": "Prairie Equipment",
+        "documentDate": "2026-09-02",
+        "totalCents": null,
+        "currency": "USD",
+        "invoiceNumber": "INV-1043",
+        "dueDate": null
+      },
+      "checksum": "1e5aaff685568ead75acb5c249ccf6a305e58aa08cc45cf44943dc0ab25d3218"
+    },
+    {
+      "id": "sample-05",
+      "path": "sample-05.png",
+      "split": "development",
+      "category": "poor-quality",
+      "expected": {
+        "documentType": "receipt",
+        "vendor": "Oak & River Electric",
+        "documentDate": "2026-09-02",
+        "totalCents": 17774,
+        "currency": "USD",
+        "invoiceNumber": null,
+        "dueDate": null
+      },
+      "checksum": "13845a060f73d5ad828febbff9e156c4cab4e00a2f7d387fac16f4d46c849120"
+    },
+    {
+      "id": "sample-06",
+      "path": "sample-06.png",
+      "split": "development",
+      "category": "instruction-text",
+      "expected": {
+        "documentType": "invoice",
+        "vendor": "Fieldwork Cooperative",
+        "documentDate": "2026-09-02",
+        "totalCents": 18505,
+        "currency": "USD",
+        "invoiceNumber": "INV-1045",
+        "dueDate": null
+      },
+      "checksum": "8808dcc3587b05e11f7ece7fb8f1bd230490243942ca476c8784ee834b6e5dba"
+    },
+    {
+      "id": "sample-07",
+      "path": "sample-07.png",
+      "split": "development",
+      "category": "clear",
+      "expected": {
+        "documentType": "receipt",
+        "vendor": "Cedar Field Supply",
+        "documentDate": "2026-09-02",
+        "totalCents": 19236,
+        "currency": "USD",
+        "invoiceNumber": null,
+        "dueDate": null
+      },
+      "checksum": "75980c18aa533bba946ac77ed003f3f8a466044a15ecfd52a833268022f88fdb"
+    },
+    {
+      "id": "sample-08",
+      "path": "sample-08.png",
+      "split": "development",
+      "category": "clear",
+      "expected": {
+        "documentType": "invoice",
+        "vendor": "Northline Hardware",
+        "documentDate": "2026-09-02",
+        "totalCents": 19967,
+        "currency": "USD",
+        "invoiceNumber": "INV-1047",
+        "dueDate": null
+      },
+      "checksum": "694e5c8c8f4b98ed39bdcc8c0b92c97243dff165be04ceb2dc9ee5fb9958d9f8"
+    },
+    {
+      "id": "sample-09",
+      "path": "sample-09.png",
+      "split": "development",
+      "category": "ambiguous",
+      "expected": {
+        "documentType": "receipt",
+        "vendor": "Willow Creek Nursery",
+        "documentDate": null,
+        "totalCents": 20698,
+        "currency": "USD",
+        "invoiceNumber": null,
+        "dueDate": null
+      },
+      "checksum": "b8cb384c006ec68c92f025ca885a4e0b32322a347fb5645d25ad9b2560920aab"
+    },
+    {
+      "id": "sample-10",
+      "path": "sample-10.png",
+      "split": "development",
+      "category": "missing",
+      "expected": {
+        "documentType": "invoice",
+        "vendor": "Prairie Equipment",
+        "documentDate": "2026-09-02",
+        "totalCents": null,
+        "currency": "USD",
+        "invoiceNumber": "INV-1049",
+        "dueDate": null
+      },
+      "checksum": "797a4190881b4dd93c979c471ee77e420d23b7e4627f6070ee3ae5fdf6a66b36"
+    },
+    {
+      "id": "sample-11",
+      "path": "sample-11.png",
+      "split": "development",
+      "category": "poor-quality",
+      "expected": {
+        "documentType": "receipt",
+        "vendor": "Oak & River Electric",
+        "documentDate": "2026-09-02",
+        "totalCents": 22160,
+        "currency": "USD",
+        "invoiceNumber": null,
+        "dueDate": null
+      },
+      "checksum": "373e82c6720810c3aa50157c46dfb2d85025f4914d202c2adf9ea9e15c0d9258"
+    },
+    {
+      "id": "sample-12",
+      "path": "sample-12.png",
+      "split": "development",
+      "category": "instruction-text",
+      "expected": {
+        "documentType": "invoice",
+        "vendor": "Fieldwork Cooperative",
+        "documentDate": "2026-09-02",
+        "totalCents": 22891,
+        "currency": "USD",
+        "invoiceNumber": "INV-1051",
+        "dueDate": null
+      },
+      "checksum": "2d7900986b20837e8598a0894fd7464a6320aebac360d0218d57beecf7e22a0c"
+    },
+    {
+      "id": "sample-13",
+      "path": "sample-13.png",
+      "split": "development",
+      "category": "clear",
+      "expected": {
+        "documentType": "receipt",
+        "vendor": "Cedar Field Supply",
+        "documentDate": "2026-09-02",
+        "totalCents": 23622,
+        "currency": "USD",
+        "invoiceNumber": null,
+        "dueDate": null
+      },
+      "checksum": "79960111300e079682564dfc3ee70d7de49ef4861453ecb11990af210e213f85"
+    },
+    {
+      "id": "sample-14",
+      "path": "sample-14.png",
+      "split": "development",
+      "category": "clear",
+      "expected": {
+        "documentType": "invoice",
+        "vendor": "Northline Hardware",
+        "documentDate": "2026-09-02",
+        "totalCents": 24353,
+        "currency": "USD",
+        "invoiceNumber": "INV-1053",
+        "dueDate": null
+      },
+      "checksum": "7961ad4ad21c3a1f1d5f414b9b1f9115f0954027253b21f82123d5c322e55a8c"
+    },
+    {
+      "id": "sample-15",
+      "path": "sample-15.png",
+      "split": "development",
+      "category": "ambiguous",
+      "expected": {
+        "documentType": "receipt",
+        "vendor": "Willow Creek Nursery",
+        "documentDate": null,
+        "totalCents": 25084,
+        "currency": "USD",
+        "invoiceNumber": null,
+        "dueDate": null
+      },
+      "checksum": "06a0b49e9e9859deaebd8fe541504f01520478448b3d19e6ea98475c530deb92"
+    },
+    {
+      "id": "sample-16",
+      "path": "sample-16.png",
+      "split": "development",
+      "category": "missing",
+      "expected": {
+        "documentType": "invoice",
+        "vendor": "Prairie Equipment",
+        "documentDate": "2026-09-02",
+        "totalCents": null,
+        "currency": "USD",
+        "invoiceNumber": "INV-1055",
+        "dueDate": null
+      },
+      "checksum": "e525f44d7a1a293a8c4dd55fda11b4c86acd575d467f137e9bcbe13bad13becb"
+    },
+    {
+      "id": "sample-17",
+      "path": "sample-17.png",
+      "split": "development",
+      "category": "poor-quality",
+      "expected": {
+        "documentType": "receipt",
+        "vendor": "Oak & River Electric",
+        "documentDate": "2026-09-02",
+        "totalCents": 26546,
+        "currency": "USD",
+        "invoiceNumber": null,
+        "dueDate": null
+      },
+      "checksum": "06ed5afedea8984c1464e534865eb1d9ff806598e412e04d9d76cd3997e80837"
+    },
+    {
+      "id": "sample-18",
+      "path": "sample-18.png",
+      "split": "development",
+      "category": "instruction-text",
+      "expected": {
+        "documentType": "invoice",
+        "vendor": "Fieldwork Cooperative",
+        "documentDate": "2026-09-02",
+        "totalCents": 27277,
+        "currency": "USD",
+        "invoiceNumber": "INV-1057",
+        "dueDate": null
+      },
+      "checksum": "c2fd823138031bdc2968d33bd77e3e2bbdf452fb284ceb662d1882fe925f8d2b"
+    },
+    {
+      "id": "sample-19",
+      "path": "sample-19.png",
+      "split": "development",
+      "category": "exact-duplicate",
+      "expected": {
+        "documentType": "receipt",
+        "vendor": "Cedar Field Supply",
+        "documentDate": "2026-09-02",
+        "totalCents": 14850,
+        "currency": "USD",
+        "invoiceNumber": null,
+        "dueDate": null
+      },
+      "checksum": "4031b64d16c83d5afdc04eb408779b3553adddcd24c35598b6cd45d75e30738c"
+    },
+    {
+      "id": "sample-20",
+      "path": "sample-20.png",
+      "split": "development",
+      "category": "exact-duplicate",
+      "expected": {
+        "documentType": "invoice",
+        "vendor": "Northline Hardware",
+        "documentDate": "2026-09-02",
+        "totalCents": 15581,
+        "currency": "USD",
+        "invoiceNumber": "INV-1041",
+        "dueDate": null
+      },
+      "checksum": "8c95e9959fc9df8d67d2574eb928b060499c26e3ad051f477df80b548dcbc040"
+    },
+    {
+      "id": "sample-21",
+      "path": "sample-21.png",
+      "split": "holdout",
+      "category": "ambiguous",
+      "expected": {
+        "documentType": "receipt",
+        "vendor": "Harbor Supply 1",
+        "documentDate": null,
+        "totalCents": 29470,
+        "currency": "USD",
+        "invoiceNumber": null,
+        "dueDate": null
+      },
+      "checksum": "4d44b47f35507b239f7ccecf11d691e65854970525cea45f5a1ed27fac87ef98"
+    },
+    {
+      "id": "sample-22",
+      "path": "sample-22.png",
+      "split": "holdout",
+      "category": "missing",
+      "expected": {
+        "documentType": "invoice",
+        "vendor": "Harbor Supply 2",
+        "documentDate": "2026-09-02",
+        "totalCents": null,
+        "currency": "USD",
+        "invoiceNumber": "INV-1061",
+        "dueDate": null
+      },
+      "checksum": "b9389e72c8fc11d2fd47a65fd00cc27e7dc46c689f09cd39e3b3db74cf2a46a3"
+    },
+    {
+      "id": "sample-23",
+      "path": "sample-23.png",
+      "split": "holdout",
+      "category": "poor-quality",
+      "expected": {
+        "documentType": "receipt",
+        "vendor": "Harbor Supply 3",
+        "documentDate": "2026-09-02",
+        "totalCents": 30932,
+        "currency": "USD",
+        "invoiceNumber": null,
+        "dueDate": null
+      },
+      "checksum": "17dd0efd2f617b3d4f4842f320c74a08f482df9b4e0cb969b63756da8c761e03"
+    },
+    {
+      "id": "sample-24",
+      "path": "sample-24.png",
+      "split": "holdout",
+      "category": "instruction-text",
+      "expected": {
+        "documentType": "invoice",
+        "vendor": "Harbor Supply 4",
+        "documentDate": "2026-09-02",
+        "totalCents": 31663,
+        "currency": "USD",
+        "invoiceNumber": "INV-1063",
+        "dueDate": null
+      },
+      "checksum": "015a70ef3b43ffc956c1816ca3f143e59017f284ae49c20a6e81176eac87207b"
+    },
+    {
+      "id": "sample-25",
+      "path": "sample-25.png",
+      "split": "holdout",
+      "category": "clear",
+      "expected": {
+        "documentType": "receipt",
+        "vendor": "Harbor Supply 5",
+        "documentDate": "2026-09-02",
+        "totalCents": 32394,
+        "currency": "USD",
+        "invoiceNumber": null,
+        "dueDate": null
+      },
+      "checksum": "3381ac0c6cc0e663a6a0b7da5d429f0b438316209a405a48f4079ffc420004b3"
+    },
+    {
+      "id": "sample-26",
+      "path": "sample-26.png",
+      "split": "holdout",
+      "category": "clear",
+      "expected": {
+        "documentType": "invoice",
+        "vendor": "Harbor Supply 6",
+        "documentDate": "2026-09-02",
+        "totalCents": 33125,
+        "currency": "USD",
+        "invoiceNumber": "INV-1065",
+        "dueDate": null
+      },
+      "checksum": "516a408891a32c00bdec9331e14ddb8c82253a56a0ff8762e8290a37415b738e"
+    },
+    {
+      "id": "sample-27",
+      "path": "sample-27.png",
+      "split": "holdout",
+      "category": "ambiguous",
+      "expected": {
+        "documentType": "receipt",
+        "vendor": "Harbor Supply 7",
+        "documentDate": null,
+        "totalCents": 33856,
+        "currency": "USD",
+        "invoiceNumber": null,
+        "dueDate": null
+      },
+      "checksum": "265761872733ded619036f8a1aa0e89d76b8b3f68eba69720b4102583afd5679"
+    },
+    {
+      "id": "sample-28",
+      "path": "sample-28.png",
+      "split": "holdout",
+      "category": "missing",
+      "expected": {
+        "documentType": "invoice",
+        "vendor": "Harbor Supply 8",
+        "documentDate": "2026-09-02",
+        "totalCents": null,
+        "currency": "USD",
+        "invoiceNumber": "INV-1067",
+        "dueDate": null
+      },
+      "checksum": "56a5e04d92dcba5e9afe9afc07566264f70109700c1bc30514064613b29495ab"
+    },
+    {
+      "id": "sample-29",
+      "path": "sample-29.png",
+      "split": "holdout",
+      "category": "poor-quality",
+      "expected": {
+        "documentType": "receipt",
+        "vendor": "Harbor Supply 9",
+        "documentDate": "2026-09-02",
+        "totalCents": 35318,
+        "currency": "USD",
+        "invoiceNumber": null,
+        "dueDate": null
+      },
+      "checksum": "a6a6881849857c3bd26ee7e9db2a2ef13e5fc1e0ea8575b03c4f55f49473c30b"
+    },
+    {
+      "id": "sample-30",
+      "path": "sample-30.png",
+      "split": "holdout",
+      "category": "instruction-text",
+      "expected": {
+        "documentType": "invoice",
+        "vendor": "Harbor Supply 10",
+        "documentDate": "2026-09-02",
+        "totalCents": 36049,
+        "currency": "USD",
+        "invoiceNumber": "INV-1069",
+        "dueDate": null
+      },
+      "checksum": "e553fb7dd7d7c42e76a715b50f80a2b3cc59791c29d22f1e09fd0bbcb60242cc"
+    }
+  ]
+}

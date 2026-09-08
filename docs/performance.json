@@ -1,0 +1,24 @@
+{
+  "at": "2026-09-08T05:44:45.245Z",
+  "browser": "153.0.8010.12",
+  "target": "local production sample build /documents",
+  "profile": "390x844; 4x CPU slowdown; 150ms network latency; 1.6Mbps down / 0.75Mbps up; disabled browser cache; 3 new contexts",
+  "limitations": "Local loopback server; not real-device field data or remote Vercel latency. CLS is summed no-input shifts during the sampled window, not a full-session field score.",
+  "runs": [
+    {
+      "run": 1,
+      "lcp": 620,
+      "cls": 0.000033949109797796373
+    },
+    {
+      "run": 2,
+      "lcp": 620,
+      "cls": 0.000033949109797796373
+    },
+    {
+      "run": 3,
+      "lcp": 620,
+      "cls": 0.000033949109797796373
+    }
+  ]
+}

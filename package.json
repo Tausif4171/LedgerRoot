@@ -1,0 +1,61 @@
+{
+  "name": "ledgerroot",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "npm@11.19.1",
+  "type": "module",
+  "overrides": {
+    "effect": "^3.20.0",
+    "deepmerge-ts": "^8.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "setup:local": "tsx scripts/setup-local.ts",
+    "smoke:extraction": "tsx scripts/smoke-extraction.ts",
+    "dev": "npm run build:packages && npm run dev -w @ledgerroot/web",
+    "dev:live": "npm run build:packages && concurrently -k \"npm run dev -w @ledgerroot/api\" \"npm run worker -w @ledgerroot/api\" \"npm run dispatcher -w @ledgerroot/api\" \"npm run dev:live -w @ledgerroot/web\"",
+    "build:packages": "npm run build -w @ledgerroot/contracts && npm run build -w @ledgerroot/domain",
+    "build": "npm run build:packages && npm run build -w @ledgerroot/api && npm run build -w @ledgerroot/web",
+    "typecheck": "npm run build:packages && npm run typecheck -ws --if-present",
+    "lint": "eslint . && node scripts/check-boundaries.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run build:packages && vitest run",
+    "test:integration": "npm run build:packages && vitest run --config vitest.integration.config.ts",
+    "db:test:setup": "tsx scripts/setup-test-db.ts",
+    "test:e2e": "playwright test",
+    "test:a11y": "playwright test --grep accessibility",
+    "db:generate": "npm run db:generate -w @ledgerroot/api",
+    "db:migrate": "npm run db:migrate -w @ledgerroot/api",
+    "db:deploy": "npm run db:deploy -w @ledgerroot/api",
+    "seed": "npm run seed -w @ledgerroot/api",
+    "fixtures": "tsx scripts/generate-fixtures.ts",
+    "samples:prepare": "tsx scripts/prepare-samples.ts",
+    "eval:import": "tsx scripts/import-evaluation.ts",
+    "storage:cleanup": "tsx apps/api/src/entrypoints/cleanup.ts",
+    "eval": "npm run build:packages && tsx scripts/evaluate.ts",
+    "verify:tokens": "node scripts/check-boundaries.mjs",
+    "infra:up": "docker compose -p ledgerroot -f infrastructure/compose.yml --env-file .env up -d"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.0",
+    "@playwright/test": "^1.58.2",
+    "@axe-core/playwright": "^4.11.1",
+    "@types/node": "^24.10.0",
+    "concurrently": "^9.2.1",
+    "dotenv-cli": "^10.0.0",
+    "eslint": "^10.0.0",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "prettier": "^3.8.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.0",
+    "vitest": "^4.0.18"
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "fields": {
+    "documentType": "receipt",
+    "vendor": null,
+    "documentDate": "2026-09-02",
+    "totalCents": 32394,
+    "currency": "USD",
+    "invoiceNumber": null,
+    "dueDate": null
+  },
+  "evidence": {
+    "documentType": [
+      "s1"
+    ],
+    "vendor": [],
+    "documentDate": [
+      "s2"
+    ],
+    "totalCents": [
+      "s5"
+    ],
+    "currency": [
+      "s5"
+    ],
+    "invoiceNumber": [],
+    "dueDate": []
+  },
+  "warnings": [
+    "vendor: needs human confirmation."
+  ],
+  "spans": [
+    {
+      "id": "s0",
+      "text": "Harbor Supply 5",
+      "x": 0.083,
+      "y": 0.05307692307692308,
+      "width": 0.299,
+      "height": 0.03076923076923077
+    },
+    {
+      "id": "s1",
+      "text": "RECEIPT",
+      "x": 0.082,
+      "y": 0.11153846153846154,
+      "width": 0.119,
+      "height": 0.015384615384615385
+    },
+    {
+      "id": "s2",
+      "text": "Date: September 2, 2026",
+      "x": 0.082,
+      "y": 0.21153846153846154,
+      "width": 0.31,
+      "height": 0.02
+    },
+    {
+      "id": "s3",
+      "text": "Farm and workshop supplies",
+      "x": 0.082,
+      "y": 0.31153846153846154,
+      "width": 0.355,
+      "height": 0.02
+    },
+    {
+      "id": "s4",
+      "text": "Thank you for supporting local business.",
+      "x": 0.081,
+      "y": 0.36153846153846153,
+      "width": 0.498,
+      "height": 0.02
+    },
+    {
+      "id": "s5",
+      "text": "TOTAL: USD 323.94",
+      "x": 0.081,
+      "y": 0.46153846153846156,
+      "width": 0.253,
+      "height": 0.015384615384615385
+    },
+    {
+      "id": "s6",
+      "text": "SYNTHETIC DOCUMENT / NOT FOR PAYMENT",
+      "x": 0.081,
+      "y": 0.5615384615384615,
+      "width": 0.614,
+      "height": 0.015384615384615385
+    }
+  ],
+  "model": "qwen2.5:7b",
+  "modelDigest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+  "promptVersion": "receipt-fields-v2",
+  "durationMs": 8231,
+  "provenance": "live"
+}

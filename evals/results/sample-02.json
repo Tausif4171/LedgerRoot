@@ -1,0 +1,104 @@
+{
+  "fields": {
+    "documentType": null,
+    "vendor": "Northline Hardware",
+    "documentDate": "2026-09-02",
+    "totalCents": 15581,
+    "currency": "USD",
+    "invoiceNumber": "INV-1041",
+    "dueDate": null
+  },
+  "evidence": {
+    "documentType": [],
+    "vendor": [
+      "s0"
+    ],
+    "documentDate": [
+      "s3"
+    ],
+    "totalCents": [
+      "s6"
+    ],
+    "currency": [
+      "s6"
+    ],
+    "invoiceNumber": [
+      "s2"
+    ],
+    "dueDate": []
+  },
+  "warnings": [
+    "documentType: needs human confirmation."
+  ],
+  "spans": [
+    {
+      "id": "s0",
+      "text": "Northline Hardware",
+      "x": 0.083,
+      "y": 0.05384615384615385,
+      "width": 0.357,
+      "height": 0.023846153846153847
+    },
+    {
+      "id": "s1",
+      "text": "INVOICE",
+      "x": 0.083,
+      "y": 0.11153846153846154,
+      "width": 0.111,
+      "height": 0.015384615384615385
+    },
+    {
+      "id": "s2",
+      "text": "Invoice number: INV-1041",
+      "x": 0.083,
+      "y": 0.21153846153846154,
+      "width": 0.316,
+      "height": 0.015384615384615385
+    },
+    {
+      "id": "s3",
+      "text": "Date: September 2, 2026",
+      "x": 0.082,
+      "y": 0.26153846153846155,
+      "width": 0.31,
+      "height": 0.02
+    },
+    {
+      "id": "s4",
+      "text": "Farm and workshop supplies",
+      "x": 0.082,
+      "y": 0.36153846153846153,
+      "width": 0.355,
+      "height": 0.02
+    },
+    {
+      "id": "s5",
+      "text": "Thank you for supporting local business.",
+      "x": 0.081,
+      "y": 0.4115384615384615,
+      "width": 0.498,
+      "height": 0.02
+    },
+    {
+      "id": "s6",
+      "text": "TOTAL: USD 155.81",
+      "x": 0.081,
+      "y": 0.5115384615384615,
+      "width": 0.25,
+      "height": 0.015384615384615385
+    },
+    {
+      "id": "s7",
+      "text": "SYNTHETIC DOCUMENT / NOT FOR PAYMENT",
+      "x": 0.081,
+      "y": 0.6115384615384616,
+      "width": 0.614,
+      "height": 0.015384615384615385
+    }
+  ],
+  "model": "qwen2.5:7b",
+  "modelDigest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+  "promptVersion": "receipt-fields-v2",
+  "durationMs": 7899,
+  "provenance": "live"
+}

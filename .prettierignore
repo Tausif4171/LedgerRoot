@@ -1,0 +1,8 @@
+package-lock.json
+node_modules
+.next
+.next-*
+dist
+evals/results
+apps/web/public/samples
+apps/api/prisma/migrations

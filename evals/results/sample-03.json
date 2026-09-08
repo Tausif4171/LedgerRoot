@@ -1,0 +1,107 @@
+{
+  "fields": {
+    "documentType": null,
+    "vendor": null,
+    "documentDate": null,
+    "totalCents": 16312,
+    "currency": "USD",
+    "invoiceNumber": null,
+    "dueDate": null
+  },
+  "evidence": {
+    "documentType": [],
+    "vendor": [
+      "s0"
+    ],
+    "documentDate": [
+      "s2"
+    ],
+    "totalCents": [
+      "s6"
+    ],
+    "currency": [
+      "s5",
+      "s6"
+    ],
+    "invoiceNumber": [],
+    "dueDate": []
+  },
+  "warnings": [
+    "documentType: needs human confirmation.",
+    "vendor: needs human confirmation.",
+    "documentDate: needs human confirmation.",
+    "Multiple total labels found. Compare the final total against the source.",
+    "Numeric date format may be ambiguous. Confirm the document date."
+  ],
+  "spans": [
+    {
+      "id": "s0",
+      "text": "Willow Creek Nursery",
+      "x": 0.081,
+      "y": 0.05307692307692308,
+      "width": 0.402,
+      "height": 0.03076923076923077
+    },
+    {
+      "id": "s1",
+      "text": "RECEIPT",
+      "x": 0.082,
+      "y": 0.11153846153846154,
+      "width": 0.119,
+      "height": 0.015384615384615385
+    },
+    {
+      "id": "s2",
+      "text": "Date: 09/02/2026",
+      "x": 0.082,
+      "y": 0.21153846153846154,
+      "width": 0.212,
+      "height": 0.015384615384615385
+    },
+    {
+      "id": "s3",
+      "text": "Farm and workshop supplies",
+      "x": 0.082,
+      "y": 0.31153846153846154,
+      "width": 0.355,
+      "height": 0.02
+    },
+    {
+      "id": "s4",
+      "text": "Thank you for supporting local business.",
+      "x": 0.081,
+      "y": 0.36153846153846153,
+      "width": 0.498,
+      "height": 0.02
+    },
+    {
+      "id": "s5",
+      "text": "Estimated total: USD 199.00",
+      "x": 0.082,
+      "y": 0.46153846153846156,
+      "width": 0.35,
+      "height": 0.015384615384615385
+    },
+    {
+      "id": "s6",
+      "text": "TOTAL: USD 163.12",
+      "x": 0.081,
+      "y": 0.5115384615384615,
+      "width": 0.253,
+      "height": 0.015384615384615385
+    },
+    {
+      "id": "s7",
+      "text": "SYNTHETIC DOCUMENT / NOT FOR PAYMENT",
+      "x": 0.081,
+      "y": 0.6115384615384616,
+      "width": 0.614,
+      "height": 0.015384615384615385
+    }
+  ],
+  "model": "qwen2.5:7b",
+  "modelDigest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+  "promptVersion": "receipt-fields-v2",
+  "durationMs": 20016,
+  "provenance": "live"
+}

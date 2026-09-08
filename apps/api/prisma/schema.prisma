@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+model User {
+  id String @id
+  name String
+  email String @unique
+  emailVerified Boolean @default(false)
+  image String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sessions Session[]
+  accounts Account[]
+  memberships Membership[]
+  @@map("user")
+}
+model Session {
+  id String @id
+  expiresAt DateTime
+  token String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId String
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@map("session")
+}
+model Account {
+  id String @id
+  accountId String
+  providerId String
+  userId String
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  accessToken String?
+  refreshToken String?
+  idToken String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope String?
+  password String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("account")
+}
+model Verification {
+  id String @id
+  identifier String
+  value String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("verification")
+}
+model Workspace {
+  id String @id @default(uuid())
+  name String
+  memberships Membership[]
+  documents Document[]
+}
+model Membership {
+  userId String
+  workspaceId String
+  role String
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade)
+  @@id([userId,workspaceId])
+}
+model Document {
+  id String @id @default(uuid())
+  workspaceId String
+  workspace Workspace @relation(fields:[workspaceId],references:[id])
+  filename String
+  checksum String
+  objectKey String @unique
+  mime String
+  bytes Int
+  createdAt DateTime @default(now())
+  reviewStatus String @default("NOT_READY")
+  revision Int @default(0)
+  fields Json
+  latestRunId String @unique
+  runs ProcessingRun[]
+  reviews ReviewRevision[]
+  audit AuditEvent[]
+  @@unique([workspaceId,checksum])
+  @@index([workspaceId,createdAt,id])
+}
+model ProcessingRun {
+  id String @id @default(uuid())
+  documentId String
+  document Document @relation(fields:[documentId],references:[id])
+  stage String @default("PENDING_DISPATCH")
+  generation Int @default(0)
+  leaseUntil DateTime?
+  attempts Int @default(0)
+  error String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  result ExtractionResult?
+  attemptHistory ProcessingAttempt[]
+  artifacts Artifact[]
+  outbox Outbox?
+}
+model ProcessingAttempt {
+  id String @id @default(uuid())
+  runId String
+  run ProcessingRun @relation(fields:[runId],references:[id])
+  generation Int
+  startedAt DateTime @default(now())
+  finishedAt DateTime?
+  error String?
+  @@unique([runId,generation])
+}
+model ExtractionResult {
+  runId String @id
+  run ProcessingRun @relation(fields:[runId],references:[id])
+  payload Json
+  createdAt DateTime @default(now())
+}
+model Artifact {
+  id String @id @default(uuid())
+  runId String
+  run ProcessingRun @relation(fields:[runId],references:[id])
+  kind String
+  objectKey String @unique
+  @@unique([runId,kind])
+}
+model ReviewRevision {
+  id String @id @default(uuid())
+  documentId String
+  document Document @relation(fields:[documentId],references:[id])
+  revision Int
+  runId String
+  actorId String
+  action String
+  fields Json
+  note String?
+  createdAt DateTime @default(now())
+  @@unique([documentId,revision])
+}
+model AuditEvent {
+  id String @id @default(uuid())
+  documentId String
+  document Document @relation(fields:[documentId],references:[id])
+  actor String
+  action String
+  note String?
+  before Json?
+  after Json?
+  createdAt DateTime @default(now())
+}
+model Outbox {
+  id String @id @default(uuid())
+  runId String @unique
+  run ProcessingRun @relation(fields:[runId],references:[id])
+  sentAt DateTime?
+  createdAt DateTime @default(now())
+}
+model IdempotencyRecord {
+  scope String
+  key String
+  requestHash String
+  response Json
+  createdAt DateTime @default(now())
+  @@id([scope,key])
+}
+model EvaluationRun {
+  id String @id
+  payload Json
+  createdAt DateTime @default(now())
+}

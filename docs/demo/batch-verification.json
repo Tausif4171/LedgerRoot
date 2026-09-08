@@ -1,0 +1,31 @@
+{
+  "at": "2026-09-07T19:46:06.256Z",
+  "mode": "real-local",
+  "documents": [
+    {
+      "id": "2d7bc85a-fc4d-4902-9abd-5ddf91af8192",
+      "stage": "READY",
+      "filename": "sample-25.png"
+    },
+    {
+      "id": "3ebc1a6b-d1f9-4475-9df1-484bc60411ff",
+      "stage": "READY",
+      "filename": "sample-21.png"
+    },
+    {
+      "id": "abcfdd5b-6e36-4c21-83a0-15e8326cfe2d",
+      "stage": "READY",
+      "filename": "sample-24.png"
+    },
+    {
+      "id": "ce1cd6b9-d268-4e55-8cb9-22d33ff1af21",
+      "stage": "READY",
+      "filename": "sample-23.png"
+    },
+    {
+      "id": "facc97d4-8cd2-4a0c-9e81-0d8f74600d35",
+      "stage": "READY",
+      "filename": "sample-22.png"
+    }
+  ]
+}

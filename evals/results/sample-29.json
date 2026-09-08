@@ -1,0 +1,94 @@
+{
+  "fields": {
+    "documentType": "receipt",
+    "vendor": null,
+    "documentDate": "2026-09-02",
+    "totalCents": 35318,
+    "currency": "USD",
+    "invoiceNumber": null,
+    "dueDate": null
+  },
+  "evidence": {
+    "documentType": [
+      "s1"
+    ],
+    "vendor": [],
+    "documentDate": [
+      "s2"
+    ],
+    "totalCents": [
+      "s5"
+    ],
+    "currency": [
+      "s5"
+    ],
+    "invoiceNumber": [],
+    "dueDate": []
+  },
+  "warnings": [
+    "vendor: needs human confirmation."
+  ],
+  "spans": [
+    {
+      "id": "s0",
+      "text": "Harbor Supply 9",
+      "x": 0.082,
+      "y": 0.05307692307692308,
+      "width": 0.301,
+      "height": 0.031538461538461536
+    },
+    {
+      "id": "s1",
+      "text": "RECEIPT",
+      "x": 0.081,
+      "y": 0.11076923076923077,
+      "width": 0.12,
+      "height": 0.016923076923076923
+    },
+    {
+      "id": "s2",
+      "text": "Date: September 2, 2026",
+      "x": 0.081,
+      "y": 0.21076923076923076,
+      "width": 0.311,
+      "height": 0.02076923076923077
+    },
+    {
+      "id": "s3",
+      "text": "Farm and workshop supplies",
+      "x": 0.081,
+      "y": 0.31076923076923074,
+      "width": 0.357,
+      "height": 0.02076923076923077
+    },
+    {
+      "id": "s4",
+      "text": "Thank you for supporting local business.",
+      "x": 0.08,
+      "y": 0.3607692307692308,
+      "width": 0.499,
+      "height": 0.021538461538461538
+    },
+    {
+      "id": "s5",
+      "text": "TOTAL: USD 353.18",
+      "x": 0.08,
+      "y": 0.46076923076923076,
+      "width": 0.255,
+      "height": 0.016923076923076923
+    },
+    {
+      "id": "s6",
+      "text": "SYNTHETIC DOCUMENT / NOT FOR PAYMENT",
+      "x": 0.081,
+      "y": 0.5607692307692308,
+      "width": 0.614,
+      "height": 0.016923076923076923
+    }
+  ],
+  "model": "qwen2.5:7b",
+  "modelDigest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+  "promptVersion": "receipt-fields-v2",
+  "durationMs": 7609,
+  "provenance": "live"
+}

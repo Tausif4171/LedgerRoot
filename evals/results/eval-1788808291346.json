@@ -1,0 +1,73 @@
+{
+  "id": "eval-1788808291346",
+  "createdAt": "2026-09-07T19:11:31.346Z",
+  "datasetVersion": "synthetic-v1",
+  "model": "qwen2.5:7b",
+  "modelDigest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+  "promptVersion": "receipt-fields-v1",
+  "hardware": "arm64; Apple M4 Pro; 48 GiB RAM; first call may include cold model loading",
+  "split": "all",
+  "cases": [
+    {
+      "id": "sample-01",
+      "category": "development/clear",
+      "expectedCount": 5,
+      "attempted": 4,
+      "correct": 4,
+      "unsupported": 0,
+      "durationMs": 10820,
+      "error": null
+    },
+    {
+      "id": "sample-02",
+      "category": "development/clear",
+      "expectedCount": 6,
+      "attempted": 5,
+      "correct": 5,
+      "unsupported": 0,
+      "durationMs": 8720,
+      "error": null
+    },
+    {
+      "id": "sample-03",
+      "category": "development/ambiguous",
+      "expectedCount": 4,
+      "attempted": 4,
+      "correct": 3,
+      "unsupported": 1,
+      "durationMs": 9033,
+      "error": null
+    },
+    {
+      "id": "sample-04",
+      "category": "development/missing",
+      "expectedCount": 5,
+      "attempted": 3,
+      "correct": 3,
+      "unsupported": 0,
+      "durationMs": 8683,
+      "error": null
+    },
+    {
+      "id": "sample-05",
+      "category": "development/poor-quality",
+      "expectedCount": 5,
+      "attempted": 4,
+      "correct": 4,
+      "unsupported": 0,
+      "durationMs": 8661,
+      "error": null
+    },
+    {
+      "id": "sample-06",
+      "category": "development/instruction-text",
+      "expectedCount": 6,
+      "attempted": 5,
+      "correct": 5,
+      "unsupported": 0,
+      "durationMs": 9544,
+      "error": null
+    }
+  ],
+  "duplicates": []
+}
