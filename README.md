@@ -12,6 +12,8 @@ An independent engineering prototype for reliable document processing. Not an Am
 - PostgreSQL-backed processing state, durable dispatch outbox, BullMQ workers, bounded retries, expired-worker fencing, and retained attempts.
 - Local Tesseract OCR + Ollama extraction, checked source references, empty unsupported fields, image-region evidence.
 - Human edits, explicit approval, rejection/needs-information reasons, reopen, conflict-safe revisions, and append-only application history.
+- Assigned correction requests with an in-app inbox, responses, follow-ups, reassignment and resolution. Active requests block approval.
+- Clearer-photo revisions preserve every source image and saved correction. New suggestions require explicit review; historical images are read-only, not restorable.
 - Five-file batch UI, per-file byte progress, responsive review, keyboard navigation, accessible dialogs, small thumbnails, pagination.
 - Separate sample adapter using six synthetic documents with **recorded real-model results**. Edits stay in this tab; simulated failures/retries are labelled. No arbitrary public uploads or inference calls.
 - A 30-case synthetic evaluation, including errors and abstentions—not a production benchmark.
@@ -44,6 +46,8 @@ Open **http://localhost:3100/login**. Local credentials are in the generated, gi
 
 See [engineering/setup](docs/engineering.md) for ports, commands, migrations, roles, recovery and deployment.
 
+For the new two-person scenario, open **http://localhost:3100/requests** in sample mode and select **Start correction scenario**. See the [correction workflow guide](docs/correction-workflow.md) for real two-user setup, migration precautions, test steps and remaining release checks.
+
 ## Verified evidence
 
 - [Actual local workflow recording](docs/demo/live-workflow.webm) and [machine-readable verification](docs/demo/live-verification.json): upload, real processing, edit surviving refresh, approval and duplicate handling. This is a short un-narrated recording, not a simulated processing animation.
@@ -75,6 +79,7 @@ The UI primitives follow the small, local Radix/CVA component pattern used by sh
 - [Architecture and invariants](docs/architecture.md)
 - [UI/UX specification](docs/ui-ux.md)
 - [Engineering guide](docs/engineering.md)
+- [Correction requests and source-image revisions](docs/correction-workflow.md)
 - [Evaluation and reproducibility](docs/evaluation.md)
 - [Evidence and reference boundaries](docs/evidence.md)
 - [Prioritized backlog](docs/backlog.md)

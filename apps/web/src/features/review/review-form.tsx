@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -17,6 +17,7 @@ import { moneyInput, parseMoney } from "@ledgerroot/domain";
 import { gateway } from "@/adapters/gateway";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/dialog";
+import { fieldLabels, fieldValue, readableWarning } from "@/lib/field-labels";
 const formSchema = z.object({
   documentType: z.enum(["", "receipt", "invoice"]),
   vendor: z.string().max(200),
@@ -41,9 +42,11 @@ const defaults = (f: Fields): Values => ({
 export function ReviewForm({
   document: d,
   onEvidence,
+  onDirtyChange,
 }: {
   document: DocumentRecord;
   onEvidence: (ids: string[]) => void;
+  onDirtyChange?: (dirty: boolean) => void;
 }) {
   const cache = useQueryClient();
   const [base, setBase] = useState(d);
@@ -57,7 +60,14 @@ export function ReviewForm({
     resolver: zodResolver(formSchema),
     defaultValues: defaults(d.fields),
   });
-  const locked = !["PENDING", "NEEDS_INFORMATION"].includes(base.reviewStatus) || !d.canReview;
+  useEffect(() => {
+    onDirtyChange?.(form.formState.isDirty);
+  }, [form.formState.isDirty, onDirtyChange]);
+  const changedRemotely = base.revision !== d.revision || base.runId !== d.runId;
+  const locked =
+    !["PENDING", "NEEDS_INFORMATION"].includes(base.reviewStatus) ||
+    !d.canReview ||
+    d.stage !== "READY";
   async function send(action: ReviewAction, values: Values) {
     setBusy(true);
     setError("");
@@ -106,6 +116,10 @@ export function ReviewForm({
   const submit = (action: ReviewAction) =>
     void form.handleSubmit((values) => send(action, values))();
   function evidence(name: FieldName) {
+    if (base.runId !== d.runId)
+      return (
+        <span className="field-origin">Previous source values · reconcile with the new source</span>
+      );
     const ids = d.extraction?.evidence[name] ?? [];
     const edited = base.fields[name] !== d.extraction?.fields[name];
     return edited ? (
@@ -130,12 +144,87 @@ export function ReviewForm({
         <span>Revision {base.revision}</span>
       </div>
       <form className="review-form" onSubmit={form.handleSubmit((v) => send("save", v))}>
+        {changedRemotely && (
+          <div className="callout" role="status">
+            <strong>The saved record or source changed. Your draft is still here.</strong>
+            <p>
+              Compare the saved values before continuing. Approval confirmation must be renewed.
+            </p>
+            <details>
+              <summary>Latest saved values</summary>
+              <pre style={{ whiteSpace: "pre-wrap" }}>{JSON.stringify(d.fields, null, 2)}</pre>
+            </details>
+            <Button
+              type="button"
+              onClick={() => {
+                setBase(d);
+                form.setValue("confirmed", false);
+                setConflict(null);
+              }}
+            >
+              Keep draft against latest version
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setBase(d);
+                form.reset(defaults(d.fields));
+                setConflict(null);
+              }}
+            >
+              Discard draft and load saved values
+            </Button>
+          </div>
+        )}
+        {d.hasActiveRequest && (
+          <p className="callout">
+            Resolve or cancel the active correction request before approving.
+          </p>
+        )}
+        {(d.sourceVersion ?? 1) > 1 && d.extraction && !changedRemotely && (
+          <details>
+            <summary>
+              Compare saved values with new suggestions · source version {d.sourceVersion}
+            </summary>
+            <ul>
+              {Object.entries(d.extraction.fields)
+                .filter(([key, value]) => base.fields[key as FieldName] !== value)
+                .map(([key, value]) => (
+                  <li key={key}>
+                    <strong>{fieldLabels[key as FieldName]}</strong>: saved{" "}
+                    {fieldValue(key as FieldName, base.fields[key as FieldName])} → suggested{" "}
+                    {fieldValue(key as FieldName, value)}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      disabled={locked || value === null}
+                      onClick={() => {
+                        const mapped = key === "totalCents" ? "amount" : (key as keyof Values);
+                        form.setValue(
+                          mapped,
+                          key === "totalCents" ? moneyInput(value as number) : String(value),
+                          { shouldDirty: true },
+                        );
+                        form.setValue("confirmed", false);
+                      }}
+                    >
+                      Use new suggestion
+                    </Button>
+                    <span>
+                      {" "}
+                      Keep the existing value by leaving this field unchanged, or edit it below.
+                    </span>
+                  </li>
+                ))}
+            </ul>
+          </details>
+        )}
         {d.extraction?.warnings.length ? (
           <div className="callout">
             <strong>{locked ? "Original extraction warnings" : "Worth a closer look"}</strong>
             <ul>
               {d.extraction.warnings.map((w) => (
-                <li key={w}>{w}</li>
+                <li key={w}>{readableWarning(w)}</li>
               ))}
             </ul>
           </div>
@@ -273,7 +362,7 @@ export function ReviewForm({
               <Button
                 type="button"
                 variant="primary"
-                disabled={busy}
+                disabled={busy || changedRemotely || !!d.hasActiveRequest}
                 onClick={() => submit("approve")}
               >
                 <Check size={16} />
@@ -281,7 +370,9 @@ export function ReviewForm({
               </Button>
             </>
           ) : (
-            d.canReview && (
+            d.canReview &&
+            d.stage === "READY" &&
+            ["APPROVED", "REJECTED", "NEEDS_INFORMATION"].includes(d.reviewStatus) && (
               <Button type="button" disabled={busy} onClick={() => submit("reopen")}>
                 Reopen for review
               </Button>

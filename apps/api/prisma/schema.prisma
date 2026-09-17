@@ -84,15 +84,21 @@ model Document {
   revision Int @default(0)
   fields Json
   latestRunId String @unique
+  currentSourceId String
+  currentSource SourceRevision @relation("CurrentSource", fields:[currentSourceId],references:[id])
   runs ProcessingRun[]
   reviews ReviewRevision[]
   audit AuditEvent[]
+  sources SourceRevision[] @relation("DocumentSources")
+  requests CorrectionRequest[]
   @@unique([workspaceId,checksum])
   @@index([workspaceId,createdAt,id])
 }
 model ProcessingRun {
   id String @id @default(uuid())
   documentId String
+  sourceId String
+  source SourceRevision @relation(fields:[sourceId],references:[id])
   document Document @relation(fields:[documentId],references:[id])
   stage String @default("PENDING_DISPATCH")
   generation Int @default(0)
@@ -136,6 +142,8 @@ model ReviewRevision {
   document Document @relation(fields:[documentId],references:[id])
   revision Int
   runId String
+  sourceId String
+  source SourceRevision @relation(fields:[sourceId],references:[id])
   actorId String
   action String
   fields Json
@@ -173,4 +181,61 @@ model EvaluationRun {
   id String @id
   payload Json
   createdAt DateTime @default(now())
+}
+
+model SourceRevision {
+  id String @id @default(uuid())
+  documentId String
+  document Document @relation("DocumentSources",fields:[documentId],references:[id])
+  workspaceId String
+  version Int
+  filename String
+  checksum String
+  objectKey String @unique
+  mime String
+  bytes Int
+  uploaderId String?
+  uploaderName String?
+  reason String
+  createdAt DateTime @default(now())
+  currentDocuments Document[] @relation("CurrentSource")
+  runs ProcessingRun[]
+  reviews ReviewRevision[]
+  requests CorrectionRequest[]
+  events RequestEvent[]
+  @@unique([documentId,version])
+  @@unique([workspaceId,checksum])
+}
+
+model CorrectionRequest {
+  id String @id @default(uuid())
+  documentId String
+  document Document @relation(fields:[documentId],references:[id])
+  sourceId String
+  source SourceRevision @relation(fields:[sourceId],references:[id])
+  assigneeId String
+  question String
+  field String?
+  state String @default("OPEN")
+  version Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  events RequestEvent[]
+  @@index([documentId,state])
+  @@index([assigneeId,state,id])
+}
+
+model RequestEvent {
+  id String @id @default(uuid())
+  requestId String
+  request CorrectionRequest @relation(fields:[requestId],references:[id])
+  actorId String
+  actorName String
+  action String
+  message String
+  sourceId String?
+  source SourceRevision? @relation(fields:[sourceId],references:[id])
+  assigneeId String?
+  createdAt DateTime @default(now())
+  @@index([requestId,createdAt,id])
 }

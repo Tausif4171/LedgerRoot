@@ -15,6 +15,8 @@ import { Storage, type ObjectStore } from "./infrastructure/storage.js";
 import { logger } from "./infrastructure/logger.js";
 import { environment } from "./config/env.js";
 import { createAuth } from "./modules/auth/service.js";
+import { createRequest, changeRequest } from "./modules/requests/service.js";
+import { replaceSource } from "./modules/sources/service.js";
 import {
   getDocument,
   includeDocument,
@@ -80,6 +82,88 @@ export async function createApp(
     next();
   });
   app.get("/api/v1/me", (_req, res) => res.json(res.locals.identity));
+  app.get("/api/v1/request-assignees", async (_req, res) => {
+    const rows = await db.membership.findMany({
+      where: { workspaceId: res.locals.identity.workspaceId, role: { in: ["OWNER", "REVIEWER"] } },
+      include: { user: { select: { id: true, name: true } } },
+      orderBy: { userId: "asc" },
+    });
+    res.json(rows.map((m) => m.user));
+  });
+  app.get("/api/v1/requests-summary", async (_req, res) => {
+    const identity = res.locals.identity as Identity;
+    if (identity.role === "VIEWER") return res.json({ actionable: 0 });
+    const actionable = await db.correctionRequest.count({
+      where: {
+        document: { workspaceId: identity.workspaceId },
+        OR: [{ state: "OPEN", assigneeId: identity.userId }, { state: "RESPONDED" }],
+      },
+    });
+    res.json({ actionable });
+  });
+  app.get("/api/v1/requests", async (req, res) => {
+    const query = z
+      .object({
+        view: z.enum(["mine", "review", "all", "active"]).default("mine"),
+        documentId: z.string().max(100).optional(),
+        cursor: z.string().max(100).optional(),
+        q: z.string().max(200).default(""),
+      })
+      .parse(req.query);
+    const identity = res.locals.identity as Identity;
+    const rows = await db.correctionRequest.findMany({
+      where: {
+        document: { workspaceId: identity.workspaceId },
+        ...(query.documentId ? { documentId: query.documentId } : {}),
+        ...(query.view === "mine"
+          ? { assigneeId: identity.userId, state: "OPEN" }
+          : query.view === "review"
+            ? { state: "RESPONDED" }
+            : query.view === "active"
+              ? { state: { in: ["OPEN", "RESPONDED"] } }
+              : {}),
+        ...(query.cursor ? { id: { gt: query.cursor } } : {}),
+        question: { contains: query.q, mode: "insensitive" },
+      },
+      include: {
+        document: { select: { filename: true } },
+        events: { orderBy: [{ createdAt: "asc" }, { id: "asc" }] },
+      },
+      orderBy: { id: "asc" },
+      take: 51,
+    });
+    res.json({ items: rows.slice(0, 50), nextCursor: rows.length > 50 ? rows[49]!.id : null });
+  });
+  app.post("/api/v1/documents/:id/requests", async (req, res) =>
+    res
+      .status(201)
+      .json(
+        await createRequest(
+          String(req.params.id),
+          res.locals.identity,
+          z.string().min(8).max(128).parse(req.get("idempotency-key")),
+          req.body,
+        ),
+      ),
+  );
+  for (const [path, action] of Object.entries({
+    responses: "respond",
+    "follow-up": "follow-up",
+    reassign: "reassign",
+    resolve: "resolve",
+    cancel: "cancel",
+  })) {
+    app.post(`/api/v1/requests/:id/${path}`, async (req, res) =>
+      res.json(
+        await changeRequest(
+          String(req.params.id),
+          res.locals.identity,
+          z.string().min(8).max(128).parse(req.get("idempotency-key")),
+          { ...req.body, action },
+        ),
+      ),
+    );
+  }
   app.get("/api/v1/documents-summary", async (_req, res) => {
     const { workspaceId } = res.locals.identity as Identity;
     const [summary] = await db.$queryRaw<
@@ -96,6 +180,122 @@ export async function createApp(
     dest: temp,
     limits: { fileSize: MAX_BYTES, files: 1, fields: 0, parts: 2 },
   }).single("file");
+  const receiveSource = multer({
+    dest: temp,
+    limits: { fileSize: MAX_BYTES, files: 1, fields: 1, fieldSize: 8192, parts: 3 },
+  }).single("file");
+  app.post("/api/v1/documents/:id/sources", (req, res, next) => {
+    if ((res.locals.identity as Identity).role === "VIEWER")
+      return next(new ApiError("FORBIDDEN", "Viewer access cannot upload.", 403));
+    receiveSource(req, res, (error) => {
+      if (error) return next(error);
+      void (async () => {
+        if (!req.file) throw new ApiError("FILE_REQUIRED", "Select a JPEG or PNG image.", 422);
+        try {
+          const metadata = z.string().max(8192).parse(req.body.metadata);
+          let value: unknown;
+          try {
+            value = JSON.parse(metadata);
+          } catch {
+            throw new ApiError("INVALID_JSON", "Upload metadata must be JSON.", 422);
+          }
+          const result = await replaceSource(
+            String(req.params.id),
+            res.locals.identity,
+            z.string().min(8).max(128).parse(req.get("idempotency-key")),
+            value,
+            await readFile(req.file.path),
+            req.file.originalname,
+            store,
+          );
+          const duplicate = z.object({ duplicate: z.boolean(), id: z.string() }).parse(result);
+          if (duplicate.duplicate && duplicate.id !== String(req.params.id)) {
+            res.status(409).json({
+              ...(result as object),
+              error: {
+                code: "DUPLICATE_DOCUMENT",
+                message: "This image belongs to another document in your workspace.",
+                retryable: false,
+                requestId: res.locals.requestId,
+              },
+            });
+          } else res.status(duplicate.duplicate ? 200 : 202).json(result);
+        } finally {
+          await unlink(req.file.path);
+        }
+      })().catch(next);
+    });
+  });
+  app.get("/api/v1/documents/:id/sources", async (req, res) => {
+    const documentId = String(req.params.id);
+    const cursor = z.coerce.number().int().positive().optional().parse(req.query.cursor);
+    const doc = await db.document.findFirst({
+      where: { id: documentId, workspaceId: res.locals.identity.workspaceId },
+      select: { currentSourceId: true },
+    });
+    if (!doc) throw new ApiError("NOT_FOUND", "Document not found.", 404);
+    const sources = await db.sourceRevision.findMany({
+      where: { documentId, ...(cursor ? { version: { lt: cursor } } : {}) },
+      orderBy: { version: "desc" },
+      take: 21,
+    });
+    const runs = await db.processingRun.findMany({
+      where: { documentId, sourceId: { in: sources.slice(0, 20).map((s) => s.id) } },
+      include: { result: true },
+      orderBy: { createdAt: "desc" },
+    });
+    res.json({
+      items: sources.slice(0, 20).map((s) => {
+        const run = runs.find((r) => r.sourceId === s.id);
+        return {
+          id: s.id,
+          version: s.version,
+          filename: s.filename,
+          uploaderName: s.uploaderName,
+          reason: s.reason,
+          createdAt: s.createdAt,
+          current: s.id === doc.currentSourceId,
+          stage: run?.stage ?? "FAILED",
+          extraction: run?.result?.payload ?? null,
+          sourceUrl: `/api/v1/documents/${documentId}/sources/${s.id}/source${run ? `?runId=${run.id}` : ""}`,
+        };
+      }),
+      nextCursor: sources.length > 20 ? sources[19]!.version : null,
+    });
+  });
+  app.get("/api/v1/documents/:id/sources/:sourceId/source", async (req, res) => {
+    const source = await db.sourceRevision.findFirst({
+      where: {
+        id: String(req.params.sourceId),
+        documentId: String(req.params.id),
+        document: { workspaceId: res.locals.identity.workspaceId },
+      },
+    });
+    if (!source) throw new ApiError("NOT_FOUND", "Source not found.", 404);
+    // Historical evidence requires the normalized derivative from this exact source's run.
+    const run = await db.processingRun.findFirst({
+      where: {
+        sourceId: source.id,
+        documentId: source.documentId,
+        ...(req.query.runId ? { id: z.string().min(1).max(100).parse(req.query.runId) } : {}),
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    if (req.query.runId && !run)
+      throw new ApiError("NOT_FOUND", "Processing run not found for this source.", 404);
+    const artifact =
+      run && req.query.original !== "1"
+        ? await db.artifact.findUnique({
+            where: {
+              runId_kind: {
+                runId: run.id,
+                kind: req.query.thumbnail === "1" ? "thumbnail" : "normalized",
+              },
+            },
+          })
+        : null;
+    res.redirect(302, await store.url(artifact?.objectKey ?? source.objectKey));
+  });
   app.post("/api/v1/documents", (req, res, next) => {
     if ((res.locals.identity as Identity).role === "VIEWER")
       return next(new ApiError("FORBIDDEN", "Viewer access cannot upload.", 403));
@@ -179,7 +379,10 @@ export async function createApp(
               },
             },
           });
-    res.redirect(302, await store.url(preview?.objectKey ?? d.objectKey));
+    const source = await db.sourceRevision.findFirstOrThrow({
+      where: { id: d.currentSourceId, documentId: d.id },
+    });
+    res.redirect(302, await store.url(preview?.objectKey ?? source.objectKey));
   });
   app.patch("/api/v1/documents/:id/review", async (req, res) =>
     res.json(

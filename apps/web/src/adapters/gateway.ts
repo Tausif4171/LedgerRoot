@@ -14,7 +14,7 @@ import { reviewTransition } from "@ledgerroot/domain";
 export const isSample = process.env.NEXT_PUBLIC_MODE !== "live";
 const storageKey = "ledgerroot-sample-v1";
 let memory: DocumentRecord[] | null = null;
-async function readSamples() {
+export async function readSamples() {
   if (memory) return structuredClone(memory);
   try {
     const stored = sessionStorage.getItem(storageKey);
@@ -34,7 +34,7 @@ async function readSamples() {
   memory = z.array(documentSchema).parse(await response.json());
   return structuredClone(memory);
 }
-function persist(data: DocumentRecord[]) {
+export function persist(data: DocumentRecord[]) {
   memory = structuredClone(data);
   try {
     sessionStorage.setItem(storageKey, JSON.stringify(data));
@@ -42,7 +42,7 @@ function persist(data: DocumentRecord[]) {
     /* Memory mode remains isolated to the browser tab. */
   }
 }
-async function request(path: string, init?: RequestInit) {
+export async function request(path: string, init?: RequestInit) {
   const res = await fetch(`/api/v1${path}`, { credentials: "same-origin", ...init });
   if (!res.ok) {
     const payload = await res.json().catch(() => null);
@@ -117,6 +117,12 @@ export const gateway = {
     if (!d) throw new ApiError("NOT_FOUND", "Document not found.", 404);
     const before = structuredClone(d.fields);
     d.reviewStatus = reviewTransition(d, action, input);
+    if (action === "approve" && d.hasActiveRequest)
+      throw new ApiError(
+        "ACTIVE_REQUEST",
+        "Resolve or cancel the active request before approving.",
+        409,
+      );
     d.revision++;
     if (action === "retry") {
       d.stage = "READY";
@@ -124,12 +130,17 @@ export const gateway = {
       d.reviewStatus = "PENDING";
       d.failure = null;
     } else if (action !== "reopen") d.fields = input.fields;
+    const actor = d.sourceId
+      ? (await import("./sample-collaboration")).sampleCollaboration.identity().name
+      : "Sample reviewer";
     d.history.push({
       id: crypto.randomUUID(),
       at: new Date().toISOString(),
-      actor: "Sample reviewer",
+      actor,
       action: action === "retry" ? "Simulated retry completed" : action,
-      note: input.note || null,
+      note: d.sourceVersion
+        ? `Source version ${d.sourceVersion}${input.note ? ` · ${input.note}` : ""}`
+        : input.note || null,
       before,
       after: d.fields,
     });
@@ -140,6 +151,7 @@ export const gateway = {
     memory = null;
     try {
       sessionStorage.removeItem(storageKey);
+      sessionStorage.removeItem("ledgerroot-collaboration-v1");
     } catch {
       /* No persistent browser state. */
     }

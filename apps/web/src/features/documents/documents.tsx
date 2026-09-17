@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, ArrowUpFromLine, CheckCheck, Clock3, Files, Search } from "lucide-react";
-import { formatMoney } from "@ledgerroot/domain";
+import { documentCompleteness } from "./completeness";
 import { gateway, isSample } from "@/adapters/gateway";
 import { Status } from "@/components/ui/status";
 import { Button } from "@/components/ui/button";
@@ -148,68 +148,81 @@ export function Documents() {
                     <th scope="col">Document</th>
                     <th scope="col">Status</th>
                     <th scope="col">Total</th>
-                    <th scope="col">Added</th>
+                    <th scope="col">Uploaded</th>
                     <th scope="col">
                       <span className="sr-only">Action</span>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {docs.map((d) => (
-                    <tr key={d.id}>
-                      <td className="document-main">
-                        <div className="doc-cell">
-                          {d.thumbnailUrl ? (
-                            <img
-                              className="doc-thumb"
-                              src={d.thumbnailUrl}
-                              alt=""
-                              loading="lazy"
-                              width={42}
-                              height={54}
-                            />
-                          ) : (
-                            <Files size={24} aria-hidden="true" />
-                          )}
-                          <div>
-                            <Link className="doc-link" href={`/documents/${d.id}`}>
-                              {d.fields.vendor ?? d.filename}
-                            </Link>
-                            <small>
-                              {d.fields.documentType === "invoice"
-                                ? "Invoice"
-                                : d.fields.documentType === "receipt"
-                                  ? "Receipt"
-                                  : "Type needs review"}{" "}
-                              · {d.fields.invoiceNumber ?? d.filename}
-                            </small>
+                  {docs.map((d) => {
+                    const completeness = documentCompleteness(d);
+                    return (
+                      <tr key={d.id}>
+                        <td className="document-main">
+                          <div className="doc-cell">
+                            {d.thumbnailUrl ? (
+                              <img
+                                className="doc-thumb"
+                                src={d.thumbnailUrl}
+                                alt=""
+                                loading="lazy"
+                                width={42}
+                                height={54}
+                              />
+                            ) : (
+                              <Files size={24} aria-hidden="true" />
+                            )}
+                            <div>
+                              <Link className="doc-link" href={`/documents/${d.id}`}>
+                                {d.fields.vendor ?? d.filename}
+                              </Link>
+                              <small>
+                                {d.fields.documentType === "invoice"
+                                  ? "Invoice"
+                                  : d.fields.documentType === "receipt"
+                                    ? "Receipt"
+                                    : "Type needs review"}{" "}
+                                · {d.fields.invoiceNumber ?? d.filename}
+                              </small>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td>
-                        <Status document={d} />
-                      </td>
-                      <td style={{ fontVariantNumeric: "tabular-nums" }}>
-                        {formatMoney(d.fields.totalCents)}
-                      </td>
-                      <td className="document-date muted">
-                        {new Date(d.createdAt).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          timeZone: "UTC",
-                        })}
-                      </td>
-                      <td className="document-action">
-                        <Link
-                          className="btn btn-ghost btn-small"
-                          href={`/documents/${d.id}`}
-                          aria-label={`Review ${d.fields.vendor ?? d.filename}`}
-                        >
-                          <ArrowUpRight size={17} />
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td>
+                          <Status document={d} />
+                        </td>
+                        <td style={{ fontVariantNumeric: "tabular-nums" }}>
+                          {completeness.total === "Total not extracted" ? (
+                            <span>
+                              <span className="sr-only">Total not extracted</span>
+                              <span className="total-mobile-prefix" aria-hidden="true">
+                                Total{" "}
+                              </span>
+                              <span aria-hidden="true">Not extracted</span>
+                            </span>
+                          ) : (
+                            completeness.total
+                          )}
+                        </td>
+                        <td className="document-date muted">
+                          {new Date(d.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            timeZone: "UTC",
+                          })}
+                        </td>
+                        <td className="document-action">
+                          <Link
+                            className="btn btn-ghost btn-small"
+                            href={`/documents/${d.id}`}
+                            aria-label={`Review ${d.fields.vendor ?? d.filename}`}
+                          >
+                            <ArrowUpRight size={17} />
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

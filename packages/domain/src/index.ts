@@ -7,6 +7,7 @@ import {
   type Stage,
   type Mutation,
 } from "@ledgerroot/contracts";
+export * from "./collaboration.js";
 
 export function parseMoney(input: string): number | null {
   const value = input.trim();

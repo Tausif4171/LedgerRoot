@@ -1,4 +1,5 @@
 import { z } from "zod";
+export * from "./collaboration.js";
 
 export const MAX_BYTES = 10 * 1024 * 1024;
 export const MAX_PIXELS = 24_000_000;
@@ -111,6 +112,9 @@ export const documentSchema = z.object({
   failure: z.string().nullable(),
   canReview: z.boolean(),
   sample: z.boolean(),
+  sourceId: z.string().optional(),
+  sourceVersion: z.number().int().positive().optional(),
+  hasActiveRequest: z.boolean().optional(),
 });
 export type DocumentRecord = z.infer<typeof documentSchema>;
 export const actions = [

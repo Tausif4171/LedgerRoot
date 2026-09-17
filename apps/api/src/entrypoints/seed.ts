@@ -38,6 +38,44 @@ await db.membership.upsert({
   create: { userId: user.id, workspaceId: workspace.id, role: "OWNER" },
   update: {},
 });
+const reviewerEmail = process.env.SEED_REVIEWER_EMAIL;
+const reviewerPassword = process.env.SEED_REVIEWER_PASSWORD;
+if (reviewerEmail || reviewerPassword) {
+  if (
+    !reviewerEmail ||
+    !reviewerPassword ||
+    reviewerPassword.length < 12 ||
+    reviewerEmail === email
+  )
+    throw new Error(
+      "Set a different SEED_REVIEWER_EMAIL and SEED_REVIEWER_PASSWORD (12+ characters).",
+    );
+  let reviewer = await db.user.findUnique({ where: { email: reviewerEmail } });
+  if (!reviewer) {
+    const id = randomUUID();
+    reviewer = await db.user.create({
+      data: {
+        id,
+        email: reviewerEmail,
+        name: "Local teammate",
+        emailVerified: true,
+        accounts: {
+          create: {
+            id: randomUUID(),
+            accountId: id,
+            providerId: "credential",
+            password: await hashPassword(reviewerPassword),
+          },
+        },
+      },
+    });
+  }
+  await db.membership.upsert({
+    where: { userId_workspaceId: { userId: reviewer.id, workspaceId: workspace.id } },
+    create: { userId: reviewer.id, workspaceId: workspace.id, role: "REVIEWER" },
+    update: {},
+  });
+}
 await new Storage().ensureBucket();
 await db.$disconnect();
 console.log("Local owner, workspace, and private storage are ready.");

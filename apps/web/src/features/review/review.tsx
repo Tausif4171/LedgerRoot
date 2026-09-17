@@ -9,6 +9,11 @@ import { gateway, isSample } from "@/adapters/gateway";
 import { Status } from "@/components/ui/status";
 import { Button } from "@/components/ui/button";
 import { ReviewForm } from "./review-form";
+import { Button as ActionButton } from "@/components/ui/button";
+import { Modal } from "@/components/ui/dialog";
+import { ReplaceSource } from "./source-revisions";
+const SourceHistory = dynamic(() => import("./source-revisions").then((m) => m.SourceHistory));
+const DocumentRequests = dynamic(() => import("@/features/requests/document-requests"));
 const SourceViewer = dynamic(() => import("./source-viewer"), {
   loading: () => (
     <div className="panel" aria-busy="true" style={{ height: 600, padding: 30 }}>
@@ -20,14 +25,32 @@ const History = dynamic(() => import("@/features/history/history"));
 export function Review({ id }: { id: string }) {
   const cache = useQueryClient();
   const [tab, setTab] = useState("fields");
-  const [evidence, setEvidence] = useState<string[]>([]);
+  const [evidence, setEvidence] = useState<{ runId: string; ids: string[] }>({
+    runId: "",
+    ids: [],
+  });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [replacement, setReplacement] = useState<{ id?: string; version?: number } | null>(null);
+  const [pendingReplacement, setPendingReplacement] = useState<{
+    id?: string;
+    version?: number;
+  } | null>(null);
+  const [formGeneration, setFormGeneration] = useState(0);
+  function beginReplacement(id?: string, version?: number) {
+    if (dirty) setPendingReplacement({ id, version });
+    else setReplacement({ id, version });
+  }
   const query = useQuery({
     queryKey: ["document", id],
     queryFn: () => gateway.get(id),
     refetchInterval: (q) =>
-      q.state.data && !["READY", "FAILED"].includes(q.state.data.stage) ? 2500 : false,
+      q.state.data && !["READY", "FAILED"].includes(q.state.data.stage)
+        ? Math.min(30000, 2500 * 2 ** Math.min(q.state.fetchFailureCount, 4))
+        : !isSample && q.state.data
+          ? Math.min(60000, 15000 * 2 ** Math.min(q.state.fetchFailureCount, 2))
+          : false,
     refetchIntervalInBackground: false,
   });
   const d = query.data;
@@ -93,6 +116,51 @@ export function Review({ id }: { id: string }) {
           {error}
         </div>
       )}
+      {(!isSample || d.id === "correction-scenario") && (
+        <>
+          <DocumentRequests document={d} onReplace={beginReplacement} />
+          {d.canReview &&
+            ["READY", "FAILED"].includes(d.stage) &&
+            !["APPROVED", "REJECTED"].includes(d.reviewStatus) && (
+              <ActionButton onClick={() => beginReplacement()}>Upload clearer photo</ActionButton>
+            )}
+          {replacement && (
+            <ReplaceSource
+              document={d}
+              request={replacement}
+              onClose={() => setReplacement(null)}
+            />
+          )}
+          <Modal
+            open={!!pendingReplacement}
+            onOpenChange={(open) => {
+              if (!open) setPendingReplacement(null);
+            }}
+            title="You have unsaved changes"
+            description="Save your review first, discard the draft, or cancel. Uploading must not silently lose your work."
+          >
+            <ActionButton
+              onClick={() => {
+                setPendingReplacement(null);
+                setTab("fields");
+              }}
+            >
+              Return to fields to save first
+            </ActionButton>
+            <ActionButton
+              onClick={() => {
+                setFormGeneration((n) => n + 1);
+                setDirty(false);
+                setReplacement(pendingReplacement);
+                setPendingReplacement(null);
+              }}
+            >
+              Discard draft and continue
+            </ActionButton>
+            <ActionButton onClick={() => setPendingReplacement(null)}>Cancel</ActionButton>
+          </Modal>
+        </>
+      )}
       {d.stage !== "READY" && (
         <div className="callout" aria-live="polite">
           <h2>
@@ -119,15 +187,20 @@ export function Review({ id }: { id: string }) {
         </Tabs.List>
         <div className="review-grid">
           <Tabs.Content value="source" forceMount className="tab-pane">
-            <SourceViewer document={d} selected={evidence} />
+            <SourceViewer
+              key={d.runId}
+              document={d}
+              selected={evidence.runId === d.runId ? evidence.ids : []}
+            />
           </Tabs.Content>
           <Tabs.Content value="fields" forceMount className="tab-pane">
-            {d.stage === "READY" ? (
+            {d.stage === "READY" || (d.sourceVersion ?? 1) > 1 ? (
               <ReviewForm
-                key={`${d.id}/${d.runId}`}
+                key={`${d.id}/${formGeneration}`}
                 document={d}
+                onDirtyChange={setDirty}
                 onEvidence={(ids) => {
-                  setEvidence(ids);
+                  setEvidence({ runId: d.runId, ids });
                   setTab("source");
                 }}
               />
@@ -140,6 +213,7 @@ export function Review({ id }: { id: string }) {
           </Tabs.Content>
           <Tabs.Content value="history" forceMount className="tab-pane history-pane">
             <History events={d.history} />
+            {(!isSample || d.id === "correction-scenario") && <SourceHistory document={d} />}
           </Tabs.Content>
         </div>
       </Tabs.Root>

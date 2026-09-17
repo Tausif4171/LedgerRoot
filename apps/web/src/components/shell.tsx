@@ -3,12 +3,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Files, ChartNoAxesCombined, GitBranch, Info, RotateCcw, ArrowUpRight } from "lucide-react";
 import type { ReactNode } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { collaborationGateway } from "@/adapters/collaboration";
+import { sampleCollaboration, samplePeople } from "@/adapters/sample-collaboration";
 import { Button } from "./ui/button";
 import { gateway, isSample } from "@/adapters/gateway";
 export function Shell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const cache = useQueryClient();
+  const identity = useQuery({
+    queryKey: ["identity"],
+    queryFn: () => collaborationGateway.identity(),
+  });
+  const requests = useQuery({
+    queryKey: ["requests", "count"],
+    queryFn: () => collaborationGateway.summary(),
+    refetchInterval: (q) => Math.min(60000, 15000 * 2 ** Math.min(q.state.fetchFailureCount, 2)),
+    refetchIntervalInBackground: false,
+  });
   return (
     <div className="shell">
       <a href="#main" className="skip">
@@ -34,6 +46,10 @@ export function Shell({ children }: { children: ReactNode }) {
           <Link href="/quality" aria-current={pathname === "/quality" ? "page" : undefined}>
             <ChartNoAxesCombined size={18} />
             Quality
+          </Link>
+          <Link href="/requests" aria-current={pathname === "/requests" ? "page" : undefined}>
+            <Info size={18} />
+            Requests {requests.data?.actionable ? `(${requests.data.actionable})` : ""}
           </Link>
         </nav>
         <div className="sidebar-foot">
@@ -63,9 +79,36 @@ export function Shell({ children }: { children: ReactNode }) {
         <header className="topbar">
           <span>
             Workspace{" "}
-            <span className="muted"> / {pathname === "/quality" ? "Quality" : "Documents"}</span>
+            <span className="muted">
+              {" "}
+              /{" "}
+              {pathname === "/quality"
+                ? "Quality"
+                : pathname === "/requests"
+                  ? "Requests"
+                  : "Documents"}
+            </span>
           </span>
           <div className="topbar-profile">
+            {isSample && (
+              <label>
+                Demo actor{" "}
+                <select
+                  aria-label="Demo actor (simulation only)"
+                  value={identity.data?.userId ?? samplePeople[0]!.id}
+                  onChange={async (e) => {
+                    sampleCollaboration.switchActor(e.target.value);
+                    await cache.invalidateQueries();
+                  }}
+                >
+                  {samplePeople.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             <span className="muted">{isSample ? "Sample workspace" : "Local workspace"}</span>
             <div className="avatar" aria-label="Workspace avatar">
               LR

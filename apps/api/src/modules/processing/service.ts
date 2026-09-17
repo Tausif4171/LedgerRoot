@@ -33,7 +33,10 @@ export async function processRun(
   const generation = run.generation + 1;
   await db.processingAttempt.create({ data: { runId, generation } });
   try {
-    const bytes = await store.get(run.document.objectKey);
+    const source = await db.sourceRevision.findFirstOrThrow({
+      where: { id: run.sourceId, documentId: run.documentId },
+    });
+    const bytes = await store.get(source.objectKey);
     const artifacts: Array<{ kind: string; objectKey: string }> = [];
     let result: Extraction;
     if (extract) result = await extract(bytes);
@@ -92,8 +95,16 @@ export async function processRun(
         },
       });
       await tx.document.updateMany({
-        where: { id: run.documentId, latestRunId: runId, reviewStatus: "NOT_READY" },
-        data: { reviewStatus: "PENDING", ...(!humanReview ? { fields: json(result.fields) } : {}) },
+        where: {
+          id: run.documentId,
+          latestRunId: runId,
+          currentSourceId: run.sourceId,
+          reviewStatus: "NOT_READY",
+        },
+        data: {
+          reviewStatus: "PENDING",
+          ...(!humanReview && source.version === 1 ? { fields: json(result.fields) } : {}),
+        },
       });
       await tx.auditEvent.create({
         data: {

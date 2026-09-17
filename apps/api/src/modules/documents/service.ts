@@ -18,19 +18,24 @@ export const json = (value: unknown): Prisma.InputJsonValue =>
   JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 const hash = (value: string) => createHash("sha256").update(value).digest("hex");
 export const includeDocument = {
+  sources: { orderBy: { version: "asc" as const } },
+  requests: { where: { state: { in: ["OPEN", "RESPONDED"] } } },
   runs: { include: { result: true } },
   audit: { orderBy: { createdAt: "asc" as const } },
 };
 type Loaded = Prisma.DocumentGetPayload<{ include: typeof includeDocument }>;
 export function serialize(d: Loaded, identity: Identity) {
   const run = d.runs.find((r) => r.id === d.latestRunId);
+  const source = d.sources.find((s) => s.id === d.currentSourceId);
   return documentSchema.parse({
     id: d.id,
-    filename: d.filename,
+    filename: source?.filename ?? d.filename,
     createdAt: d.createdAt.toISOString(),
-    checksum: d.checksum,
-    sourceUrl: `/api/v1/documents/${d.id}/source`,
-    thumbnailUrl: run?.result ? `/api/v1/documents/${d.id}/source?thumbnail=1` : undefined,
+    checksum: source?.checksum ?? d.checksum,
+    sourceUrl: `/api/v1/documents/${d.id}/sources/${d.currentSourceId}/source?runId=${d.latestRunId}`,
+    thumbnailUrl: run?.result
+      ? `/api/v1/documents/${d.id}/sources/${d.currentSourceId}/source?runId=${d.latestRunId}&thumbnail=1`
+      : undefined,
     stage: run?.stage ?? "FAILED",
     reviewStatus: d.reviewStatus,
     revision: d.revision,
@@ -42,13 +47,19 @@ export function serialize(d: Loaded, identity: Identity) {
       at: a.createdAt.toISOString(),
       actor: a.actor,
       action: a.action,
-      note: a.note,
+      note:
+        a.action === "approve" && !a.note?.startsWith("Source version ")
+          ? `Source version 1 (historical approval). ${a.note ?? ""}`
+          : a.note,
       before: a.before ?? null,
       after: a.after ?? null,
     })),
     failure: run?.error ?? null,
     canReview: identity.role !== "VIEWER",
     sample: false,
+    sourceId: d.currentSourceId,
+    sourceVersion: source?.version ?? 1,
+    hasActiveRequest: d.requests.length > 0,
   });
 }
 export async function getDocument(id: string, identity: Identity) {
@@ -59,7 +70,7 @@ export async function getDocument(id: string, identity: Identity) {
   if (!d) throw new ApiError("NOT_FOUND", "Document not found.", 404);
   return serialize(d, identity);
 }
-async function cached(
+export async function cached(
   tx: Prisma.TransactionClient,
   scope: string,
   key: string,
@@ -100,12 +111,16 @@ export async function upload(
       if (old) return old.response;
       // Serialize same-checksum uploads independently of each request's idempotency key.
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`${identity.workspaceId}/${checksum}`},0))`;
-      let document = await tx.document.findUnique({
+      const duplicateSource = await tx.sourceRevision.findUnique({
         where: { workspaceId_checksum: { workspaceId: identity.workspaceId, checksum } },
       });
+      let document = duplicateSource
+        ? await tx.document.findUnique({ where: { id: duplicateSource.documentId } })
+        : null;
       const duplicate = !!document;
       if (!document) {
         const runId = randomUUID();
+        const sourceId = randomUUID();
         document = await tx.document.create({
           data: {
             workspaceId: identity.workspaceId,
@@ -116,7 +131,23 @@ export async function upload(
             bytes: bytes.length,
             fields: json(emptyFields),
             latestRunId: runId,
-            runs: { create: { id: runId, outbox: { create: {} } } },
+            currentSourceId: sourceId,
+            sources: {
+              create: {
+                id: sourceId,
+                workspaceId: identity.workspaceId,
+                version: 1,
+                filename: filename.slice(0, 200),
+                checksum,
+                objectKey,
+                mime,
+                bytes: bytes.length,
+                uploaderId: identity.userId,
+                uploaderName: identity.name,
+                reason: "Original upload",
+              },
+            },
+            runs: { create: { id: runId, sourceId, outbox: { create: {} } } },
             audit: {
               create: {
                 actor: identity.name,
@@ -149,12 +180,19 @@ export async function mutate(
     async (tx) => {
       const old = await cached(tx, scope, key, requestHash);
       if (old) return old.response;
+      await tx.$queryRaw`SELECT id FROM "Document" WHERE id=${id} AND "workspaceId"=${identity.workspaceId} FOR UPDATE`;
       const d = await tx.document.findFirst({
         where: { id, workspaceId: identity.workspaceId },
         include: includeDocument,
       });
       if (!d) throw new ApiError("NOT_FOUND", "Document not found.", 404);
       const current = serialize(d, identity);
+      if (action === "approve" && d.requests.length)
+        throw new ApiError(
+          "ACTIVE_REQUEST",
+          "Resolve or cancel the active request before approving.",
+          409,
+        );
       const status = reviewTransition(current, action, input);
       const runId = action === "retry" ? randomUUID() : d.latestRunId;
       const nextFields =
@@ -176,13 +214,14 @@ export async function mutate(
         );
       if (action === "retry")
         await tx.processingRun.create({
-          data: { id: runId, documentId: id, outbox: { create: {} } },
+          data: { id: runId, documentId: id, sourceId: d.currentSourceId, outbox: { create: {} } },
         });
       await tx.reviewRevision.create({
         data: {
           documentId: id,
           revision: d.revision + 1,
           runId,
+          sourceId: d.currentSourceId,
           actorId: identity.userId,
           action,
           fields: json(nextFields),
@@ -194,7 +233,7 @@ export async function mutate(
           documentId: id,
           actor: identity.name,
           action,
-          note: input.note || null,
+          note: `Source version ${d.sources.find((s) => s.id === d.currentSourceId)?.version ?? 1}. ${input.note}`,
           before: json(d.fields),
           after: json(nextFields),
         },

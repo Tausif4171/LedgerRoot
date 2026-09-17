@@ -205,6 +205,18 @@ small {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.topbar-profile label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.topbar-profile select {
+  max-width: 100%;
+  min-width: 0;
 }
 .main {
   max-width: 1500px;
@@ -542,6 +554,52 @@ tbody tr:hover {
 .review-form {
   padding: 22px;
 }
+.collaboration-form,
+.request-inbox {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.collaboration-form > button {
+  justify-self: start;
+}
+.collaboration-form > label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.collaboration-form > input:not([type="checkbox"]),
+.collaboration-form > select,
+.collaboration-form > textarea,
+.request-inbox input,
+.request-inbox select {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 11px;
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.collaboration-form textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+.request-inbox > form {
+  display: grid;
+  gap: 8px;
+}
+.request-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.request-preview img {
+  width: 64px;
+  max-height: 88px;
+  object-fit: contain;
+}
 .field-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -848,7 +906,16 @@ tbody tr:hover {
     margin-top: 0;
   }
 }
+.total-mobile-prefix {
+  display: none;
+}
 @media (max-width: 760px) {
+  .total-mobile-prefix {
+    display: inline;
+  }
+  .total-mobile-prefix + span {
+    text-transform: lowercase;
+  }
   .shell {
     display: block;
   }
@@ -861,6 +928,7 @@ tbody tr:hover {
     align-items: center;
     justify-content: space-between;
     gap: 20px;
+    flex-wrap: wrap;
   }
   .wordmark {
     font-size: 1.2rem;
@@ -872,6 +940,7 @@ tbody tr:hover {
   .nav {
     display: flex;
     gap: 4px;
+    flex-wrap: wrap;
   }
   .nav a {
     padding: 8px;
@@ -881,8 +950,10 @@ tbody tr:hover {
     display: none;
   }
   .topbar {
-    height: 54px;
-    padding: 0 20px;
+    height: auto;
+    min-height: 54px;
+    padding: 8px 20px;
+    flex-wrap: wrap;
   }
   .topbar-profile span {
     display: none;
