@@ -12,14 +12,14 @@ export function Quality() {
     <>
       <div className="page-heading">
         <div>
-          <h1>Quality, made visible.</h1>
-          <p>Measured results. Including the cases that need work.</p>
+          <h1>Extraction evaluation</h1>
+          <p>Saved test results—not your workspace uploads.</p>
         </div>
       </div>
       <p className="quality-intro">
-        A small, synthetic evaluation set—not a production benchmark or evidence of customer demand.
-        These are saved measurements, not live service health. Missing values count toward coverage;
-        failures are not hidden.
+        Recorded extraction results on synthetic test documents with known answers. Uploading,
+        editing or approving workspace documents does not change this report. This is not live
+        service health, a production benchmark or evidence of customer demand.
       </p>
       {query.isPending ? (
         <div className="skeleton" />
@@ -37,6 +37,11 @@ export function Quality() {
         </div>
       ) : (
         <>
+          <p className="quality-intro">
+            This recorded run contains {cases.length} test cases. Rows below identify test images,
+            not workspace records, and are read-only. Missing answers and processing failures remain
+            included in the results.
+          </p>
           <section className="stats" aria-label="Evaluation summary">
             <div className="stat">
               <div className="stat-title">Correct / attempted</div>
@@ -115,7 +120,7 @@ export function Quality() {
               <table>
                 <thead>
                   <tr>
-                    <th>Case</th>
+                    <th>Test case</th>
                     <th>Category / split</th>
                     <th>Correct / expected</th>
                     <th>Duration</th>

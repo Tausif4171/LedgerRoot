@@ -1,0 +1,322 @@
+{
+  "id": "eval-1789491760405",
+  "createdAt": "2026-09-15T17:02:40.405Z",
+  "datasetVersion": "synthetic-v1",
+  "model": "qwen2.5:7b",
+  "modelDigest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+  "promptVersion": "receipt-fields-v2",
+  "hardware": "arm64; Apple M4 Pro; 48 GiB RAM; first call may include cold model loading",
+  "split": "all",
+  "cases": [
+    {
+      "id": "sample-01",
+      "category": "development/clear",
+      "expectedCount": 5,
+      "attempted": 4,
+      "correct": 4,
+      "unsupported": 0,
+      "durationMs": 15004,
+      "error": null
+    },
+    {
+      "id": "sample-02",
+      "category": "development/clear",
+      "expectedCount": 6,
+      "attempted": 5,
+      "correct": 5,
+      "unsupported": 0,
+      "durationMs": 8698,
+      "error": null
+    },
+    {
+      "id": "sample-03",
+      "category": "development/ambiguous",
+      "expectedCount": 4,
+      "attempted": 2,
+      "correct": 2,
+      "unsupported": 0,
+      "durationMs": 7825,
+      "error": null
+    },
+    {
+      "id": "sample-04",
+      "category": "development/missing",
+      "expectedCount": 5,
+      "attempted": 3,
+      "correct": 3,
+      "unsupported": 0,
+      "durationMs": 8374,
+      "error": null
+    },
+    {
+      "id": "sample-05",
+      "category": "development/poor-quality",
+      "expectedCount": 5,
+      "attempted": 4,
+      "correct": 4,
+      "unsupported": 0,
+      "durationMs": 7785,
+      "error": null
+    },
+    {
+      "id": "sample-06",
+      "category": "development/instruction-text",
+      "expectedCount": 6,
+      "attempted": 5,
+      "correct": 5,
+      "unsupported": 0,
+      "durationMs": 8840,
+      "error": null
+    },
+    {
+      "id": "sample-07",
+      "category": "development/clear",
+      "expectedCount": 5,
+      "attempted": 4,
+      "correct": 4,
+      "unsupported": 0,
+      "durationMs": 8026,
+      "error": null
+    },
+    {
+      "id": "sample-08",
+      "category": "development/clear",
+      "expectedCount": 6,
+      "attempted": 5,
+      "correct": 5,
+      "unsupported": 0,
+      "durationMs": 9493,
+      "error": null
+    },
+    {
+      "id": "sample-09",
+      "category": "development/ambiguous",
+      "expectedCount": 4,
+      "attempted": 3,
+      "correct": 3,
+      "unsupported": 0,
+      "durationMs": 7891,
+      "error": null
+    },
+    {
+      "id": "sample-10",
+      "category": "development/missing",
+      "expectedCount": 5,
+      "attempted": 3,
+      "correct": 3,
+      "unsupported": 0,
+      "durationMs": 7973,
+      "error": null
+    },
+    {
+      "id": "sample-11",
+      "category": "development/poor-quality",
+      "expectedCount": 5,
+      "attempted": 4,
+      "correct": 4,
+      "unsupported": 0,
+      "durationMs": 8015,
+      "error": null
+    },
+    {
+      "id": "sample-12",
+      "category": "development/instruction-text",
+      "expectedCount": 6,
+      "attempted": 5,
+      "correct": 5,
+      "unsupported": 0,
+      "durationMs": 9738,
+      "error": null
+    },
+    {
+      "id": "sample-13",
+      "category": "development/clear",
+      "expectedCount": 5,
+      "attempted": 4,
+      "correct": 4,
+      "unsupported": 0,
+      "durationMs": 8368,
+      "error": null
+    },
+    {
+      "id": "sample-14",
+      "category": "development/clear",
+      "expectedCount": 6,
+      "attempted": 5,
+      "correct": 5,
+      "unsupported": 0,
+      "durationMs": 9267,
+      "error": null
+    },
+    {
+      "id": "sample-15",
+      "category": "development/ambiguous",
+      "expectedCount": 4,
+      "attempted": 3,
+      "correct": 3,
+      "unsupported": 0,
+      "durationMs": 11288,
+      "error": null
+    },
+    {
+      "id": "sample-16",
+      "category": "development/missing",
+      "expectedCount": 5,
+      "attempted": 3,
+      "correct": 3,
+      "unsupported": 0,
+      "durationMs": 10141,
+      "error": null
+    },
+    {
+      "id": "sample-17",
+      "category": "development/poor-quality",
+      "expectedCount": 5,
+      "attempted": 4,
+      "correct": 4,
+      "unsupported": 0,
+      "durationMs": 8942,
+      "error": null
+    },
+    {
+      "id": "sample-18",
+      "category": "development/instruction-text",
+      "expectedCount": 6,
+      "attempted": 4,
+      "correct": 4,
+      "unsupported": 0,
+      "durationMs": 9572,
+      "error": null
+    },
+    {
+      "id": "sample-19",
+      "category": "development/exact-duplicate",
+      "expectedCount": 5,
+      "attempted": 4,
+      "correct": 4,
+      "unsupported": 0,
+      "durationMs": 8571,
+      "error": null
+    },
+    {
+      "id": "sample-20",
+      "category": "development/exact-duplicate",
+      "expectedCount": 6,
+      "attempted": 5,
+      "correct": 5,
+      "unsupported": 0,
+      "durationMs": 9391,
+      "error": null
+    },
+    {
+      "id": "sample-21",
+      "category": "holdout/ambiguous",
+      "expectedCount": 4,
+      "attempted": 3,
+      "correct": 3,
+      "unsupported": 0,
+      "durationMs": 9413,
+      "error": null
+    },
+    {
+      "id": "sample-22",
+      "category": "holdout/missing",
+      "expectedCount": 5,
+      "attempted": 3,
+      "correct": 2,
+      "unsupported": 0,
+      "durationMs": 8294,
+      "error": null
+    },
+    {
+      "id": "sample-23",
+      "category": "holdout/poor-quality",
+      "expectedCount": 5,
+      "attempted": 4,
+      "correct": 4,
+      "unsupported": 0,
+      "durationMs": 8752,
+      "error": null
+    },
+    {
+      "id": "sample-24",
+      "category": "holdout/instruction-text",
+      "expectedCount": 6,
+      "attempted": 5,
+      "correct": 5,
+      "unsupported": 0,
+      "durationMs": 13139,
+      "error": null
+    },
+    {
+      "id": "sample-25",
+      "category": "holdout/clear",
+      "expectedCount": 5,
+      "attempted": 4,
+      "correct": 4,
+      "unsupported": 0,
+      "durationMs": 11701,
+      "error": null
+    },
+    {
+      "id": "sample-26",
+      "category": "holdout/clear",
+      "expectedCount": 6,
+      "attempted": 5,
+      "correct": 5,
+      "unsupported": 0,
+      "durationMs": 12568,
+      "error": null
+    },
+    {
+      "id": "sample-27",
+      "category": "holdout/ambiguous",
+      "expectedCount": 4,
+      "attempted": 3,
+      "correct": 3,
+      "unsupported": 0,
+      "durationMs": 13230,
+      "error": null
+    },
+    {
+      "id": "sample-28",
+      "category": "holdout/missing",
+      "expectedCount": 5,
+      "attempted": 3,
+      "correct": 2,
+      "unsupported": 0,
+      "durationMs": 12575,
+      "error": null
+    },
+    {
+      "id": "sample-29",
+      "category": "holdout/poor-quality",
+      "expectedCount": 5,
+      "attempted": 4,
+      "correct": 4,
+      "unsupported": 0,
+      "durationMs": 8477,
+      "error": null
+    },
+    {
+      "id": "sample-30",
+      "category": "holdout/instruction-text",
+      "expectedCount": 6,
+      "attempted": 5,
+      "correct": 5,
+      "unsupported": 0,
+      "durationMs": 9074,
+      "error": null
+    }
+  ],
+  "duplicates": [
+    {
+      "id": "sample-19",
+      "matches": "sample-01"
+    },
+    {
+      "id": "sample-20",
+      "matches": "sample-02"
+    }
+  ]
+}

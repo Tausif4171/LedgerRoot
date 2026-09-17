@@ -89,6 +89,6 @@
   "model": "qwen2.5:7b",
   "modelDigest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
   "promptVersion": "receipt-fields-v2",
-  "durationMs": 6858,
+  "durationMs": 7443,
   "provenance": "live"
 }

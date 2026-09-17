@@ -1,7 +1,7 @@
 [
   {
-    "id": "eval-1788808569253",
-    "createdAt": "2026-09-07T19:16:09.253Z",
+    "id": "eval-1789491760405",
+    "createdAt": "2026-09-15T17:02:40.405Z",
     "datasetVersion": "synthetic-v1",
     "model": "qwen2.5:7b",
     "modelDigest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
@@ -16,7 +16,7 @@
         "attempted": 4,
         "correct": 4,
         "unsupported": 0,
-        "durationMs": 8140,
+        "durationMs": 15004,
         "error": null
       },
       {
@@ -26,7 +26,7 @@
         "attempted": 5,
         "correct": 5,
         "unsupported": 0,
-        "durationMs": 8427,
+        "durationMs": 8698,
         "error": null
       },
       {
@@ -36,7 +36,7 @@
         "attempted": 2,
         "correct": 2,
         "unsupported": 0,
-        "durationMs": 20532,
+        "durationMs": 7825,
         "error": null
       },
       {
@@ -46,7 +46,7 @@
         "attempted": 3,
         "correct": 3,
         "unsupported": 0,
-        "durationMs": 9122,
+        "durationMs": 8374,
         "error": null
       },
       {
@@ -56,7 +56,7 @@
         "attempted": 4,
         "correct": 4,
         "unsupported": 0,
-        "durationMs": 7305,
+        "durationMs": 7785,
         "error": null
       },
       {
@@ -66,7 +66,7 @@
         "attempted": 5,
         "correct": 5,
         "unsupported": 0,
-        "durationMs": 8604,
+        "durationMs": 8840,
         "error": null
       },
       {
@@ -76,7 +76,7 @@
         "attempted": 4,
         "correct": 4,
         "unsupported": 0,
-        "durationMs": 7552,
+        "durationMs": 8026,
         "error": null
       },
       {
@@ -86,7 +86,7 @@
         "attempted": 5,
         "correct": 5,
         "unsupported": 0,
-        "durationMs": 9276,
+        "durationMs": 9493,
         "error": null
       },
       {
@@ -96,7 +96,7 @@
         "attempted": 3,
         "correct": 3,
         "unsupported": 0,
-        "durationMs": 8069,
+        "durationMs": 7891,
         "error": null
       },
       {
@@ -106,7 +106,7 @@
         "attempted": 3,
         "correct": 3,
         "unsupported": 0,
-        "durationMs": 7585,
+        "durationMs": 7973,
         "error": null
       },
       {
@@ -116,7 +116,7 @@
         "attempted": 4,
         "correct": 4,
         "unsupported": 0,
-        "durationMs": 8055,
+        "durationMs": 8015,
         "error": null
       },
       {
@@ -126,7 +126,7 @@
         "attempted": 5,
         "correct": 5,
         "unsupported": 0,
-        "durationMs": 8709,
+        "durationMs": 9738,
         "error": null
       },
       {
@@ -136,7 +136,7 @@
         "attempted": 4,
         "correct": 4,
         "unsupported": 0,
-        "durationMs": 7360,
+        "durationMs": 8368,
         "error": null
       },
       {
@@ -146,7 +146,7 @@
         "attempted": 5,
         "correct": 5,
         "unsupported": 0,
-        "durationMs": 8398,
+        "durationMs": 9267,
         "error": null
       },
       {
@@ -156,7 +156,7 @@
         "attempted": 3,
         "correct": 3,
         "unsupported": 0,
-        "durationMs": 8937,
+        "durationMs": 11288,
         "error": null
       },
       {
@@ -166,7 +166,7 @@
         "attempted": 3,
         "correct": 3,
         "unsupported": 0,
-        "durationMs": 8450,
+        "durationMs": 10141,
         "error": null
       },
       {
@@ -176,7 +176,7 @@
         "attempted": 4,
         "correct": 4,
         "unsupported": 0,
-        "durationMs": 10476,
+        "durationMs": 8942,
         "error": null
       },
       {
@@ -186,7 +186,7 @@
         "attempted": 4,
         "correct": 4,
         "unsupported": 0,
-        "durationMs": 12415,
+        "durationMs": 9572,
         "error": null
       },
       {
@@ -196,7 +196,7 @@
         "attempted": 4,
         "correct": 4,
         "unsupported": 0,
-        "durationMs": 8795,
+        "durationMs": 8571,
         "error": null
       },
       {
@@ -206,7 +206,7 @@
         "attempted": 5,
         "correct": 5,
         "unsupported": 0,
-        "durationMs": 10237,
+        "durationMs": 9391,
         "error": null
       },
       {
@@ -216,7 +216,7 @@
         "attempted": 3,
         "correct": 3,
         "unsupported": 0,
-        "durationMs": 10448,
+        "durationMs": 9413,
         "error": null
       },
       {
@@ -226,7 +226,7 @@
         "attempted": 3,
         "correct": 2,
         "unsupported": 0,
-        "durationMs": 9070,
+        "durationMs": 8294,
         "error": null
       },
       {
@@ -236,7 +236,7 @@
         "attempted": 4,
         "correct": 4,
         "unsupported": 0,
-        "durationMs": 8774,
+        "durationMs": 8752,
         "error": null
       },
       {
@@ -246,7 +246,7 @@
         "attempted": 5,
         "correct": 5,
         "unsupported": 0,
-        "durationMs": 9348,
+        "durationMs": 13139,
         "error": null
       },
       {
@@ -256,7 +256,7 @@
         "attempted": 4,
         "correct": 4,
         "unsupported": 0,
-        "durationMs": 8723,
+        "durationMs": 11701,
         "error": null
       },
       {
@@ -266,7 +266,7 @@
         "attempted": 5,
         "correct": 5,
         "unsupported": 0,
-        "durationMs": 9709,
+        "durationMs": 12568,
         "error": null
       },
       {
@@ -276,7 +276,7 @@
         "attempted": 3,
         "correct": 3,
         "unsupported": 0,
-        "durationMs": 9590,
+        "durationMs": 13230,
         "error": null
       },
       {
@@ -286,7 +286,7 @@
         "attempted": 3,
         "correct": 2,
         "unsupported": 0,
-        "durationMs": 7881,
+        "durationMs": 12575,
         "error": null
       },
       {
@@ -296,7 +296,7 @@
         "attempted": 4,
         "correct": 4,
         "unsupported": 0,
-        "durationMs": 8206,
+        "durationMs": 8477,
         "error": null
       },
       {
@@ -306,7 +306,7 @@
         "attempted": 5,
         "correct": 5,
         "unsupported": 0,
-        "durationMs": 9103,
+        "durationMs": 9074,
         "error": null
       }
     ]

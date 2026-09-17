@@ -45,7 +45,7 @@ export function Shell({ children }: { children: ReactNode }) {
           </Link>
           <Link href="/quality" aria-current={pathname === "/quality" ? "page" : undefined}>
             <ChartNoAxesCombined size={18} />
-            Quality
+            Evaluation
           </Link>
           <Link href="/requests" aria-current={pathname === "/requests" ? "page" : undefined}>
             <Info size={18} />
@@ -83,7 +83,7 @@ export function Shell({ children }: { children: ReactNode }) {
               {" "}
               /{" "}
               {pathname === "/quality"
-                ? "Quality"
+                ? "Evaluation"
                 : pathname === "/requests"
                   ? "Requests"
                   : "Documents"}

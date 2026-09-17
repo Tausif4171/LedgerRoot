@@ -65,6 +65,13 @@ test("accessibility: documents, review, dialog, quality and narrow reflow", asyn
   for (const route of ["/documents", "/documents/sample-01", "/quality"]) {
     await page.goto(route);
     await expect(page.locator("h1")).toBeVisible();
+    if (route === "/quality") {
+      await expect(page.getByRole("heading", { name: "Extraction evaluation" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Evaluation", exact: true })).toBeVisible();
+      await expect(page.getByText("Saved test results—not your workspace uploads.")).toBeVisible();
+      await expect(page.getByText(/This recorded run contains 30 test cases/)).toBeVisible();
+      await expect(page.locator("th", { hasText: /^Test case$/ })).toHaveCount(1);
+    }
     await page.waitForTimeout(500);
     const report = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
