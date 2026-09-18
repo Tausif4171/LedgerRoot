@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Upload, ArrowUpRight } from "lucide-react";
@@ -7,7 +7,14 @@ import { MAX_BYTES } from "@ledgerroot/contracts";
 import { gateway, isSample } from "@/adapters/gateway";
 import { Modal } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-type Item = { name: string; progress: number; status: string; id?: string; duplicate?: boolean };
+type Item = {
+  name: string;
+  progress: number;
+  status: string;
+  transferring?: boolean;
+  id?: string;
+  duplicate?: boolean;
+};
 export function UploadDialog({
   open,
   onOpenChange,
@@ -16,6 +23,7 @@ export function UploadDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const cache = useQueryClient();
+  const fileInput = useRef<HTMLInputElement>(null);
   const samples = useQuery({
     queryKey: ["sample-options"],
     queryFn: () => gateway.list(),
@@ -45,20 +53,28 @@ export function UploadDialog({
         const i = cursor++;
         const file = selected[i]!;
         try {
-          update(i, { status: "Uploading" });
+          update(i, { status: "Uploading", transferring: true });
           const result = await gateway.upload(file, (p) =>
-            update(i, { progress: p, status: p === 100 ? "Saving original" : "Uploading" }),
+            update(i, {
+              progress: p,
+              transferring: p < 100,
+              status: p === 100 ? "Saving original" : "Uploading",
+            }),
           );
           update(i, {
             id: result.id,
             duplicate: result.duplicate,
             status: result.duplicate
               ? "Duplicate · existing record preserved"
-              : "Saved · processing queued",
+              : "Uploaded · processing queued",
+            transferring: false,
             progress: 100,
           });
         } catch (e) {
-          update(i, { status: e instanceof Error ? e.message : "Upload failed" });
+          update(i, {
+            status: e instanceof Error ? e.message : "Upload failed",
+            transferring: false,
+          });
         }
       }
     }
@@ -76,7 +92,7 @@ export function UploadDialog({
       description={
         isSample
           ? "Explore the review workflow with synthetic documents. No files leave your browser in sample mode."
-          : "JPEG or PNG · up to 10 MiB and 24 megapixels each · five files per batch. PDFs and HEIC are not supported."
+          : "JPEG or PNG · English · USD · one document per image · up to 10 MiB and 24 megapixels each · five files per batch. PDFs and HEIC are not supported."
       }
     >
       {isSample ? (
@@ -98,13 +114,22 @@ export function UploadDialog({
           <div className="upload-area">
             <Upload size={28} />
             <label htmlFor="upload-files">Choose receipt or invoice images</label>
+            <Button disabled={busy} onClick={() => fileInput.current?.click()}>
+              Choose images
+            </Button>
             <input
+              ref={fileInput}
+              className="sr-only"
+              tabIndex={-1}
               id="upload-files"
               type="file"
               multiple
               accept="image/png,image/jpeg"
               disabled={busy}
-              onChange={(e) => void upload(e.target.files)}
+              onChange={(e) => {
+                void upload(e.target.files);
+                e.target.value = "";
+              }}
             />
           </div>
           {error && (
@@ -117,21 +142,23 @@ export function UploadDialog({
               <div className="upload-item" key={`${item.name}-${i}`}>
                 <strong>{item.name}</strong>
                 <p>{item.status}</p>
-                {item.id && (
+                {item.id && !busy && (
                   <Link
                     className="btn btn-ghost"
                     href={`/documents/${item.id}`}
                     onClick={() => onOpenChange(false)}
                   >
-                    {item.duplicate ? "Open existing record" : "Review document"}
+                    {item.duplicate ? "Open existing record" : "Open document"}
                     <ArrowUpRight size={16} />
                   </Link>
                 )}
-                <progress
-                  aria-label={`${item.name} upload progress`}
-                  value={item.progress}
-                  max={100}
-                />
+                {item.transferring && (
+                  <progress
+                    aria-label={`${item.name} upload progress`}
+                    value={item.progress}
+                    max={100}
+                  />
+                )}
               </div>
             ))}
           </div>

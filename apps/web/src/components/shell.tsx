@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import { ApiError } from "@ledgerroot/contracts";
+import { loginHref } from "@/lib/login-return";
 import { usePathname } from "next/navigation";
 import { Files, ChartNoAxesCombined, GitBranch, Info, RotateCcw, ArrowUpRight } from "lucide-react";
 import type { ReactNode } from "react";
@@ -90,6 +92,14 @@ export function Shell({ children }: { children: ReactNode }) {
             </span>
           </span>
           <div className="topbar-profile">
+            {!isSample &&
+              identity.error instanceof ApiError &&
+              identity.error.status === 401 &&
+              pathname !== "/login" && (
+                <Link className="btn btn-small" href={loginHref(pathname)}>
+                  Sign in
+                </Link>
+              )}
             {isSample && (
               <label>
                 Demo actor{" "}

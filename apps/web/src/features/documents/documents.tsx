@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import { ApiError } from "@ledgerroot/contracts";
+import { loginHref } from "@/lib/login-return";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, ArrowUpFromLine, CheckCheck, Clock3, Files, Search } from "lucide-react";
@@ -12,6 +14,7 @@ const filters = [
   ["all", "All documents"],
   ["review", "Needs review"],
   ["approved", "Approved"],
+  ["rejected", "Rejected"],
   ["failed", "Failed"],
 ] as const;
 export function Documents() {
@@ -36,6 +39,7 @@ export function Documents() {
   });
   const all = useQuery({ queryKey: ["documents", "counts"], queryFn: () => gateway.summary() });
   const docs = query.data?.items ?? [];
+  const signedOut = !isSample && query.error instanceof ApiError && query.error.status === 401;
   return (
     <>
       <div className="page-heading">
@@ -43,7 +47,7 @@ export function Documents() {
           <h1>Documents</h1>
           <p>A clear path from source to reviewed record.</p>
         </div>
-        <Button variant="primary" onClick={() => setOpen(true)}>
+        <Button variant="primary" disabled={signedOut} onClick={() => setOpen(true)}>
           <ArrowUpFromLine size={16} />
           {isSample ? "Try a sample" : "Upload"}
         </Button>
@@ -112,11 +116,11 @@ export function Documents() {
           </div>
         ) : query.error ? (
           <div className="empty" role="alert">
-            <h2>Documents couldn’t load</h2>
+            <h2>{signedOut ? "Sign in to view your documents" : "Documents couldn’t load"}</h2>
             <p>{query.error.message}</p>
             <Button onClick={() => query.refetch()}>Try again</Button>
-            {!isSample && (
-              <Link className="btn" href="/login">
+            {signedOut && (
+              <Link className="btn" href={loginHref("/documents")}>
                 Sign in
               </Link>
             )}

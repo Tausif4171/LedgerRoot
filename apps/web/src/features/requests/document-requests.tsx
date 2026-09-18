@@ -23,6 +23,7 @@ export default function DocumentRequests({
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [refreshFailed, setRefreshFailed] = useState(false);
+  const [oldestMessageId, setOldestMessageId] = useState<string | null>(null);
   async function refreshLatest() {
     setRefreshFailed(false);
     try {
@@ -65,6 +66,11 @@ export default function DocumentRequests({
   });
   const me = useQuery({ queryKey: ["identity"], queryFn: () => collaborationGateway.identity() });
   const active = query.data?.items.find((r) => ["OPEN", "RESPONDED"].includes(r.state));
+  const messageIndex = active?.events.findIndex((event) => event.id === oldestMessageId) ?? -1;
+  const conversationLimit = Math.max(
+    5,
+    messageIndex < 0 ? 5 : active!.events.length - messageIndex,
+  );
   const guard = { expectedRevision: d.revision, runId: d.runId, sourceId: d.sourceId };
   async function send(action: string) {
     setBusy(true);
@@ -137,15 +143,37 @@ export default function DocumentRequests({
               {active.state === "OPEN" ? "Waiting for response" : "Response needs review"} ·{" "}
               {members.data?.find((m) => m.id === active.assigneeId)?.name ?? "Assigned teammate"}
             </p>
-            <ul>
-              {active.events.map((e) => (
+            <ul className="request-conversation">
+              {active.events.slice(-conversationLimit).map((e) => (
                 <li key={e.id}>
-                  {e.actorName} · {e.action}: {e.message}
+                  <strong>{e.actorName}</strong> · {e.action.replaceAll("-", " ")}: {e.message}
+                  <div className="muted">
+                    <time dateTime={e.createdAt}>{new Date(e.createdAt).toLocaleString()}</time>
+                  </div>
                 </li>
               ))}
             </ul>
+            {active.events.length > conversationLimit && (
+              <Button
+                onClick={() =>
+                  setOldestMessageId(
+                    active.events[Math.max(0, active.events.length - conversationLimit - 5)]!.id,
+                  )
+                }
+              >
+                Show earlier messages
+              </Button>
+            )}
+            {conversationLimit > 5 && (
+              <Button variant="ghost" onClick={() => setOldestMessageId(null)}>
+                Show fewer messages
+              </Button>
+            )}
             {d.canReview && !refreshFailed && (
               <>
+                <p className="muted">
+                  Resolve closes this question. The document still needs review.
+                </p>
                 <label htmlFor="request-message">Response, follow-up, or cancellation reason</label>
                 <textarea
                   id="request-message"

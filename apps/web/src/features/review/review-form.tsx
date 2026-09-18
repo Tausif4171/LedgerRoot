@@ -64,6 +64,7 @@ export function ReviewForm({
     onDirtyChange?.(form.formState.isDirty);
   }, [form.formState.isDirty, onDirtyChange]);
   const changedRemotely = base.revision !== d.revision || base.runId !== d.runId;
+  const finalized = ["APPROVED", "REJECTED"].includes(base.reviewStatus);
   const locked =
     !["PENDING", "NEEDS_INFORMATION"].includes(base.reviewStatus) ||
     !d.canReview ||
@@ -98,11 +99,7 @@ export function ReviewForm({
       form.reset(defaults(next.fields));
       cache.setQueryData(["document", d.id], next);
       await cache.invalidateQueries({ queryKey: ["documents"] });
-      setSuccess(
-        action === "approve"
-          ? "Record approved in LedgerRoot. Nothing was posted or paid."
-          : "Review saved.",
-      );
+      setSuccess(action === "approve" ? "" : "Review saved.");
       setReasonAction(null);
       setNote("");
       setConflict(null);
@@ -125,10 +122,15 @@ export function ReviewForm({
     return edited ? (
       <span className="field-origin">Human correction · original extraction retained</span>
     ) : ids.length ? (
-      <button type="button" className="evidence-button" onClick={() => onEvidence(ids)}>
-        <ExternalLink size={12} />
-        Source found
-      </button>
+      <>
+        <button type="button" className="evidence-button" onClick={() => onEvidence(ids)}>
+          <ExternalLink size={12} />
+          {base.fields[name] === null ? "View source text" : "Source found"}
+        </button>
+        {base.fields[name] === null && (
+          <span className="field-origin">No value supplied—confirm from the document.</span>
+        )}
+      </>
     ) : (
       <span className="field-origin">
         {name === "invoiceNumber" || name === "dueDate"
@@ -220,14 +222,26 @@ export function ReviewForm({
           </details>
         )}
         {d.extraction?.warnings.length ? (
-          <div className="callout">
-            <strong>{locked ? "Original extraction warnings" : "Worth a closer look"}</strong>
-            <ul>
-              {d.extraction.warnings.map((w) => (
-                <li key={w}>{readableWarning(w)}</li>
-              ))}
-            </ul>
-          </div>
+          finalized ? (
+            <details className="callout">
+              <summary>Original extraction warnings</summary>
+              <p>These describe the original AI result, before human review.</p>
+              <ul>
+                {d.extraction.warnings.map((w) => (
+                  <li key={w}>{readableWarning(w)}</li>
+                ))}
+              </ul>
+            </details>
+          ) : (
+            <div className="callout">
+              <strong>{locked ? "Original extraction warnings" : "Worth a closer look"}</strong>
+              <ul>
+                {d.extraction.warnings.map((w) => (
+                  <li key={w}>{readableWarning(w)}</li>
+                ))}
+              </ul>
+            </div>
+          )
         ) : (
           <div className="callout">
             Source links help you check suggestions. They do not guarantee the values are correct.
@@ -345,12 +359,21 @@ export function ReviewForm({
               {evidence("dueDate")}
             </div>
           </div>
-          <label className="confirmation">
-            <input disabled={locked || busy} type="checkbox" {...form.register("confirmed")} />
-            <span>
-              I reviewed the document type, vendor, date, total, and currency against the source.
-            </span>
-          </label>
+          {finalized ? (
+            <p className="confirmation" role="status">
+              {base.reviewStatus === "APPROVED"
+                ? "Approved in LedgerRoot."
+                : "Rejected in LedgerRoot."}{" "}
+              Reopen to make changes.
+            </p>
+          ) : (
+            <label className="confirmation">
+              <input disabled={locked || busy} type="checkbox" {...form.register("confirmed")} />
+              <span>
+                I reviewed the document type, vendor, date, total, and currency against the source.
+              </span>
+            </label>
+          )}
         </fieldset>
         <div className="review-actions">
           {!locked ? (
@@ -407,8 +430,8 @@ export function ReviewForm({
           )}
         </div>
         <p className="legal-note">
-          Approval is local to LedgerRoot. It does not post to a ledger, make a payment, or verify
-          tax treatment.
+          Approval records your review only. It does not create accounting entries, send payments or
+          verify tax treatment.
         </p>
         <details style={{ marginTop: 16, fontSize: 12 }}>
           <summary>Extraction provenance</summary>
@@ -432,7 +455,11 @@ export function ReviewForm({
           if (!open) setReasonAction(null);
         }}
         title={reasonAction === "reject" ? "Reject document" : "What information is needed?"}
-        description="Leave a reason for the next reviewer. The source and processing history will be preserved."
+        description={
+          reasonAction === "needs-information"
+            ? "This reason is visible to your workspace. No teammate is assigned. Use Request information on the document to ask a specific teammate."
+            : "Leave a reason for the next reviewer. The source and processing history will be preserved."
+        }
       >
         <div className="field">
           <label htmlFor="review-reason">Reason</label>

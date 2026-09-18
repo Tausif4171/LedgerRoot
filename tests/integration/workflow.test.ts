@@ -331,14 +331,17 @@ describe("Database-backed workflow", () => {
       expect(login.status).toBe(200);
     }
     const image = Buffer.concat([bytes, Buffer.from("authenticated-sessions")]);
+    const unicodeName = "Screenshot 11.44.38\u202fPM – reçu.png";
     const uploaded = await bookkeeper
       .post("/api/v1/documents")
       .set("origin", "http://localhost:3100")
       .set("idempotency-key", randomUUID())
+      .field("filename", unicodeName)
       .attach("file", image, "receipt.png");
     expect(uploaded.status).toBe(202);
     const id = uploaded.body.id;
     let d = (await bookkeeper.get(`/api/v1/documents/${id}`)).body;
+    expect(d.filename).toBe(unicodeName);
     await processRun(d.runId, store, async () => extracted);
     d = (await bookkeeper.get(`/api/v1/documents/${id}`)).body;
     const create = await bookkeeper
@@ -363,6 +366,7 @@ describe("Database-backed workflow", () => {
       .post(`/api/v1/documents/${id}/sources`)
       .set("origin", "http://localhost:3100")
       .set("idempotency-key", randomUUID())
+      .field("filename", "Clearer – reçu.png")
       .field(
         "metadata",
         JSON.stringify({
@@ -377,6 +381,10 @@ describe("Database-backed workflow", () => {
       )
       .attach("file", Buffer.concat([bytes, Buffer.from("authenticated-clearer")]), "clearer.png");
     expect(changed.status).toBe(202);
+    const sourceVersions = (await bookkeeper.get(`/api/v1/documents/${id}/sources`)).body.items;
+    expect(sourceVersions.find((source: { current: boolean }) => source.current).filename).toBe(
+      "Clearer – reçu.png",
+    );
     await processRun(changed.body.runId, store, async () => extracted);
     const oldImage = await bookkeeper.get(d.sourceUrl);
     expect(oldImage.status).toBe(302);

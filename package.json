@@ -30,6 +30,8 @@
     "test:integration": "npm run build:packages && vitest run --config vitest.integration.config.ts",
     "db:test:setup": "tsx scripts/setup-test-db.ts",
     "test:e2e": "playwright test",
+    "test:e2e:live-ui": "playwright test --config playwright.live-ui.config.ts",
+    "test:e2e:sample-ui": "playwright test --config playwright.sample-ui.config.ts",
     "test:a11y": "playwright test --grep accessibility",
     "db:generate": "npm run db:generate -w @ledgerroot/api",
     "db:migrate": "npm run db:migrate -w @ledgerroot/api",

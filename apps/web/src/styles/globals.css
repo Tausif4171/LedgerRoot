@@ -800,6 +800,8 @@ tbody tr:hover {
   font-size: 0.875rem;
 }
 .upload-item {
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
   padding: 10px 0;
   font-size: 0.875rem;
 }
@@ -807,6 +809,26 @@ tbody tr:hover {
   width: 100%;
   accent-color: var(--brand);
   height: 8px;
+}
+.dialog-content .review-form {
+  padding: 0;
+}
+.dialog-content .confirmation {
+  margin: 4px 0;
+}
+.request-conversation {
+  padding-left: 20px;
+  display: grid;
+  gap: 8px;
+}
+.collaboration-form input[type="file"]::file-selector-button {
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 10px 14px;
+  margin-right: 12px;
+  cursor: pointer;
 }
 .quality-intro {
   max-width: 700px;

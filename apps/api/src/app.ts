@@ -17,6 +17,7 @@ import { environment } from "./config/env.js";
 import { createAuth } from "./modules/auth/service.js";
 import { createRequest, changeRequest } from "./modules/requests/service.js";
 import { replaceSource } from "./modules/sources/service.js";
+import { uploadFilename } from "./modules/documents/upload-filename.js";
 import {
   getDocument,
   includeDocument,
@@ -178,11 +179,11 @@ export async function createApp(
   const temp = await mkdtemp(join(tmpdir(), "ledgerroot-upload-"));
   const receive = multer({
     dest: temp,
-    limits: { fileSize: MAX_BYTES, files: 1, fields: 0, parts: 2 },
+    limits: { fileSize: MAX_BYTES, files: 1, fields: 1, fieldSize: 8192, parts: 3 },
   }).single("file");
   const receiveSource = multer({
     dest: temp,
-    limits: { fileSize: MAX_BYTES, files: 1, fields: 1, fieldSize: 8192, parts: 3 },
+    limits: { fileSize: MAX_BYTES, files: 1, fields: 2, fieldSize: 8192, parts: 4 },
   }).single("file");
   app.post("/api/v1/documents/:id/sources", (req, res, next) => {
     if ((res.locals.identity as Identity).role === "VIEWER")
@@ -205,7 +206,7 @@ export async function createApp(
             z.string().min(8).max(128).parse(req.get("idempotency-key")),
             value,
             await readFile(req.file.path),
-            req.file.originalname,
+            uploadFilename(req.body.filename, req.file.originalname),
             store,
           );
           const duplicate = z.object({ duplicate: z.boolean(), id: z.string() }).parse(result);
@@ -307,7 +308,7 @@ export async function createApp(
           const key = z.string().min(8).max(128).parse(req.get("idempotency-key"));
           const result = await upload(
             await readFile(req.file.path),
-            req.file.originalname,
+            uploadFilename(req.body.filename, req.file.originalname),
             res.locals.identity,
             key,
             store,

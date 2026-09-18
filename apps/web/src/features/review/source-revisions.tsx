@@ -189,7 +189,7 @@ export function ReplaceSource({
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         />
-        <label>
+        <label className="confirmation">
           <input
             type="checkbox"
             required
@@ -199,10 +199,18 @@ export function ReplaceSource({
           This is a clearer photo of the same receipt or invoice, not a changed bill.
         </label>
         {busy && (
-          <label>
-            Upload progress <progress aria-label="Upload progress" max={100} value={progress} />
-            {progress === 100 ? "Saving safely…" : `${progress}%`}
-          </label>
+          <div role="status">
+            {isSample ? (
+              "Preparing supplied sample…"
+            ) : progress === 100 ? (
+              "Saving safely…"
+            ) : (
+              <>
+                <progress aria-label="Upload progress" max={100} value={progress} /> Uploading ·{" "}
+                {progress}%
+              </>
+            )}
+          </div>
         )}
         {error && <p role="alert">{error}</p>}
         {duplicate && (
