@@ -113,7 +113,9 @@ export function UploadDialog({
         <>
           <div className="upload-area">
             <Upload size={28} />
-            <label htmlFor="upload-files">Choose receipt or invoice images</label>
+            <label htmlFor="upload-files">
+              Upload a photo or screenshot of a receipt or invoice.
+            </label>
             <Button disabled={busy} onClick={() => fileInput.current?.click()}>
               Choose images
             </Button>

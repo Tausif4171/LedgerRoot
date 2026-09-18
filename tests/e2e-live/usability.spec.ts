@@ -67,6 +67,9 @@ test("upload shows queued completion rather than an extraction progress bar", as
   await page.goto("/documents");
   await page.getByRole("button", { name: "Upload", exact: true }).click();
   await expect(page.getByRole("dialog")).toContainText("English · USD · one document per image");
+  await expect(page.getByRole("dialog")).toContainText(
+    "Upload a photo or screenshot of a receipt or invoice.",
+  );
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await page.locator("#upload-files").setInputFiles({
     name: filename,

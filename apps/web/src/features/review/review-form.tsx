@@ -18,6 +18,7 @@ import { gateway } from "@/adapters/gateway";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/dialog";
 import { fieldLabels, fieldValue, readableWarning } from "@/lib/field-labels";
+import { hasEmptyExtraction } from "./empty-extraction";
 const formSchema = z.object({
   documentType: z.enum(["", "receipt", "invoice"]),
   vendor: z.string().max(200),
@@ -220,6 +221,12 @@ export function ReviewForm({
                 ))}
             </ul>
           </details>
+        )}
+        {hasEmptyExtraction(d) && !finalized && (
+          <div className="callout">
+            <strong>No receipt or invoice details were extracted.</strong>
+            <p>Check that this image shows a receipt or invoice and that the text is readable.</p>
+          </div>
         )}
         {d.extraction?.warnings.length ? (
           finalized ? (
