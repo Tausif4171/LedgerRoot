@@ -88,6 +88,7 @@ export const gateway = {
           (query.status === "review" &&
             ["PENDING", "NEEDS_INFORMATION"].includes(d.reviewStatus)) ||
           (query.status === "approved" && d.reviewStatus === "APPROVED") ||
+          (query.status === "rejected" && d.reviewStatus === "REJECTED") ||
           (query.status === "failed" && d.stage === "FAILED") ||
           (query.status === "processing" && !["READY", "FAILED"].includes(d.stage)),
       );
@@ -217,6 +218,7 @@ export const gateway = {
         else reject(new Error(body.error?.message ?? "Upload failed."));
       };
       const data = new FormData();
+      data.append("filename", file.name);
       data.append("file", file);
       xhr.send(data);
     });

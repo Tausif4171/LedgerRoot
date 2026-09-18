@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { loginReturn } from "@/lib/login-return";
 export default function Login() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -29,7 +30,7 @@ export default function Login() {
             if (!response.ok)
               throw new Error("Sign-in failed. Check your local account credentials.");
             await cache.invalidateQueries();
-            router.push("/documents");
+            router.push(loginReturn(new URLSearchParams(window.location.search).get("next")));
           } catch (e) {
             setError(e instanceof Error ? e.message : "Sign-in failed.");
           } finally {

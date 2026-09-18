@@ -143,6 +143,7 @@ export const collaborationGateway = {
           }
         };
         const data = new FormData();
+        data.append("filename", file.name);
         data.append("metadata", JSON.stringify(metadata));
         data.append("file", file);
         xhr.send(data);

@@ -27,6 +27,15 @@ test("sample review edits persist, approval is explicit and reset is isolated", 
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Approve record", exact: true }).click();
   await expect(page.getByRole("button", { name: "Reopen for review" })).toBeVisible();
+  await expect(page.getByRole("checkbox")).toHaveCount(0);
+  await expect(page.getByText("Approved in LedgerRoot. Reopen to make changes.")).toBeVisible();
+  await expect(page.getByText("Record approved.", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Approval records your review only.", { exact: false })).toBeVisible();
+  const warnings = page
+    .locator("details")
+    .filter({ has: page.locator("summary", { hasText: "Original extraction warnings" }) });
+  await expect(warnings).toHaveCount(1);
+  await expect(warnings).not.toHaveAttribute("open", "");
   await page.getByRole("button", { name: "Source found", exact: true }).first().click();
   await expect(page.locator(".evidence-highlight").first()).toBeVisible();
   await page.goto("/documents");
