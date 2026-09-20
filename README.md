@@ -1,26 +1,42 @@
 # LedgerRoot
 
-**Receipt and invoice images → evidence-linked suggestions → accountable human review.**
+Receipt and invoice review, with source evidence and a clear path to resolve missing information.
 
-An independent engineering prototype for reliable document processing. Not an Ambrook integration, a verified missing Ambrook feature, or production accounting software. Approval never posts a ledger entry, pays a bill, or verifies tax treatment.
+LedgerRoot helps a bookkeeper review extracted details, ask a teammate for clarification, and review a clearer photo without losing earlier images or saved corrections. AI suggests values; a person decides what to approve.
 
-![Real local review workflow](docs/demo/live-review-before.png)
+An independent prototype for receipt and invoice review.
 
-## What works
+[Quick start](#quick-start) · [Workflow](#the-workflow) · [Architecture](#architecture) · [Evaluation](#extraction-evaluation)
 
-- Private, validated JPEG/PNG upload, originals preserved, SHA-256 duplicate detection scoped to a workspace.
-- PostgreSQL-backed processing state, durable dispatch outbox, BullMQ workers, bounded retries, expired-worker fencing, and retained attempts.
-- Local Tesseract OCR + Ollama extraction, checked source references, empty unsupported fields, image-region evidence.
-- Human edits, explicit approval, rejection/needs-information reasons, reopen, conflict-safe revisions, and append-only application history.
-- Assigned correction requests with an in-app inbox, responses, follow-ups, reassignment and resolution. Active requests block approval.
-- Clearer-photo revisions preserve every source image and saved correction. New suggestions require explicit review; historical images are read-only, not restorable.
-- Five-file batch UI, per-file byte progress, responsive review, keyboard navigation, accessible dialogs, small thumbnails, pagination.
-- Separate sample adapter using six synthetic documents with **recorded real-model results**. Edits stay in this tab; simulated failures/retries are labelled. No arbitrary public uploads or inference calls.
-- A 30-case synthetic evaluation, including errors and abstentions—not a production benchmark.
+![A receipt beside its extracted fields in the local review workflow](docs/demo/live-review-before.png)
 
-## Try it locally
+_Earlier local-build screenshot. The current application also includes correction requests and source-image history._
 
-Prerequisite: **Node 24 and npm 11**. One workspace lockfile is committed. No model or database is needed for sample mode.
+## The workflow
+
+A receipt arrives with an unreadable total. Instead of starting over or keeping the clarification in a separate conversation:
+
+1. **Upload:** preserve the original image and process it in the background.
+2. **Review:** compare suggestions with the source and save corrections.
+3. **Ask:** assign a question to an authorized teammate. An active request blocks approval.
+4. **Respond:** the teammate answers or supplies a clearer photo of the same document.
+5. **Compare:** keep earlier images and saved values separate from new suggestions.
+6. **Finish:** resolve the request, confirm the fields, and explicitly approve the record.
+
+Approval records a review inside LedgerRoot. It does not create accounting entries, send payments, or verify tax treatment.
+
+## What it supports
+
+- **Evidence-linked review:** inspect the image region behind a suggestion; correct, save, approve, reject, or reopen a record.
+- **Correction requests:** an in-app inbox with responses, follow-ups, reassignment, cancellation, and resolution. No email or push notifications.
+- **Source-image revisions:** preserve previous photos, extraction results, and review history. Historical images are viewable, not restorable.
+- **Reliable processing:** durable dispatch, bounded retries, failure history, and protection against stale workers and conflicting edits.
+- **Workspace access:** owners and reviewers can work on records; viewers are read-only. Exact duplicate detection is workspace-scoped.
+- **Batch uploads:** up to five files, with individual progress and results.
+
+## Quick start
+
+Use **Node.js 24 and npm 11**. Run these commands from the repository root:
 
 ```sh
 npm ci
@@ -28,9 +44,15 @@ npm run db:generate
 npm run dev
 ```
 
-Open **http://localhost:3100/documents**. Select a sample, inspect a source link, correct a field, save, confirm and approve. Reset restores recorded output. Only synthetic data is bundled.
+Open [localhost:3100/documents](http://localhost:3100/documents).
 
-For the real pipeline, install Docker and a local Ollama runtime, then:
+Sample mode needs no running database, storage service, or AI model. It uses synthetic documents and recorded model results. Changes stay in the current browser tab; **Reset samples** restores the demo.
+
+For the two-person flow, open **Requests → Start correction scenario** and switch between the sample bookkeeper and teammate. Actor switching and processing transitions are demo simulations—not real authentication or live inference. Arbitrary uploads are disabled in sample mode.
+
+### Real local processing
+
+After installing dependencies above, start Docker Desktop and the local Ollama service, then run:
 
 ```sh
 npm run setup:local
@@ -42,52 +64,91 @@ npm run eval:import
 npm run dev:live
 ```
 
-Open **http://localhost:3100/login**. Local credentials are in the generated, gitignored `.env`; do not share it. Stop the sample server before using `dev:live` on the same port. The real API binds to loopback; Docker ports also bind to loopback. Initial OCR use downloads English trained data to `.cache/ocr`.
+Wait for PostgreSQL to be healthy before running migrations. Stop the sample server first: both modes use port 3100.
 
-See [engineering/setup](docs/engineering.md) for ports, commands, migrations, roles, recovery and deployment.
+Open [localhost:3100/login](http://localhost:3100/login), matching your configured application origin. Local credentials are in the generated, gitignored `.env`; never publish that file. `eval:import` imports the saved evaluation—it does not run extraction again.
 
-For the new two-person scenario, open **http://localhost:3100/requests** in sample mode and select **Start correction scenario**. See the [correction workflow guide](docs/correction-workflow.md) for real two-user setup, migration precautions, test steps and remaining release checks.
+See the [local setup guide](docs/engineering.md) for service prerequisites and recovery, and the [correction workflow guide](docs/correction-workflow.md) for two-user setup and migration precautions.
 
-## Verified evidence
+## Demo and verification
 
-- [Actual local workflow recording](docs/demo/live-workflow.webm) and [machine-readable verification](docs/demo/live-verification.json): upload, real processing, edit surviving refresh, approval and duplicate handling. This is a short un-narrated recording, not a simulated processing animation.
-- [Recorded evaluation](apps/web/public/samples/evaluations.json): 30 cases, 116 correct of 118 attempted suggestions, 155 known fields, 2 incorrect suggestions, no predictions into unknown-labelled fields, no terminal extraction errors in this run. Many vendor values were withheld. Read the [evaluation limitations](docs/evaluation.md) before interpreting these numbers.
-- Automated local checks include strict types, lint/boundaries, unit rules, database concurrency/recovery, browser review and axe scans. [Verification notes](docs/verification.md) distinguish tested behavior from remaining release work.
-
-Public Vercel publication is **not completed**: the local CLI sign-in token needs renewal. There is no deployed URL to claim yet. [Deployment instructions](docs/deployment.md).
+- [Local workflow recording](docs/demo/live-workflow.webm): an earlier, un-narrated real-service check of upload, extraction, correction, approval, and duplicate handling. It does not cover the newer two-person workflow.
+- [Recorded verification](docs/demo/live-verification.json) and [testing notes](docs/verification.md): historical checks, their scope, and outstanding release work.
+- [Sample deployment guide](docs/deployment.md): instructions for hosting the synthetic demo separately from private live-workspace services.
 
 ## Architecture
 
 ```text
-Next.js / React ── Express API ── private S3-compatible storage
-                       │            original + derived artifacts
-                    PostgreSQL
-             documents / runs / revisions / outbox
-                       │
-                 dispatcher ── Redis / BullMQ ── worker
-                                                  │
-                                     Sharp → Tesseract → Ollama
+Next.js review UI → Express API → private S3-compatible storage
+                         │
+                     PostgreSQL
+              documents, sources, reviews, outbox
+                         │
+                     Dispatcher
+                         ↓
+                  Redis / BullMQ → Worker
+                                      ↓
+                           Sharp → Tesseract → Ollama
 ```
 
-TypeScript strict · Node 24 · Next 16 / React 19 · Tailwind 4 / Radix · React Hook Form / Zod / TanStack Query · Express 5 · PostgreSQL 17 / Prisma · BullMQ / Redis · S3 SDK · Better Auth · Pino.
+**Stack:** TypeScript, Next.js, React, Tailwind CSS, Radix, Zod, Express, PostgreSQL, Prisma, Redis, BullMQ, and S3-compatible storage.
 
-The UI primitives follow the small, local Radix/CVA component pattern used by shadcn-style applications; this project does not claim that an external design-skill audit has run.
+Key design decisions:
 
-## Documentation
+- Original images, AI output, and human revisions are stored separately.
+- Each processing run reads its own source version, not whichever image is currently selected.
+- Server-side authorization, idempotency, and revision checks protect mutations.
+- Replacing an image never silently overwrites saved corrections or approves a record.
 
-- [PRD and scope](docs/PRD.md)
-- [Architecture and invariants](docs/architecture.md)
-- [UI/UX specification](docs/ui-ux.md)
-- [Engineering guide](docs/engineering.md)
+See [architecture and invariants](docs/architecture.md) for the implementation details.
+
+## Extraction evaluation
+
+The Evaluation page shows a saved test run on **30 synthetic documents**: 20 development cases and 10 holdout cases. It is separate from workspace uploads and does not change when someone edits or approves a record.
+
+| Recorded measure                            | Result            |
+| ------------------------------------------- | ----------------- |
+| Correct suggestions / attempted suggestions | 116 / 118 (98.3%) |
+| Known fields receiving a suggestion         | 118 / 155 (76.1%) |
+| Known fields left unanswered                | 37                |
+
+High correctness among supplied suggestions does not mean every field was extracted. This small synthetic set is not a production-accuracy benchmark; vendor extraction and positive due-date coverage remain limitations.
+
+```sh
+npm run eval          # Run extraction against the labelled test documents
+npm run eval:import   # Import the saved results into the local application
+```
+
+[Recorded results](apps/web/public/samples/evaluations.json) · [Method and limitations](docs/evaluation.md)
+
+## Development checks
+
+```sh
+npm run typecheck
+npm run lint
+npm test
+npm run test:integration
+npm run build
+npm run test:e2e
+```
+
+Integration tests require the separate test database described in the [engineering guide](docs/engineering.md). Browser tests and controlled-provider integration tests do not establish real-model accuracy or replace manual accessibility checks.
+
+## Scope and limitations
+
+Built for demonstration and local testing, not production accounting.
+
+- JPEG or PNG; English; USD; one document per image; maximum 10 MiB and 24 megapixels per file.
+- No PDF, HEIC, multipage grouping, offline sync, bank connections, ledger entries, or payments.
+- No automatic approval, fuzzy duplicate detection, or automatic verification that replacement photos show the same document.
+
+Production use requires further security, reliability, and extraction-quality validation. See the [engineering guide](docs/engineering.md) for operational and dependency-licensing considerations.
+
+## Further reading
+
+- [Product requirements and scope](docs/PRD.md)
 - [Correction requests and source-image revisions](docs/correction-workflow.md)
-- [Evaluation and reproducibility](docs/evaluation.md)
-- [Evidence and reference boundaries](docs/evidence.md)
-- [Prioritized backlog](docs/backlog.md)
+- [UI/UX specification](docs/ui-ux.md)
 - [Architecture decisions](docs/decisions.md)
-- [Founder walkthrough](docs/walkthrough.md)
-
-## Important limits
-
-English, USD, JPEG/PNG only; one purchase document per image, 10 MiB / 24 MP. No PDF, HEIC, multipage, bank links, ledger, payments, automatic approval, fuzzy matching, email ingestion or offline sync. This is not a secure production hosting blueprint. Real customer demand, Ambrook's internal implementation, production extraction performance and production operational readiness are unverified.
-
-MinIO is a separate local S3-compatible service, not copied proprietary AIStor source. Review its AGPL/commercial licensing obligations for your intended deployment. An AIStor license is not included or assumed transferable. Reference repositories are untouched.
+- [Walkthrough outline](docs/walkthrough.md)
+- [Prioritized backlog](docs/backlog.md)
