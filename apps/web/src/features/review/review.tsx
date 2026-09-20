@@ -118,11 +118,15 @@ export function Review({ id }: { id: string }) {
       )}
       {(!isSample || d.id === "correction-scenario") && (
         <>
-          <DocumentRequests document={d} onReplace={beginReplacement} />
+          <div className="collaboration-section">
+            <DocumentRequests document={d} onReplace={beginReplacement} />
+          </div>
           {d.canReview &&
             ["READY", "FAILED"].includes(d.stage) &&
             !["APPROVED", "REJECTED"].includes(d.reviewStatus) && (
-              <ActionButton onClick={() => beginReplacement()}>Upload clearer photo</ActionButton>
+              <div className="source-actions">
+                <ActionButton onClick={() => beginReplacement()}>Upload clearer photo</ActionButton>
+              </div>
             )}
           {replacement && (
             <ReplaceSource
@@ -212,8 +216,10 @@ export function Review({ id }: { id: string }) {
             )}
           </Tabs.Content>
           <Tabs.Content value="history" forceMount className="tab-pane history-pane">
-            <History events={d.history} />
-            {(!isSample || d.id === "correction-scenario") && <SourceHistory document={d} />}
+            <div className="history-stack">
+              <History events={d.history} />
+              {(!isSample || d.id === "correction-scenario") && <SourceHistory document={d} />}
+            </div>
           </Tabs.Content>
         </div>
       </Tabs.Root>

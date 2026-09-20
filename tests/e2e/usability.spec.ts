@@ -11,13 +11,24 @@ test("source text is not presented as a supplied value when extraction abstains"
   await expect(page.locator(".evidence-highlight").first()).toBeVisible();
 });
 
-test("rejected records remain discoverable and can be reopened", async ({ page }) => {
+test("rejected records remain discoverable and can be reopened", async ({ page }, testInfo) => {
   await page.goto("/documents/sample-01");
+  await page.getByLabel("Vendor", { exact: true }).fill("Cedar Field Supply");
   await page.getByRole("button", { name: "Reject document", exact: true }).click();
   await page.getByLabel("Reason", { exact: true }).fill("Wrong document for this workspace");
   await page.getByRole("button", { name: "Save reason" }).click();
   await expect(page.getByText("Rejected in LedgerRoot. Reopen to make changes.")).toBeVisible();
   await expect(page.getByRole("checkbox")).toHaveCount(0);
+  await expect(page.getByText("Wrong document for this workspace", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Vendor", { exact: true })).toHaveCount(0);
+  const details = page
+    .locator("details")
+    .filter({ has: page.locator("summary", { hasText: "View extraction details" }) });
+  await expect(details).not.toHaveAttribute("open", "");
+  await page.getByText("View extraction details", { exact: true }).click();
+  await expect(page.locator(".rejected-fields")).toContainText("Cedar Field Supply");
+  await page.getByText("View extraction details", { exact: true }).click();
+  await page.screenshot({ path: testInfo.outputPath("rejected-summary.png"), fullPage: true });
   await page.goto("/documents");
   await page.getByRole("button", { name: "Rejected", exact: true }).click();
   await expect(page.locator('a.doc-link[href="/documents/sample-01"]')).toBeVisible();

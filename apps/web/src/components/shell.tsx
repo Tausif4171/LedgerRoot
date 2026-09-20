@@ -1,4 +1,5 @@
 "use client";
+import { Select } from "@/components/ui/select";
 import Link from "next/link";
 import { ApiError } from "@ledgerroot/contracts";
 import { loginHref } from "@/lib/login-return";
@@ -103,11 +104,11 @@ export function Shell({ children }: { children: ReactNode }) {
             {isSample && (
               <label>
                 Demo actor{" "}
-                <select
+                <Select
                   aria-label="Demo actor (simulation only)"
                   value={identity.data?.userId ?? samplePeople[0]!.id}
-                  onChange={async (e) => {
-                    sampleCollaboration.switchActor(e.target.value);
+                  onValueChange={async (value) => {
+                    sampleCollaboration.switchActor(value);
                     await cache.invalidateQueries();
                   }}
                 >
@@ -116,7 +117,7 @@ export function Shell({ children }: { children: ReactNode }) {
                       {p.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
             )}
             <span className="muted">{isSample ? "Sample workspace" : "Local workspace"}</span>

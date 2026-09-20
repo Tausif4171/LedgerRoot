@@ -1,4 +1,110 @@
 @import "tailwindcss";
+.history-stack {
+  display: grid;
+  gap: 24px;
+}
+.history-footer {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.history-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.collaboration-section,
+.source-actions {
+  margin-bottom: 24px;
+}
+.rejected-fields {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+}
+.rejected-review {
+  display: grid;
+  gap: 16px;
+}
+.rejected-review > .btn {
+  justify-self: start;
+}
+.rejected-fields dt {
+  font-weight: 600;
+}
+.rejected-fields dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.extraction-provenance {
+  margin-top: 16px;
+  overflow-wrap: anywhere;
+}
+.select-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  font-size: 0.875rem;
+}
+.select-trigger > span:first-child {
+  overflow-wrap: anywhere;
+}
+.select-trigger svg {
+  flex-shrink: 0;
+}
+.select-content {
+  z-index: 60;
+  width: var(--radix-select-trigger-width);
+  max-width: calc(100vw - 24px);
+  max-height: min(320px, var(--radix-select-content-available-height));
+  overflow: hidden;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 15%, transparent);
+}
+.select-item {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.select-item[data-highlighted] {
+  background: var(--soft);
+  outline: 2px solid var(--brand);
+  outline-offset: -2px;
+}
+.select-item[data-state="checked"] {
+  font-weight: 600;
+}
+.select-item[data-disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.select-scroll {
+  display: flex;
+  justify-content: center;
+  padding: 4px;
+}
 :root {
   --canvas: #f7f8f5;
   --surface: #ffffff;
@@ -977,7 +1083,7 @@ tbody tr:hover {
     padding: 8px 20px;
     flex-wrap: wrap;
   }
-  .topbar-profile span {
+  .topbar-profile > span {
     display: none;
   }
   .main {

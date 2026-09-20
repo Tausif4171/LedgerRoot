@@ -1,4 +1,5 @@
 "use client";
+import { Select } from "@/components/ui/select";
 import { useState } from "react";
 import { useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError, type DocumentRecord, type FieldName } from "@ledgerroot/contracts";
@@ -205,10 +206,10 @@ export default function DocumentRequests({
                   </>
                 )}
                 <label htmlFor="request-reassign">Reassign to</label>
-                <select
+                <Select
                   id="request-reassign"
                   value={assignee}
-                  onChange={(e) => setAssignee(e.target.value)}
+                  onValueChange={(value) => setAssignee(value)}
                 >
                   <option value="">Choose teammate</option>
                   {members.data?.map((m) => (
@@ -216,7 +217,7 @@ export default function DocumentRequests({
                       {m.name}
                     </option>
                   ))}
-                </select>
+                </Select>
                 <Button disabled={busy || !assignee} onClick={() => send("reassign")}>
                   Reassign request
                 </Button>
@@ -298,11 +299,11 @@ export default function DocumentRequests({
             onChange={(e) => setMessage(e.target.value)}
           />
           <label htmlFor="new-assignee">Assign to</label>
-          <select
+          <Select
             id="new-assignee"
             required
             value={assignee}
-            onChange={(e) => setAssignee(e.target.value)}
+            onValueChange={(value) => setAssignee(value)}
           >
             <option value="">Choose teammate</option>
             {members.data?.map((m) => (
@@ -310,9 +311,9 @@ export default function DocumentRequests({
                 {m.name}
               </option>
             ))}
-          </select>
+          </Select>
           <label htmlFor="request-field">Related field (optional)</label>
-          <select id="request-field" value={field} onChange={(e) => setField(e.target.value)}>
+          <Select id="request-field" value={field} onValueChange={(value) => setField(value)}>
             <option value="">Whole document</option>
             {[
               "documentType",
@@ -327,7 +328,7 @@ export default function DocumentRequests({
                 {fieldLabels[f as FieldName]}
               </option>
             ))}
-          </select>
+          </Select>
           {error && <p role="alert">{error}</p>}
           <Button disabled={busy || !message.trim() || !assignee} type="submit">
             {busy ? "Sending…" : "Send request"}

@@ -15,8 +15,10 @@ test("sample review edits persist, approval is explicit and reset is isolated", 
   await page.locator('a[href="/documents/sample-01"]').first().click();
   await page.getByLabel("Vendor", { exact: true }).fill("Cedar Field Supply");
   await page.getByLabel("Document date", { exact: true }).fill("2026-09-02");
-  await page.getByLabel("Currency", { exact: true }).selectOption("USD");
-  await page.getByLabel("Document type", { exact: true }).selectOption("receipt");
+  await page.getByLabel("Currency", { exact: true }).click();
+  await page.getByRole("option", { name: "USD — US Dollar", exact: true }).click();
+  await page.getByLabel("Document type", { exact: true }).click();
+  await page.getByRole("option", { name: "Receipt", exact: true }).click();
   await page.getByLabel("Total amount (USD)").fill("151.00");
   await page.getByRole("button", { name: "Save changes", exact: true }).click();
   await expect(page.getByText("Review saved.", { exact: true })).toBeVisible();
@@ -30,7 +32,9 @@ test("sample review edits persist, approval is explicit and reset is isolated", 
   await expect(page.getByRole("checkbox")).toHaveCount(0);
   await expect(page.getByText("Approved in LedgerRoot. Reopen to make changes.")).toBeVisible();
   await expect(page.getByText("Record approved.", { exact: true })).toHaveCount(0);
-  await expect(page.getByText("Approval records your review only.", { exact: false })).toBeVisible();
+  await expect(
+    page.getByText("Approval records your review only.", { exact: false }),
+  ).toBeVisible();
   const warnings = page
     .locator("details")
     .filter({ has: page.locator("summary", { hasText: "Original extraction warnings" }) });

@@ -1,4 +1,5 @@
 "use client";
+import { Select } from "@/components/ui/select";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,11 +28,11 @@ export function SourceHistory({ document: d }: { document: DocumentRecord }) {
       <p>Earlier images are read-only. Selecting one does not restore it.</p>
       {query.error && <p role="alert">{query.error.message}</p>}
       <label htmlFor="source-version">View a saved source</label>
-      <select
+      <Select
         id="source-version"
         value={selected}
-        onChange={(e) => {
-          setSelected(e.target.value);
+        onValueChange={(value) => {
+          setSelected(value);
           setEvidence([]);
         }}
       >
@@ -42,7 +43,7 @@ export function SourceHistory({ document: d }: { document: DocumentRecord }) {
             {s.current ? " · current" : ""} · {s.stage}
           </option>
         ))}
-      </select>
+      </Select>
       {query.hasNextPage && (
         <Button disabled={query.isFetchingNextPage} onClick={() => query.fetchNextPage()}>
           Load older source versions

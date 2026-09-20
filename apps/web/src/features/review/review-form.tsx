@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
@@ -18,7 +18,8 @@ import { gateway } from "@/adapters/gateway";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/dialog";
 import { fieldLabels, fieldValue, readableWarning } from "@/lib/field-labels";
-import { hasEmptyExtraction } from "./empty-extraction";
+import { hasEmptyExtraction, reviewWarnings } from "./empty-extraction";
+import { Select } from "@/components/ui/select";
 const formSchema = z.object({
   documentType: z.enum(["", "receipt", "invoice"]),
   vendor: z.string().max(200),
@@ -128,7 +129,7 @@ export function ReviewForm({
           <ExternalLink size={12} />
           {base.fields[name] === null ? "View source text" : "Source found"}
         </button>
-        {base.fields[name] === null && (
+        {base.fields[name] === null && !finalized && (
           <span className="field-origin">No value supplied—confirm from the document.</span>
         )}
       </>
@@ -136,8 +137,74 @@ export function ReviewForm({
       <span className="field-origin">
         {name === "invoiceNumber" || name === "dueDate"
           ? "Not supplied · optional"
-          : "No verified source · confirm manually"}
+          : finalized
+            ? "No verified source"
+            : "No verified source · confirm manually"}
       </span>
+    );
+  }
+  const visibleWarnings = reviewWarnings({ ...d, reviewStatus: base.reviewStatus });
+  if (base.reviewStatus === "REJECTED" && !changedRemotely && !conflict) {
+    const rejection = [...base.history].reverse().find((event) => event.action === "reject");
+    return (
+      <section className="panel">
+        <div className="panel-heading">
+          <h2>Document rejected</h2>
+          <span>Revision {base.revision}</span>
+        </div>
+        <div className="review-form rejected-review">
+          <div role="status">
+            <p>
+              <strong>Rejected in LedgerRoot. Reopen to make changes.</strong>
+            </p>
+            <p>{rejection?.note || "No rejection reason recorded."}</p>
+          </div>
+          <details>
+            <summary>View extraction details</summary>
+            <dl className="rejected-fields">
+              {Object.entries(base.fields).map(([key, value]) => (
+                <div key={key}>
+                  <dt>{fieldLabels[key as FieldName]}</dt>
+                  <dd>{fieldValue(key as FieldName, value)}</dd>
+                  <dd>{evidence(key as FieldName)}</dd>
+                </div>
+              ))}
+            </dl>
+            {!!d.extraction?.warnings.length && (
+              <details className="callout">
+                <summary>Original extraction warnings</summary>
+                <p>These describe the original AI result, before human review.</p>
+                <ul>
+                  {d.extraction.warnings.map((warning) => (
+                    <li key={warning}>{readableWarning(warning)}</li>
+                  ))}
+                </ul>
+              </details>
+            )}
+            <details className="extraction-provenance">
+              <summary>Extraction provenance</summary>
+              <p>
+                {d.extraction?.provenance === "live"
+                  ? "Recorded real model output"
+                  : "Authored fixture — no real model output"}
+              </p>
+              <p>
+                {d.extraction?.model} · {d.extraction?.modelDigest} · {d.extraction?.promptVersion}
+              </p>
+            </details>
+          </details>
+          {error && (
+            <p className="callout callout-error" role="alert">
+              {error}
+            </p>
+          )}
+          {d.canReview && d.stage === "READY" && (
+            <Button disabled={busy} onClick={() => submit("reopen")}>
+              {busy ? "Reopening…" : "Reopen for review"}
+            </Button>
+          )}
+        </div>
+      </section>
     );
   }
   return (
@@ -228,13 +295,13 @@ export function ReviewForm({
             <p>Check that this image shows a receipt or invoice and that the text is readable.</p>
           </div>
         )}
-        {d.extraction?.warnings.length ? (
+        {visibleWarnings.length ? (
           finalized ? (
             <details className="callout">
               <summary>Original extraction warnings</summary>
               <p>These describe the original AI result, before human review.</p>
               <ul>
-                {d.extraction.warnings.map((w) => (
+                {visibleWarnings.map((w) => (
                   <li key={w}>{readableWarning(w)}</li>
                 ))}
               </ul>
@@ -243,17 +310,17 @@ export function ReviewForm({
             <div className="callout">
               <strong>{locked ? "Original extraction warnings" : "Worth a closer look"}</strong>
               <ul>
-                {d.extraction.warnings.map((w) => (
+                {visibleWarnings.map((w) => (
                   <li key={w}>{readableWarning(w)}</li>
                 ))}
               </ul>
             </div>
           )
-        ) : (
+        ) : !hasEmptyExtraction(d) ? (
           <div className="callout">
             Source links help you check suggestions. They do not guarantee the values are correct.
           </div>
-        )}
+        ) : null}
         {error && (
           <div className="callout callout-error" role="alert">
             {error}
@@ -286,23 +353,53 @@ export function ReviewForm({
           <div className="field-grid">
             <div className="field">
               <label htmlFor="documentType">Document type</label>
-              <select
-                disabled={locked || busy}
-                id="documentType"
-                {...form.register("documentType")}
-              >
-                <option value="">Select type</option>
-                <option value="receipt">Receipt</option>
-                <option value="invoice">Invoice</option>
-              </select>
+              <Controller
+                name="documentType"
+                control={form.control}
+                render={({ field }) => (
+                  <Select
+                    disabled={locked || busy}
+                    id="documentType"
+                    name={field.name}
+                    ref={field.ref}
+                    value={field.value}
+                    onBlur={field.onBlur}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      form.setValue("confirmed", false);
+                    }}
+                  >
+                    <option value="">Select type</option>
+                    <option value="receipt">Receipt</option>
+                    <option value="invoice">Invoice</option>
+                  </Select>
+                )}
+              />
               {evidence("documentType")}
             </div>
             <div className="field">
               <label htmlFor="currency">Currency</label>
-              <select disabled={locked || busy} id="currency" {...form.register("currency")}>
-                <option value="">Confirm currency</option>
-                <option value="USD">USD — US Dollar</option>
-              </select>
+              <Controller
+                name="currency"
+                control={form.control}
+                render={({ field }) => (
+                  <Select
+                    disabled={locked || busy}
+                    id="currency"
+                    name={field.name}
+                    ref={field.ref}
+                    value={field.value}
+                    onBlur={field.onBlur}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      form.setValue("confirmed", false);
+                    }}
+                  >
+                    <option value="">Confirm currency</option>
+                    <option value="USD">USD — US Dollar</option>
+                  </Select>
+                )}
+              />
               {evidence("currency")}
             </div>
             <div className="field field-full">

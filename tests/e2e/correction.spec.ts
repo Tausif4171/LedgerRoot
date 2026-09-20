@@ -6,9 +6,11 @@ test("request conflict refreshes without navigation or lost drafts", async ({ pa
   await page.getByRole("button", { name: "Start correction scenario" }).click();
   await page.getByRole("button", { name: "Request information", exact: true }).click();
   await page.getByLabel("Question", { exact: true }).fill("Confirm vendor");
-  await page.getByLabel("Assign to", { exact: true }).selectOption("sample-teammate");
+  await page.getByLabel("Assign to", { exact: true }).click();
+  await page.getByRole("option", { name: "Sample teammate", exact: true }).click();
   await page.getByRole("button", { name: "Send request", exact: true }).click();
-  await page.getByLabel("Demo actor (simulation only)").selectOption("sample-teammate");
+  await page.getByLabel("Demo actor (simulation only)").click();
+  await page.getByRole("option", { name: "Sample teammate", exact: true }).click();
   await page
     .getByLabel("Response, follow-up, or cancellation reason")
     .fill("Confirmed from original");
@@ -48,26 +50,32 @@ test("correction scenario preserves drafts and images, resolves then approves", 
   await expect(page).toHaveURL(/correction-scenario/);
   await page.getByRole("button", { name: "Request information", exact: true }).click();
   await page.getByLabel("Question", { exact: true }).fill("Please provide a clearer total");
-  await page.getByLabel("Assign to", { exact: true }).selectOption("sample-teammate");
+  await page.getByLabel("Assign to", { exact: true }).click();
+  await page.getByRole("option", { name: "Sample teammate", exact: true }).click();
   await page.getByRole("button", { name: "Send request", exact: true }).click();
   await expect(page.getByText("Waiting for response", { exact: false })).toBeVisible();
   await expect(page.getByRole("button", { name: "Approve record", exact: true })).toBeDisabled();
-  await page.getByLabel("Demo actor (simulation only)").selectOption("sample-teammate");
+  await page.getByLabel("Demo actor (simulation only)").click();
+  await page.getByRole("option", { name: "Sample teammate", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Send response", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Upload clearer photo", exact: true }).first().click();
   await page.getByLabel("What is clearer?").fill("The total is now visible");
   await page.getByRole("dialog").getByRole("checkbox").check();
   await page.getByRole("button", { name: "Use supplied clearer photo" }).click();
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page.getByText("Response needs review", { exact: false })).toBeVisible();
-  await page.getByLabel("Demo actor (simulation only)").selectOption("sample-bookkeeper");
+  await page.getByLabel("Demo actor (simulation only)").click();
+  await page.getByRole("option", { name: "Sample bookkeeper", exact: true }).click();
   await page.getByRole("button", { name: "Resolve request", exact: true }).click();
   await expect(page.getByText("No active request.")).toBeVisible();
   const discard = page.getByRole("button", { name: "Discard draft and load saved values" });
   if (await discard.isVisible()) await discard.click();
   await page.getByLabel("Vendor", { exact: true }).fill("Cedar Field Supply");
   await page.getByLabel("Document date", { exact: true }).fill("2026-09-02");
-  await page.getByLabel("Currency", { exact: true }).selectOption("USD");
-  await page.getByLabel("Document type", { exact: true }).selectOption("receipt");
+  await page.getByLabel("Currency", { exact: true }).click();
+  await page.getByRole("option", { name: "USD — US Dollar", exact: true }).click();
+  await page.getByLabel("Document type", { exact: true }).click();
+  await page.getByRole("option", { name: "Receipt", exact: true }).click();
   await page.getByLabel("Total amount (USD)").fill("148.50");
   await page.getByRole("button", { name: "Upload clearer photo", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "You have unsaved changes" })).toBeVisible();
@@ -78,9 +86,11 @@ test("correction scenario preserves drafts and images, resolves then approves", 
   await expect(page.getByRole("button", { name: "Reopen for review" })).toBeVisible();
   const historyTab = page.getByRole("tab", { name: "History", exact: true });
   if (await historyTab.isVisible()) await historyTab.click();
-  await page.getByLabel("View a saved source").selectOption("sample-source-1");
+  await page.getByLabel("View a saved source").click();
+  await page.getByRole("option", { name: "Version 1", exact: false }).click();
   await expect(page.locator('img[src="/samples/correction-cropped.png"]')).toBeVisible();
-  await page.getByLabel("View a saved source").selectOption("sample-source-2");
+  await page.getByLabel("View a saved source").click();
+  await page.getByRole("option", { name: "Version 2", exact: false }).click();
   await expect(page.locator('img[src="/samples/correction-clear.png"]').last()).toBeVisible();
   expect(apiCalls).toEqual([]);
   await page.screenshot({

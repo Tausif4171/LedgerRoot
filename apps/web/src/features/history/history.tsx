@@ -70,11 +70,11 @@ export default function History({ events }: { events: HistoryEvent[] }) {
         </div>
       )}
       {events.length > 0 && (
-        <div className="table-foot">
+        <div className="table-foot history-footer">
           <span>
             {shown} of {events.length} events
           </span>
-          <div>
+          <div className="history-actions">
             {shown < events.length && (
               <Button
                 size="small"

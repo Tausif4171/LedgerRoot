@@ -1,4 +1,5 @@
 "use client";
+import { Select } from "@/components/ui/select";
 import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -54,18 +55,18 @@ export default function Inbox() {
       )}
       <>
         <label htmlFor="request-view">Show</label>
-        <select
+        <Select
           id="request-view"
           value={view}
-          onChange={(e) => {
-            setView(e.target.value);
+          onValueChange={(value) => {
+            setView(value);
             setCursor(undefined);
           }}
         >
           <option value="mine">Assigned to me</option>
           <option value="review">Awaiting review</option>
           <option value="all">All requests</option>
-        </select>
+        </Select>
         <form
           onSubmit={(e) => {
             e.preventDefault();

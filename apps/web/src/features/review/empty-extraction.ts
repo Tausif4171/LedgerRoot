@@ -1,5 +1,19 @@
 import { type DocumentRecord } from "@ledgerroot/contracts";
 
+export function reviewWarnings(
+  document: Pick<DocumentRecord, "stage" | "extraction" | "reviewStatus">,
+): string[] {
+  const warnings = document.extraction?.warnings ?? [];
+  if (["APPROVED", "REJECTED"].includes(document.reviewStatus) || !hasEmptyExtraction(document))
+    return warnings;
+  return warnings.filter(
+    (warning) =>
+      !/^(documentType|vendor|documentDate|totalCents|currency|invoiceNumber|dueDate): needs human confirmation\.$/.test(
+        warning,
+      ),
+  );
+}
+
 // Inspect the recorded model output, never the human's saved values or unsaved draft.
 export function hasEmptyExtraction(
   document: Pick<DocumentRecord, "stage" | "extraction">,
