@@ -30,17 +30,21 @@ export function SourceHistory({ document: d }: { document: DocumentRecord }) {
       <label htmlFor="source-version">View a saved source</label>
       <Select
         id="source-version"
+        placeholder="Choose version"
         value={selected}
         onValueChange={(value) => {
           setSelected(value);
           setEvidence([]);
         }}
       >
-        <option value="">Choose version</option>
         {sources.map((s) => (
           <option key={s.id} value={s.id}>
             Version {s.version}
-            {s.current ? " · current" : ""} · {s.stage}
+            {s.current ? " · current" : ""} ·{" "}
+            {s.stage
+              .toLowerCase()
+              .replaceAll("_", " ")
+              .replace(/^./, (letter) => letter.toUpperCase())}
           </option>
         ))}
       </Select>

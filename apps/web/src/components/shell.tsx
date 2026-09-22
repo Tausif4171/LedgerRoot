@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ApiError } from "@ledgerroot/contracts";
 import { loginHref } from "@/lib/login-return";
 import { usePathname } from "next/navigation";
-import { Files, ChartNoAxesCombined, GitBranch, Info, RotateCcw, ArrowUpRight } from "lucide-react";
+import { Files, ChartNoAxesCombined, GitBranch, Info, RotateCcw } from "lucide-react";
 import type { ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { collaborationGateway } from "@/adapters/collaboration";
@@ -56,11 +56,6 @@ export function Shell({ children }: { children: ReactNode }) {
           </Link>
         </nav>
         <div className="sidebar-foot">
-          <p>
-            Every suggestion has a source.
-            <br />
-            Every decision stays yours.
-          </p>
           {isSample && (
             <Button
               onClick={async () => {
@@ -72,10 +67,7 @@ export function Shell({ children }: { children: ReactNode }) {
               Reset samples
             </Button>
           )}
-          <span>
-            Independent engineering prototype{" "}
-            <ArrowUpRight size={12} style={{ display: "inline" }} />
-          </span>
+          <span>Independent prototype</span>
         </div>
       </aside>
       <div className="content">
@@ -102,7 +94,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 </Link>
               )}
             {isSample && (
-              <label>
+              <label className="demo-actor">
                 Demo actor{" "}
                 <Select
                   aria-label="Demo actor (simulation only)"

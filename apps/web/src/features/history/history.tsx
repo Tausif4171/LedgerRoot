@@ -22,6 +22,7 @@ export default function History({ events }: { events: HistoryEvent[] }) {
     "Request respond": "Response received",
     "Request cancel": "Request canceled",
     "Request reassign": "Request reassigned",
+    "Request follow-up": "More information requested",
   };
   return (
     <section className="panel history-panel">

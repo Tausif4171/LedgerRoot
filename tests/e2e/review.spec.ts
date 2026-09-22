@@ -69,6 +69,7 @@ test("sample state is tab-local and supports 320px reduced-motion reflow", async
 });
 test("sample failure and retry are visibly simulations", async ({ page }) => {
   await page.goto("/documents/sample-01");
+  await page.getByText("Demo controls", { exact: true }).click();
   await page.getByRole("button", { name: "Simulate a processing failure", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Processing needs attention" })).toBeVisible();
   await page.getByRole("button", { name: "Replay simulated retry", exact: true }).click();

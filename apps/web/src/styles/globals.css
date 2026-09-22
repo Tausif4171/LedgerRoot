@@ -282,6 +282,49 @@ small {
   border-color: color-mix(in srgb, var(--surface) 45%, var(--ink));
   background: transparent;
 }
+.sidebar-foot .btn:hover,
+.sidebar-foot .btn:focus-visible {
+  background: var(--soft);
+  color: var(--ink);
+}
+.demo-controls > summary {
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+.comparison-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+.comparison-item {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-wrap: anywhere;
+}
+.comparison-values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 8px 0;
+}
+.comparison-values dt {
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+.comparison-values dd {
+  margin: 4px 0 0;
+}
+.empty-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.review-actions[hidden] {
+  display: none;
+}
 .content {
   min-width: 0;
 }
@@ -320,9 +363,38 @@ small {
   gap: 8px;
   flex-wrap: wrap;
 }
-.topbar-profile select {
+.topbar-profile .select-trigger {
   max-width: 100%;
   min-width: 0;
+}
+.topbar-profile .demo-actor {
+  flex-wrap: nowrap;
+}
+.demo-actor .select-trigger {
+  width: 190px;
+}
+@media (max-width: 640px) {
+  .topbar:has(.demo-actor) {
+    height: auto;
+    min-height: 76px;
+    flex-wrap: wrap;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  .topbar-profile:has(.demo-actor) {
+    width: 100%;
+  }
+  .topbar-profile .demo-actor {
+    flex: 1;
+    min-width: 0;
+  }
+  .demo-actor .select-trigger {
+    flex: 1;
+    width: auto;
+  }
+  .comparison-values {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .main {
   max-width: 1500px;

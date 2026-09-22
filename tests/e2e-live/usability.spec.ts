@@ -1,6 +1,25 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
+test("signed-out Documents has one primary recovery action", async ({ page }) => {
+  await page.route("**/api/v1/**", (route) =>
+    route.fulfill({
+      status: 401,
+      json: { error: { code: "UNAUTHENTICATED", message: "Sign in." } },
+    }),
+  );
+  await page.goto("/documents");
+  await expect(
+    page.locator("main").getByRole("link", { name: "Sign in", exact: true }),
+  ).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "Try again" })).toHaveCount(0);
+  await page.locator("main").getByRole("link", { name: "Sign in", exact: true }).click();
+  await expect(
+    page.getByText("Use your existing workspace account. Self-service sign-up isn’t available."),
+  ).toBeVisible();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+});
+
 test("confirmed signed-out state provides a safe return to Requests", async ({ page }) => {
   let authenticated = false;
   await page.route("**/api/v1/**", async (route) => {

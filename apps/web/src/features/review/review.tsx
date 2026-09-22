@@ -32,6 +32,7 @@ export function Review({ id }: { id: string }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [requestOpen, setRequestOpen] = useState(false);
   const [replacement, setReplacement] = useState<{ id?: string; version?: number } | null>(null);
   const [pendingReplacement, setPendingReplacement] = useState<{
     id?: string;
@@ -119,7 +120,12 @@ export function Review({ id }: { id: string }) {
       {(!isSample || d.id === "correction-scenario") && (
         <>
           <div className="collaboration-section">
-            <DocumentRequests document={d} onReplace={beginReplacement} />
+            <DocumentRequests
+              document={d}
+              onReplace={beginReplacement}
+              open={requestOpen}
+              setOpen={setRequestOpen}
+            />
           </div>
           {d.canReview &&
             ["READY", "FAILED"].includes(d.stage) &&
@@ -203,6 +209,11 @@ export function Review({ id }: { id: string }) {
                 key={`${d.id}/${formGeneration}`}
                 document={d}
                 onDirtyChange={setDirty}
+                onRequestInformation={
+                  (!isSample || d.id === "correction-scenario") && !d.hasActiveRequest
+                    ? () => setRequestOpen(true)
+                    : undefined
+                }
                 onEvidence={(ids) => {
                   setEvidence({ runId: d.runId, ids });
                   setTab("source");
@@ -224,7 +235,8 @@ export function Review({ id }: { id: string }) {
         </div>
       </Tabs.Root>
       {isSample && d.stage === "READY" && (
-        <div className="footnote">
+        <details className="footnote demo-controls">
+          <summary>Demo controls</summary>
           <Button
             variant="ghost"
             onClick={async () => {
@@ -235,8 +247,8 @@ export function Review({ id }: { id: string }) {
           >
             Simulate a processing failure
           </Button>
-          <span> Sample-only simulation. It does not run or interrupt AI.</span>
-        </div>
+          <p>Simulated failure—no live AI service is affected.</p>
+        </details>
       )}
     </>
   );

@@ -2,6 +2,18 @@
 
 This file distinguishes completed local checks from release work. It is not a production-readiness certification.
 
+## Focused usability verification — September 22, 2026
+
+- Typecheck, lint/shared-package boundaries, production build, 59 unit tests and 13 database integration tests passed.
+- 34 sample browser tests passed across desktop and mobile, including empty-result manual review, preserved drafts and saved values, null suggestions, source placeholders, all request actions, reset, and exact reopen history counts.
+- 8 mocked live-UI browser tests passed, including signed-out recovery, login guidance, service errors and upload feedback. These verify browser behavior, not real extraction or authentication services.
+- Keyboard/focus and axe checks passed. Desktop and 320px screenshots were inspected for empty results, comparison layout and actor controls. Reset hover was checked. Complete manual VoiceOver testing remains outstanding.
+- The reported duplicate reopen/save event was not reproduced on the pre-change code. The exact-event-count regression passes; explicit button types and an in-flight submission guard provide additional protection. Existing history was not rewritten.
+- No API, database schema, role, approval-rule or extraction changes. Existing demo data was not reset or migrated. Sample collaboration remains limited to the supplied correction scenario.
+- Test-harness issues found during verification (an ambiguous alert locator and concurrent runs sharing an output folder) were corrected by scoping the locator and rerunning browser suites separately. Final runs passed.
+
+Earlier entries below record previous verification sessions, not the current test totals or deployment status.
+
 ## Completed
 
 - Node 24.19.0 / npm 11.19.1 clean `npm ci`: zero reported vulnerabilities at install time. ESLint has been upgraded to supported major version 10; a transitive cron-parser maintenance warning remains.

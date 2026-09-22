@@ -13,7 +13,7 @@ export default function Login() {
     <div className="panel login">
       <h1>Sign in to your workspace</h1>
       <p className="muted" style={{ margin: "10px 0 24px" }}>
-        Local accounts only. Public registration is disabled.
+        Use your existing workspace account. Self-service sign-up isn’t available.
       </p>
       <form
         onSubmit={async (e) => {

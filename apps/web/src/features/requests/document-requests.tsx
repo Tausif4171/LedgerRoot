@@ -12,12 +12,15 @@ import { Modal } from "@/components/ui/dialog";
 export default function DocumentRequests({
   document: d,
   onReplace,
+  open,
+  setOpen,
 }: {
   document: DocumentRecord;
   onReplace: (requestId: string, version: number) => void;
+  open: boolean;
+  setOpen: (open: boolean) => void;
 }) {
   const cache = useQueryClient();
-  const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [assignee, setAssignee] = useState("");
   const [field, setField] = useState("");

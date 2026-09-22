@@ -117,10 +117,10 @@ export function Documents() {
         ) : query.error ? (
           <div className="empty" role="alert">
             <h2>{signedOut ? "Sign in to view your documents" : "Documents couldn’t load"}</h2>
-            <p>{query.error.message}</p>
-            <Button onClick={() => query.refetch()}>Try again</Button>
+            {!signedOut && <p>{query.error.message}</p>}
+            {!signedOut && <Button onClick={() => query.refetch()}>Try again</Button>}
             {signedOut && (
-              <Link className="btn" href={loginHref("/documents")}>
+              <Link className="btn btn-primary" href={loginHref("/documents")}>
                 Sign in
               </Link>
             )}

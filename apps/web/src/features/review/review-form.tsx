@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -45,16 +45,20 @@ export function ReviewForm({
   document: d,
   onEvidence,
   onDirtyChange,
+  onRequestInformation,
 }: {
   document: DocumentRecord;
   onEvidence: (ids: string[]) => void;
   onDirtyChange?: (dirty: boolean) => void;
+  onRequestInformation?: () => void;
 }) {
   const cache = useQueryClient();
   const [base, setBase] = useState(d);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [busy, setBusy] = useState(false);
+  const submitting = useRef(false);
+  const [manualRun, setManualRun] = useState<string | null>(null);
   const [conflict, setConflict] = useState<DocumentRecord | null>(null);
   const [reasonAction, setReasonAction] = useState<"reject" | "needs-information" | null>(null);
   const [note, setNote] = useState("");
@@ -71,7 +75,19 @@ export function ReviewForm({
     !["PENDING", "NEEDS_INFORMATION"].includes(base.reviewStatus) ||
     !d.canReview ||
     d.stage !== "READY";
+  const emptyReview =
+    hasEmptyExtraction(d) &&
+    !finalized &&
+    !locked &&
+    Object.values(base.fields).every((value) => value === null) &&
+    Object.values(d.fields).every((value) => value === null) &&
+    !form.formState.isDirty &&
+    !changedRemotely &&
+    !conflict &&
+    manualRun !== d.runId;
   async function send(action: ReviewAction, values: Values) {
+    if (submitting.current || (emptyReview && ["save", "approve"].includes(action))) return;
+    submitting.current = true;
     setBusy(true);
     setError("");
     setSuccess("");
@@ -101,7 +117,16 @@ export function ReviewForm({
       form.reset(defaults(next.fields));
       cache.setQueryData(["document", d.id], next);
       await cache.invalidateQueries({ queryKey: ["documents"] });
-      setSuccess(action === "approve" ? "" : "Review saved.");
+      setSuccess(
+        {
+          save: "Review saved.",
+          reopen: "Reopened for review.",
+          reject: "Document rejected.",
+          "needs-information": "Marked as needing information.",
+          approve: "",
+          retry: "Processing retry requested.",
+        }[action],
+      );
       setReasonAction(null);
       setNote("");
       setConflict(null);
@@ -109,6 +134,7 @@ export function ReviewForm({
       setError(e instanceof Error ? e.message : "The review could not be saved.");
       if (e instanceof ApiError && e.status === 409) setConflict(await gateway.get(d.id));
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   }
@@ -199,7 +225,7 @@ export function ReviewForm({
             </p>
           )}
           {d.canReview && d.stage === "READY" && (
-            <Button disabled={busy} onClick={() => submit("reopen")}>
+            <Button type="button" disabled={busy} onClick={() => submit("reopen")}>
               {busy ? "Reopening…" : "Reopen for review"}
             </Button>
           )}
@@ -213,7 +239,12 @@ export function ReviewForm({
         <h2>Review extracted fields</h2>
         <span>Revision {base.revision}</span>
       </div>
-      <form className="review-form" onSubmit={form.handleSubmit((v) => send("save", v))}>
+      <form
+        className="review-form"
+        onSubmit={(event) => {
+          void form.handleSubmit((v) => send("save", v))(event);
+        }}
+      >
         {changedRemotely && (
           <div className="callout" role="status">
             <strong>The saved record or source changed. Your draft is still here.</strong>
@@ -256,34 +287,48 @@ export function ReviewForm({
             <summary>
               Compare saved values with new suggestions · source version {d.sourceVersion}
             </summary>
-            <ul>
+            <ul className="comparison-list">
               {Object.entries(d.extraction.fields)
                 .filter(([key, value]) => base.fields[key as FieldName] !== value)
                 .map(([key, value]) => (
-                  <li key={key}>
-                    <strong>{fieldLabels[key as FieldName]}</strong>: saved{" "}
-                    {fieldValue(key as FieldName, base.fields[key as FieldName])} → suggested{" "}
-                    {fieldValue(key as FieldName, value)}
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      disabled={locked || value === null}
-                      onClick={() => {
-                        const mapped = key === "totalCents" ? "amount" : (key as keyof Values);
-                        form.setValue(
-                          mapped,
-                          key === "totalCents" ? moneyInput(value as number) : String(value),
-                          { shouldDirty: true },
-                        );
-                        form.setValue("confirmed", false);
-                      }}
-                    >
-                      Use new suggestion
-                    </Button>
-                    <span>
-                      {" "}
-                      Keep the existing value by leaving this field unchanged, or edit it below.
-                    </span>
+                  <li key={key} className="comparison-item">
+                    <strong>{fieldLabels[key as FieldName]}</strong>
+                    <dl className="comparison-values">
+                      <div>
+                        <dt>Saved value</dt>
+                        <dd>{fieldValue(key as FieldName, base.fields[key as FieldName])}</dd>
+                      </div>
+                      <div>
+                        <dt>New suggestion</dt>
+                        <dd>
+                          {value === null ? "Not supplied" : fieldValue(key as FieldName, value)}
+                        </dd>
+                      </div>
+                    </dl>
+                    {value === null ? (
+                      <p>No new suggestion. Your saved value is kept.</p>
+                    ) : !locked ? (
+                      <>
+                        <Button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => {
+                            const mapped = key === "totalCents" ? "amount" : (key as keyof Values);
+                            form.setValue(
+                              mapped,
+                              key === "totalCents" ? moneyInput(value as number) : String(value),
+                              { shouldDirty: true },
+                            );
+                            form.setValue("confirmed", false);
+                          }}
+                        >
+                          Use new suggestion
+                        </Button>
+                        <p>
+                          Keep the saved value by leaving the field unchanged, or edit it below.
+                        </p>
+                      </>
+                    ) : null}
                   </li>
                 ))}
             </ul>
@@ -293,6 +338,29 @@ export function ReviewForm({
           <div className="callout">
             <strong>No receipt or invoice details were extracted.</strong>
             <p>Check that this image shows a receipt or invoice and that the text is readable.</p>
+            {emptyReview && (
+              <div className="empty-review-actions">
+                {onRequestInformation && (
+                  <Button type="button" disabled={busy} onClick={onRequestInformation}>
+                    Request information
+                  </Button>
+                )}
+                <Button type="button" disabled={busy} onClick={() => setReasonAction("reject")}>
+                  Reject document
+                </Button>
+                <Button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => {
+                    setManualRun(d.runId);
+                    requestAnimationFrame(() => form.setFocus("documentType"));
+                  }}
+                >
+                  Review manually
+                </Button>
+              </div>
+            )}
+            {!emptyReview && <p>Enter only details you can verify from this receipt or invoice.</p>}
           </div>
         )}
         {visibleWarnings.length ? (
@@ -348,7 +416,11 @@ export function ReviewForm({
             </Button>
           </div>
         )}
-        <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
+        <fieldset
+          hidden={emptyReview}
+          disabled={emptyReview}
+          style={{ border: 0, padding: 0, margin: 0 }}
+        >
           <legend className="sr-only">Document fields</legend>
           <div className="field-grid">
             <div className="field">
@@ -479,7 +551,7 @@ export function ReviewForm({
             </label>
           )}
         </fieldset>
-        <div className="review-actions">
+        <div className="review-actions" hidden={emptyReview}>
           {!locked ? (
             <>
               <Button type="submit" disabled={busy}>
@@ -506,7 +578,7 @@ export function ReviewForm({
             )
           )}
         </div>
-        {!locked && (
+        {!locked && !emptyReview && (
           <div className="secondary-actions">
             <Button
               type="button"

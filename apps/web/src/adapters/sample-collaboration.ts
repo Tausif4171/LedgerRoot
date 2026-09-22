@@ -177,8 +177,12 @@ export const sampleCollaboration = {
         409,
       );
     const at = new Date().toISOString();
+    let historyAction: string;
+    let historyMessage: string;
     if (path === `/documents/${scenarioId}/requests`) {
       const input = createRequestSchema.parse(value);
+      historyAction = "Information requested";
+      historyMessage = input.question;
       assertDocumentGuard(guard(d), input);
       assertRequestCreatable(
         guard(d),
@@ -217,6 +221,8 @@ export const sampleCollaboration = {
         ...z.record(z.string(), z.unknown()).parse(value),
         action: route === "responses" ? "respond" : route,
       });
+      historyAction = `Request ${input.action}`;
+      historyMessage = input.message;
       if (input.assigneeId && !samplePeople.some((p) => p.id === input.assigneeId))
         throw new Error("Choose a sample teammate.");
       task.state = requestTransition(task, input, { userId: s.actor, role: "REVIEWER" }, guard(d));
@@ -238,9 +244,11 @@ export const sampleCollaboration = {
     d.history.push({
       id: crypto.randomUUID(),
       actor: person(s).name,
-      action: "Sample request updated",
+      action: historyAction,
       at,
-      note: "In-app simulation; no notification sent.",
+      note: [historyMessage, "Sample simulation; no notification sent."]
+        .filter(Boolean)
+        .join(" · "),
       before: null,
       after: null,
     });

@@ -11,6 +11,7 @@ type Props = {
   onBlur?: () => void;
   disabled?: boolean;
   required?: boolean;
+  placeholder?: string;
   "aria-label"?: string;
   "aria-describedby"?: string;
   "aria-invalid"?: boolean;
@@ -21,7 +22,15 @@ type Props = {
 // Encode every value so an explicitly selectable empty value remains distinct
 // from Radix's empty-string placeholder. Domain values are never changed.
 const encode = (value: string) => `value:${value}`;
-export function Select({ children, value, onValueChange, name, required, ...trigger }: Props) {
+export function Select({
+  children,
+  value,
+  onValueChange,
+  name,
+  required,
+  placeholder,
+  ...trigger
+}: Props) {
   const [open, setOpen] = useState(false);
   return (
     <SelectPrimitive.Root
@@ -30,11 +39,11 @@ export function Select({ children, value, onValueChange, name, required, ...trig
       name={name}
       required={required}
       disabled={trigger.disabled}
-      value={encode(value)}
+      value={placeholder && value === "" ? "" : encode(value)}
       onValueChange={(next) => onValueChange(next.slice(6))}
     >
       <SelectPrimitive.Trigger {...trigger} className="select-trigger">
-        <SelectPrimitive.Value />
+        <SelectPrimitive.Value placeholder={placeholder} />
         <SelectPrimitive.Icon asChild>
           <ChevronDown size={16} aria-hidden="true" />
         </SelectPrimitive.Icon>
