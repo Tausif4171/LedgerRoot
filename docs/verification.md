@@ -4,6 +4,14 @@ This file distinguishes completed local checks from release work. It is not a pr
 
 ## Focused usability verification — September 22, 2026
 
+### Branding and feedback follow-up
+
+- Added the existing branch mark as SVG and 16/32/48px ICO favicon; verified both routes and metadata in desktop/mobile browser tests and inspected the rendered mark.
+- Removed the sidebar prototype label, kept sample disclosures/reset, and made the signed-out header link secondary. Existing signed-out and service-error tests passed.
+- Review success now uses one shared, politely announced toast with an eight-second timer, hover/focus pause, keyboard dismissal, and no animation. Errors, persistent status and history remain inline. Repeated confirmations replace the current toast rather than stacking.
+- Typecheck, lint, production build, 59 unit tests, 13 integration tests, 38 sample browser tests (34 regression + 4 focused), and 8 mocked live-UI tests passed. The focused checks cover timer expiry, hover/focus pause, dismissal, repeated saves, failed approval, icon loading, axe and 320px reflow. The mobile toast screenshot was inspected.
+- Manual VoiceOver and actual light/dark browser-tab appearance remain manual release checks; automated assertions are not a substitute. No authentication, approval, API or database changes were made.
+
 - Typecheck, lint/shared-package boundaries, production build, 59 unit tests and 13 database integration tests passed.
 - 34 sample browser tests passed across desktop and mobile, including empty-result manual review, preserved drafts and saved values, null suggestions, source placeholders, all request actions, reset, and exact reopen history counts.
 - 8 mocked live-UI browser tests passed, including signed-out recovery, login guidance, service errors and upload feedback. These verify browser behavior, not real extraction or authentication services.

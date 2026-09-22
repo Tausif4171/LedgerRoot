@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useToast } from "@/components/ui/toast";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -55,7 +56,7 @@ export function ReviewForm({
   const cache = useQueryClient();
   const [base, setBase] = useState(d);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const showToast = useToast();
   const [busy, setBusy] = useState(false);
   const submitting = useRef(false);
   const [manualRun, setManualRun] = useState<string | null>(null);
@@ -90,7 +91,6 @@ export function ReviewForm({
     submitting.current = true;
     setBusy(true);
     setError("");
-    setSuccess("");
     try {
       const fields = fieldsSchema.parse({
         documentType: values.documentType || null,
@@ -117,13 +117,13 @@ export function ReviewForm({
       form.reset(defaults(next.fields));
       cache.setQueryData(["document", d.id], next);
       await cache.invalidateQueries({ queryKey: ["documents"] });
-      setSuccess(
+      showToast(
         {
           save: "Review saved.",
           reopen: "Reopened for review.",
           reject: "Document rejected.",
           "needs-information": "Marked as needing information.",
-          approve: "",
+          approve: "Approved in LedgerRoot.",
           retry: "Processing retry requested.",
         }[action],
       );
@@ -599,11 +599,7 @@ export function ReviewForm({
           </div>
         )}
         <div aria-live="polite">
-          {busy ? (
-            <p className="legal-note">Saving your review…</p>
-          ) : (
-            success && <p className="legal-note">{success}</p>
-          )}
+          {busy ? <p className="legal-note">Saving your review…</p> : null}
         </div>
         <p className="legal-note">
           Approval records your review only. It does not create accounting entries, send payments or

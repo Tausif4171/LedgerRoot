@@ -55,8 +55,8 @@ export function Shell({ children }: { children: ReactNode }) {
             Requests {requests.data?.actionable ? `(${requests.data.actionable})` : ""}
           </Link>
         </nav>
-        <div className="sidebar-foot">
-          {isSample && (
+        {isSample && (
+          <div className="sidebar-foot">
             <Button
               onClick={async () => {
                 await gateway.reset();
@@ -66,9 +66,8 @@ export function Shell({ children }: { children: ReactNode }) {
               <RotateCcw size={15} />
               Reset samples
             </Button>
-          )}
-          <span>Independent prototype</span>
-        </div>
+          </div>
+        )}
       </aside>
       <div className="content">
         <header className="topbar">
@@ -89,7 +88,7 @@ export function Shell({ children }: { children: ReactNode }) {
               identity.error instanceof ApiError &&
               identity.error.status === 401 &&
               pathname !== "/login" && (
-                <Link className="btn btn-small" href={loginHref(pathname)}>
+                <Link className="header-sign-in" href={loginHref(pathname)}>
                   Sign in
                 </Link>
               )}
