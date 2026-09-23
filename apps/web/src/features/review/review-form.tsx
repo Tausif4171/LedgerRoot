@@ -434,6 +434,7 @@ export function ReviewForm({
                   <Select
                     disabled={locked || busy}
                     id="documentType"
+                    placeholder="Select type"
                     name={field.name}
                     ref={field.ref}
                     value={field.value}
@@ -443,7 +444,7 @@ export function ReviewForm({
                       form.setValue("confirmed", false);
                     }}
                   >
-                    <option value="">Select type</option>
+                    {field.value && <option value="">Clear selection</option>}
                     <option value="receipt">Receipt</option>
                     <option value="invoice">Invoice</option>
                   </Select>
@@ -460,6 +461,7 @@ export function ReviewForm({
                   <Select
                     disabled={locked || busy}
                     id="currency"
+                    placeholder="Confirm currency"
                     name={field.name}
                     ref={field.ref}
                     value={field.value}
@@ -469,7 +471,7 @@ export function ReviewForm({
                       form.setValue("confirmed", false);
                     }}
                   >
-                    <option value="">Confirm currency</option>
+                    {field.value && <option value="">Clear selection</option>}
                     <option value="USD">USD — US Dollar</option>
                   </Select>
                 )}

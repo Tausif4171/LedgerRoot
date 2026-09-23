@@ -45,6 +45,7 @@
   overflow-wrap: anywhere;
 }
 .toast-dismiss {
+  position: relative;
   display: grid;
   place-items: center;
   width: 44px;
@@ -56,8 +57,18 @@
   background: var(--surface);
   cursor: pointer;
 }
-.toast-dismiss:hover {
+.toast-dismiss::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 6px;
+  pointer-events: none;
+}
+.toast-dismiss:hover::before {
   background: var(--soft);
+}
+.toast-dismiss > svg {
+  position: relative;
 }
 @media (max-width: 640px) {
   .review-toast {

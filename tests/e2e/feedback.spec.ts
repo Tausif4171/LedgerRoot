@@ -13,6 +13,15 @@ test("review confirmations pause, dismiss, repeat, and preserve history", async 
   await expect(save).toBeFocused();
   await page.clock.install();
   await toast.hover();
+  const dismiss = page.getByRole("button", { name: "Dismiss confirmation" });
+  await dismiss.hover();
+  const dismissSize = await dismiss.boundingBox();
+  expect(dismissSize?.width).toBe(44);
+  expect(dismissSize?.height).toBe(44);
+  expect(await dismiss.evaluate((button) => getComputedStyle(button, "::before").inset)).toBe(
+    "8px",
+  );
+  await page.screenshot({ path: info.outputPath("compact-dismiss-hover.png") });
   await page.clock.runFor(9000);
   await expect(toast).toBeVisible();
   await page.getByRole("button", { name: "Dismiss confirmation" }).focus();

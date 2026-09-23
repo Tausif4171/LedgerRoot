@@ -4,6 +4,13 @@ This file distinguishes completed local checks from release work. It is not a pr
 
 ## Reopen and layout follow-up — September 23, 2026
 
+### Dropdown and dismiss-button audit
+
+- Inspected all eight dropdown uses. Document type and currency now show non-selectable prompts; a separate Clear selection choice preserves the ability to remove an unverified value and save an incomplete review. Assignment/reassignment and source-version prompts already use placeholders. Demo actor, Whole document and inbox filters remain genuine choices. Approval validation is unchanged.
+- Toast dismissal retains a 44px target and keyboard focus outline, with a smaller 28px hover background. Reset demo retains its leading reset icon and existing behavior.
+- Added browser assertions for both field placeholders, explicit clearing and persistence after refresh, plus the dismiss target and hover dimensions. Manual VoiceOver is still a separate outstanding check.
+- Verification passed: lint, typecheck, production build, 59 unit tests, 13 integration tests, 46 sample browser tests and 8 mocked live-UI tests. The four feedback tests were rerun with the added hover-size assertions and passed; the hover screenshot was inspected. One Next.js development-router initialization error appeared during the full browser run without failing a test; no production-runtime guarantee is implied.
+
 - Reproduced the sample duplicate reopen/save on an approved record after a source replacement, using mouse, Enter and Space. Earlier rejected-record coverage did not exercise this path. Reopening could replace the activated button with a submit button before the browser's default click action. Distinct button keys and cancellation of the reopen click's default action prevent the accidental save.
 - New desktop/mobile regressions check exactly one revision and one appended reopen event, unchanged fields, and a subsequent explicit save. Existing historical events and stored demo data are untouched.
 - Workspace wording now uses Sample workspace / Local workspace once in the sidebar. Removed the decorative LR avatar, simplified the sample banner, labeled Reset demo, made required teammate prompts placeholders, widened bounded dropdown menus, and adjusted warning/comparison/conflict spacing and toast sizing.

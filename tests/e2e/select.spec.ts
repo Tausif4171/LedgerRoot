@@ -20,12 +20,24 @@ test("custom dropdown supports keyboard, clearing, dialog focus and narrow reflo
   await expect(type).toContainText("Invoice");
   await expect(type).toBeFocused();
   await type.click();
-  await page.getByRole("option", { name: "Select type", exact: true }).click();
+  await expect(page.getByRole("option", { name: "Select type", exact: true })).toHaveCount(0);
+  await page.getByRole("option", { name: "Clear selection", exact: true }).click();
   await expect(type).toContainText("Select type");
   await page.getByRole("button", { name: "Save changes", exact: true }).click();
   await expect(page.getByText("Review saved.", { exact: true })).toBeVisible();
   await page.reload();
   await expect(type).toContainText("Select type");
+  const currency = page.getByRole("combobox", { name: "Currency", exact: true });
+  await currency.click();
+  await expect(page.getByRole("option", { name: "Confirm currency", exact: true })).toHaveCount(0);
+  await page.getByRole("option", { name: "USD — US Dollar", exact: true }).click();
+  await currency.click();
+  await page.getByRole("option", { name: "Clear selection", exact: true }).click();
+  await expect(currency).toContainText("Confirm currency");
+  await page.getByRole("button", { name: "Save changes", exact: true }).click();
+  await expect(page.getByText("Review saved.", { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(currency).toContainText("Confirm currency");
 
   await page.goto("/requests");
   await page.getByRole("button", { name: "Start correction scenario" }).click();
