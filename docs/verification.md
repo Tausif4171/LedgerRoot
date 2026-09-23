@@ -2,6 +2,15 @@
 
 This file distinguishes completed local checks from release work. It is not a production-readiness certification.
 
+## Separate field-clear actions — September 24, 2026
+
+- Visual follow-up: Clear uses normal-weight small text, a transparent hover background and an underline on hover. The 44px target and keyboard outline are unchanged. Lint, typecheck, build, 59 unit and 13 integration tests passed again; desktop/mobile dropdown and clear-control tests passed, including axe and 320px screenshots. An initial test incorrectly expected keyboard-only focus styling after mouse interaction; it was corrected to use Shift+Tab and passed. The full browser suite was not repeated for this CSS-only follow-up.
+
+- Document type and Currency now place Clear beside the label, outside the label and dropdown menu. Buttons appear only for nonempty editable values, are disabled during submission, and retain 44px targets and keyboard focus styling.
+- Clearing marks the draft dirty, resets review confirmation, and focuses the associated dropdown. It does not save, append history, change source evidence, or bypass required-field approval checks. Other dropdowns are unchanged.
+- Browser coverage checks mouse/keyboard clearing, focus return, saved empty values after refresh, approval validation, locked records and 320px layout. Manual VoiceOver remains outstanding.
+- Passed lint without warnings, typecheck, formatting, production build, 59 unit tests, 13 integration tests, 46 existing sample browser tests and 8 mocked live-UI tests. Two new clear-field cases passed on desktop/mobile (48 sample cases total); the updated dropdown cases also passed again after the final subscription change. Inspected the 320px screenshot. The existing intermittent Next.js development-router initialization error appeared during the full run without failing assertions.
+
 ## Reopen and layout follow-up — September 23, 2026
 
 ### Dropdown and dismiss-button audit

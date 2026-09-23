@@ -21,7 +21,10 @@ test("custom dropdown supports keyboard, clearing, dialog focus and narrow reflo
   await expect(type).toBeFocused();
   await type.click();
   await expect(page.getByRole("option", { name: "Select type", exact: true })).toHaveCount(0);
-  await page.getByRole("option", { name: "Clear selection", exact: true }).click();
+  await expect(page.getByRole("option", { name: "Clear selection", exact: true })).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Clear document type", exact: true }).click();
+  await expect(type).toBeFocused();
   await expect(type).toContainText("Select type");
   await page.getByRole("button", { name: "Save changes", exact: true }).click();
   await expect(page.getByText("Review saved.", { exact: true })).toBeVisible();
@@ -31,8 +34,12 @@ test("custom dropdown supports keyboard, clearing, dialog focus and narrow reflo
   await currency.click();
   await expect(page.getByRole("option", { name: "Confirm currency", exact: true })).toHaveCount(0);
   await page.getByRole("option", { name: "USD — US Dollar", exact: true }).click();
-  await currency.click();
-  await page.getByRole("option", { name: "Clear selection", exact: true }).click();
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Clear currency", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await expect(currency).toBeFocused();
+  await expect(page.getByRole("checkbox")).not.toBeChecked();
+  await expect(page.getByRole("button", { name: "Clear currency", exact: true })).toHaveCount(0);
   await expect(currency).toContainText("Confirm currency");
   await page.getByRole("button", { name: "Save changes", exact: true }).click();
   await expect(page.getByText("Review saved.", { exact: true })).toBeVisible();

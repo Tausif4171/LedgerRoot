@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/components/ui/toast";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
@@ -66,6 +66,10 @@ export function ReviewForm({
   const form = useForm<Values>({
     resolver: zodResolver(formSchema),
     defaultValues: defaults(d.fields),
+  });
+  const [documentType, currency] = useWatch({
+    control: form.control,
+    name: ["documentType", "currency"],
   });
   useEffect(() => {
     onDirtyChange?.(form.formState.isDirty);
@@ -426,7 +430,25 @@ export function ReviewForm({
           <legend className="sr-only">Document fields</legend>
           <div className="field-grid">
             <div className="field">
-              <label htmlFor="documentType">Document type</label>
+              <div className="field-label-actions">
+                <label htmlFor="documentType">Document type</label>
+                {!locked && documentType && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="field-clear"
+                    disabled={busy}
+                    aria-label="Clear document type"
+                    onClick={() => {
+                      form.setValue("documentType", "", { shouldDirty: true });
+                      form.setValue("confirmed", false);
+                      form.setFocus("documentType");
+                    }}
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
               <Controller
                 name="documentType"
                 control={form.control}
@@ -444,7 +466,6 @@ export function ReviewForm({
                       form.setValue("confirmed", false);
                     }}
                   >
-                    {field.value && <option value="">Clear selection</option>}
                     <option value="receipt">Receipt</option>
                     <option value="invoice">Invoice</option>
                   </Select>
@@ -453,7 +474,25 @@ export function ReviewForm({
               {evidence("documentType")}
             </div>
             <div className="field">
-              <label htmlFor="currency">Currency</label>
+              <div className="field-label-actions">
+                <label htmlFor="currency">Currency</label>
+                {!locked && currency && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="field-clear"
+                    disabled={busy}
+                    aria-label="Clear currency"
+                    onClick={() => {
+                      form.setValue("currency", "", { shouldDirty: true });
+                      form.setValue("confirmed", false);
+                      form.setFocus("currency");
+                    }}
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
               <Controller
                 name="currency"
                 control={form.control}
@@ -471,7 +510,6 @@ export function ReviewForm({
                       form.setValue("confirmed", false);
                     }}
                   >
-                    {field.value && <option value="">Clear selection</option>}
                     <option value="USD">USD — US Dollar</option>
                   </Select>
                 )}

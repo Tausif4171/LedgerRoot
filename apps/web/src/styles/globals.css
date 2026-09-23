@@ -904,6 +904,32 @@ tbody tr:hover {
   font-weight: 500;
   margin-bottom: 7px;
 }
+.field-label-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  margin-bottom: 7px;
+}
+.field-label-actions label {
+  margin-bottom: 0;
+}
+.field-clear {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  background: transparent;
+  text-underline-offset: 3px;
+}
+.field-clear:hover {
+  background: transparent;
+}
+.field-clear:hover:not(:disabled) {
+  text-decoration: underline;
+}
 .field input,
 .field select,
 .field textarea {
