@@ -255,26 +255,28 @@ export function ReviewForm({
               <summary>Latest saved values</summary>
               <pre style={{ whiteSpace: "pre-wrap" }}>{JSON.stringify(d.fields, null, 2)}</pre>
             </details>
-            <Button
-              type="button"
-              onClick={() => {
-                setBase(d);
-                form.setValue("confirmed", false);
-                setConflict(null);
-              }}
-            >
-              Keep draft against latest version
-            </Button>
-            <Button
-              type="button"
-              onClick={() => {
-                setBase(d);
-                form.reset(defaults(d.fields));
-                setConflict(null);
-              }}
-            >
-              Discard draft and load saved values
-            </Button>
+            <div className="conflict-actions">
+              <Button
+                type="button"
+                onClick={() => {
+                  setBase(d);
+                  form.setValue("confirmed", false);
+                  setConflict(null);
+                }}
+              >
+                Keep draft against latest version
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  setBase(d);
+                  form.reset(defaults(d.fields));
+                  setConflict(null);
+                }}
+              >
+                Discard draft and load saved values
+              </Button>
+            </div>
           </div>
         )}
         {d.hasActiveRequest && (
@@ -283,7 +285,7 @@ export function ReviewForm({
           </p>
         )}
         {(d.sourceVersion ?? 1) > 1 && d.extraction && !changedRemotely && (
-          <details>
+          <details className="source-comparison">
             <summary>
               Compare saved values with new suggestions · source version {d.sourceVersion}
             </summary>
@@ -554,7 +556,7 @@ export function ReviewForm({
         <div className="review-actions" hidden={emptyReview}>
           {!locked ? (
             <>
-              <Button type="submit" disabled={busy}>
+              <Button key="save" type="submit" disabled={busy}>
                 <Save size={15} />
                 Save changes
               </Button>
@@ -572,7 +574,17 @@ export function ReviewForm({
             d.canReview &&
             d.stage === "READY" &&
             ["APPROVED", "REJECTED", "NEEDS_INFORMATION"].includes(d.reviewStatus) && (
-              <Button type="button" disabled={busy} onClick={() => submit("reopen")}>
+              <Button
+                key="reopen"
+                type="button"
+                disabled={busy}
+                onClick={(event) => {
+                  // Reopening can render the save button before this click's default action.
+                  // Never let that activation become a form submission.
+                  event.preventDefault();
+                  submit("reopen");
+                }}
+              >
                 Reopen for review
               </Button>
             )

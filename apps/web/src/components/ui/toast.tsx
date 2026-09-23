@@ -54,7 +54,7 @@ function Toast({ message, dismiss }: { message: string; dismiss: () => void }) {
         if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
       }}
     >
-      <CheckCircle2 size={20} aria-hidden="true" />
+      <CheckCircle2 size={18} aria-hidden="true" />
       <span>{message}</span>
       <button
         type="button"
@@ -62,7 +62,7 @@ function Toast({ message, dismiss }: { message: string; dismiss: () => void }) {
         aria-label="Dismiss confirmation"
         onClick={dismiss}
       >
-        <X size={18} aria-hidden="true" />
+        <X size={16} aria-hidden="true" />
       </button>
     </div>
   );

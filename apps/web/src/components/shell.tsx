@@ -36,7 +36,7 @@ export function Shell({ children }: { children: ReactNode }) {
         </Link>
         <div className="workspace-name">
           <span className="eyebrow">Workspace</span>
-          <div style={{ marginTop: 6 }}>Fieldwork & finances</div>
+          <div style={{ marginTop: 6 }}>{isSample ? "Sample workspace" : "Local workspace"}</div>
         </div>
         <nav className="nav" aria-label="Main navigation">
           <Link
@@ -111,20 +111,13 @@ export function Shell({ children }: { children: ReactNode }) {
                 </Select>
               </label>
             )}
-            <span className="muted">{isSample ? "Sample workspace" : "Local workspace"}</span>
-            <div className="avatar" aria-label="Workspace avatar">
-              LR
-            </div>
           </div>
         </header>
         <main id="main" className="main">
           {isSample && (
             <div className="sample-notice">
               <Info size={16} />
-              <span>
-                Sample mode · Synthetic documents. Extraction provenance is shown on each record.
-                Review changes stay in this browser tab.
-              </span>
+              <span>Sample mode · Synthetic documents. Changes stay in this browser tab.</span>
               <Button
                 size="small"
                 variant="ghost"
@@ -135,6 +128,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 }}
               >
                 <RotateCcw size={14} />
+                Reset demo
               </Button>
             </div>
           )}

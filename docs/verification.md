@@ -2,6 +2,14 @@
 
 This file distinguishes completed local checks from release work. It is not a production-readiness certification.
 
+## Reopen and layout follow-up — September 23, 2026
+
+- Reproduced the sample duplicate reopen/save on an approved record after a source replacement, using mouse, Enter and Space. Earlier rejected-record coverage did not exercise this path. Reopening could replace the activated button with a submit button before the browser's default click action. Distinct button keys and cancellation of the reopen click's default action prevent the accidental save.
+- New desktop/mobile regressions check exactly one revision and one appended reopen event, unchanged fields, and a subsequent explicit save. Existing historical events and stored demo data are untouched.
+- Workspace wording now uses Sample workspace / Local workspace once in the sidebar. Removed the decorative LR avatar, simplified the sample banner, labeled Reset demo, made required teammate prompts placeholders, widened bounded dropdown menus, and adjusted warning/comparison/conflict spacing and toast sizing.
+- Lint, type checking, production build, 59 unit tests, 13 isolated database integration tests, 44 sample browser regressions, and 8 mocked live-UI tests passed. Database tests initially could not connect inside the sandbox; the permitted unsandboxed run passed. Browser coverage includes axe, keyboard navigation, request actions, reset, draft preservation, and 320px reflow.
+- Two additional desktop/mobile layout tests passed (46 sample browser tests in total), checking the workspace label, required assignment placeholder and 320px actor menu. Desktop dropdown and narrow toast screenshots inspected. Manual VoiceOver remains outstanding; automated accessibility checks do not replace it. No role, approval, API, database, extraction or authentication changes.
+
 ## Focused usability verification — September 22, 2026
 
 ### Branding and feedback follow-up

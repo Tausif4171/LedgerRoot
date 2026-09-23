@@ -73,7 +73,7 @@ export function Select({
                     className="select-item"
                   >
                     <SelectPrimitive.ItemText>{child.props.children}</SelectPrimitive.ItemText>
-                    <SelectPrimitive.ItemIndicator>
+                    <SelectPrimitive.ItemIndicator className="select-indicator">
                       <Check size={16} aria-hidden="true" />
                     </SelectPrimitive.ItemIndicator>
                   </SelectPrimitive.Item>

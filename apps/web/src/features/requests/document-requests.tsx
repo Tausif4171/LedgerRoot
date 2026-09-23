@@ -211,10 +211,10 @@ export default function DocumentRequests({
                 <label htmlFor="request-reassign">Reassign to</label>
                 <Select
                   id="request-reassign"
+                  placeholder="Choose teammate"
                   value={assignee}
                   onValueChange={(value) => setAssignee(value)}
                 >
-                  <option value="">Choose teammate</option>
                   {members.data?.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name}
@@ -304,11 +304,11 @@ export default function DocumentRequests({
           <label htmlFor="new-assignee">Assign to</label>
           <Select
             id="new-assignee"
+            placeholder="Choose teammate"
             required
             value={assignee}
             onValueChange={(value) => setAssignee(value)}
           >
-            <option value="">Choose teammate</option>
             {members.data?.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.name}

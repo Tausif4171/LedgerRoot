@@ -24,9 +24,12 @@
   bottom: max(24px, env(safe-area-inset-bottom));
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   max-width: min(420px, calc(100vw - 32px));
-  padding: 12px 12px 12px 16px;
+  min-height: 56px;
+  padding: 5px 10px 5px 14px;
+  font-size: 0.875rem;
+  line-height: 1.4;
   background: var(--surface);
   color: var(--ink);
   border: 1px solid var(--border);
@@ -129,7 +132,8 @@
 }
 .select-content {
   z-index: 60;
-  width: var(--radix-select-trigger-width);
+  width: max-content;
+  min-width: min(var(--radix-select-trigger-width), calc(100vw - 24px));
   max-width: calc(100vw - 24px);
   max-height: min(320px, var(--radix-select-content-available-height));
   overflow: hidden;
@@ -152,6 +156,25 @@
   font-size: 0.875rem;
   cursor: pointer;
   overflow-wrap: anywhere;
+}
+.select-indicator {
+  flex-shrink: 0;
+}
+.source-comparison {
+  margin-bottom: 16px;
+}
+.source-comparison > summary {
+  margin-bottom: 8px;
+}
+.conflict-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.conflict-actions .btn {
+  white-space: normal;
+  text-align: left;
 }
 .select-item[data-highlighted] {
   background: var(--soft);
@@ -467,8 +490,9 @@ small {
   padding: 30px 40px 60px;
 }
 .sample-notice {
-  display: flex;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: center;
   gap: 9px;
   font-size: 0.8125rem;
   padding: 11px 14px;
@@ -480,7 +504,19 @@ small {
 }
 .sample-notice svg {
   flex-shrink: 0;
-  margin-top: 2px;
+}
+@media (max-width: 640px) {
+  .sample-notice {
+    grid-template-columns: 16px minmax(0, 1fr);
+    align-items: start;
+  }
+  .sample-notice > svg {
+    margin-top: 2px;
+  }
+  .sample-notice > .btn {
+    grid-column: 2;
+    justify-self: start;
+  }
 }
 .page-heading {
   display: flex;
@@ -905,6 +941,7 @@ tbody tr:hover {
   border-radius: 4px;
 }
 .callout ul {
+  list-style: disc;
   padding-left: 18px;
   margin: 8px 0 0;
 }
