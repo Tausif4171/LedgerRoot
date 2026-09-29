@@ -332,6 +332,15 @@ describe("Database-backed workflow", () => {
     }
     const image = Buffer.concat([bytes, Buffer.from("authenticated-sessions")]);
     const unicodeName = "Screenshot 11.44.38\u202fPM – reçu.png";
+    const legacyUpload = await bookkeeper
+      .post("/api/v1/documents")
+      .set("origin", "http://localhost:3100")
+      .set("idempotency-key", randomUUID())
+      .attach("file", Buffer.concat([bytes, Buffer.from("legacy-unicode-header")]), unicodeName);
+    expect(legacyUpload.status).toBe(202);
+    expect((await bookkeeper.get(`/api/v1/documents/${legacyUpload.body.id}`)).body.filename).toBe(
+      unicodeName,
+    );
     const uploaded = await bookkeeper
       .post("/api/v1/documents")
       .set("origin", "http://localhost:3100")

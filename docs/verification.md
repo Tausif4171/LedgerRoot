@@ -2,6 +2,12 @@
 
 This file distinguishes completed local checks from release work. It is not a production-readiness certification.
 
+## Filename encoding recovery — September 29, 2026
+
+- Confirmed historical UTF-8 narrow-space bytes had been stored as Latin-1 in two local document names and two original source-version names. Current browser filename metadata was already correct; the legacy multipart header fallback now decodes valid UTF-8 without double-decoding explicit metadata.
+- Applied the narrowly scoped [filename recovery](filename-recovery.md) with a private temporary backup. Only filename metadata changed; the second dry run found zero remaining matches. No images, storage keys, extracted fields, approvals, or review history were rewritten.
+- Passed lint, typecheck, production build, 61 unit tests, 13 isolated database integration tests (including an actual multipart Unicode-header regression), 8 mocked live-UI browser tests, and 48 sample browser tests including automated accessibility checks. Formatting and diff checks passed. Manual VoiceOver was not performed.
+
 ## Separate field-clear actions — September 24, 2026
 
 - Visual follow-up: Clear uses normal-weight small text, a transparent hover background and an underline on hover. The 44px target and keyboard outline are unchanged. Lint, typecheck, build, 59 unit and 13 integration tests passed again; desktop/mobile dropdown and clear-control tests passed, including axe and 320px screenshots. An initial test incorrectly expected keyboard-only focus styling after mouse interaction; it was corrected to use Shift+Tab and passed. The full browser suite was not repeated for this CSS-only follow-up.

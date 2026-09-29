@@ -6,11 +6,13 @@ LedgerRoot helps a bookkeeper review extracted details, ask a teammate for clari
 
 An independent prototype for receipt and invoice review.
 
-[Quick start](#quick-start) · [Workflow](#the-workflow) · [Architecture](#architecture) · [Evaluation](#extraction-evaluation)
+[Try the sample demo](https://ledger-root.vercel.app/documents) · [Quick start](#quick-start) · [Workflow](#the-workflow) · [Architecture](#architecture) · [Evaluation](#extraction-evaluation)
 
-![A receipt beside its extracted fields in the local review workflow](docs/demo/live-review-before.png)
+The public demo uses synthetic documents and recorded extraction results. Changes stay in your browser tab; no sign-in is required.
 
-_Earlier local-build screenshot. The current application also includes correction requests and source-image history._
+![Local workspace showing a correction request, synthetic receipt, and saved review fields](docs/demo/live-review-current.png)
+
+_Local live mode with a synthetic receipt: an existing correction request, source evidence, and saved review fields—not a sample-mode simulation._
 
 ## The workflow
 
@@ -34,6 +36,8 @@ Approval records a review inside LedgerRoot. It does not create accounting entri
 - **Workspace access:** owners and reviewers can work on records; viewers are read-only. Exact duplicate detection is workspace-scoped.
 - **Batch uploads:** up to five files, with individual progress and results.
 
+If extraction returns no values, request information, reject the document, or choose **Review manually** to enter only details you can verify from the source.
+
 ## Quick start
 
 Use **Node.js 24 and npm 11**. Run these commands from the repository root:
@@ -46,7 +50,7 @@ npm run dev
 
 Open [localhost:3100/documents](http://localhost:3100/documents).
 
-Sample mode needs no running database, storage service, or AI model. It uses synthetic documents and recorded model results. Changes stay in the current browser tab; **Reset samples** restores the demo.
+Sample mode needs no running database, storage service, or AI model. It uses synthetic documents and recorded model results. Changes stay in the current browser tab; **Reset demo** restores the demo.
 
 For the two-person flow, open **Requests → Start correction scenario** and switch between the sample bookkeeper and teammate. Actor switching and processing transitions are demo simulations—not real authentication or live inference. Arbitrary uploads are disabled in sample mode.
 
