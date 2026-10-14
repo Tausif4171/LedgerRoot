@@ -36,7 +36,7 @@ export default function Inbox() {
       <p>Questions and replies linked to documents.</p>
       {isSample && (
         <div className="callout">
-          <p>Follow this example with a clearer receipt photo. Processing is simulated.</p>
+          <p>Request a clearer copy of the document, then review the updated details. Processing is simulated.</p>
           <Button
             onClick={async () => {
               try {
@@ -48,7 +48,7 @@ export default function Inbox() {
               }
             }}
           >
-            Start guided example
+            Start correction example
           </Button>
           {startError && <p role="alert">{startError}</p>}
         </div>

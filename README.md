@@ -50,7 +50,7 @@ Open [localhost:3100/documents](http://localhost:3100/documents).
 
 Sample mode needs no running database, storage service, or AI model. It uses synthetic documents and recorded model results. Changes stay in the current browser tab; **Reset demo** restores the demo.
 
-For the two-person correction example, open **Requests → Start guided example** and switch between the sample bookkeeper and teammate to follow the request and clearer-photo handoff.
+For the two-person correction example, open **Requests → Start correction example** and switch between the sample bookkeeper and teammate to follow the request and clearer-photo handoff.
 
 ### Real local processing
 
