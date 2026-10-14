@@ -23,7 +23,7 @@ npm run dev
 
 Open `http://localhost:3100/requests`.
 
-1. Click **Start correction scenario**. This adds a dedicated synthetic document; the six existing samples remain available.
+1. Click **Start correction example**. This adds a dedicated synthetic document; the six existing samples remain available.
 2. As the sample bookkeeper, click **Request information**. Ask for a clearer total and assign the sample teammate.
 3. Verify the request appears and approval is blocked.
 4. Change **Demo actor (simulation only)** to the teammate. This is not real authentication.

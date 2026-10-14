@@ -1,6 +1,8 @@
 "use client";
 import { Select } from "@/components/ui/select";
 import Link from "next/link";
+import { ApiError } from "@ledgerroot/contracts";
+import { loginHref } from "@/lib/login-return";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
@@ -27,16 +29,14 @@ export default function Inbox() {
     refetchInterval: (q) => Math.min(60000, 15000 * 2 ** Math.min(q.state.fetchFailureCount, 2)),
     refetchIntervalInBackground: false,
   });
+  const signedOut = !isSample && query.error instanceof ApiError && query.error.status === 401;
   return (
     <section className="request-inbox">
       <h1>Requests</h1>
-      <p>Questions linked to documents. In-app only: no email or push notifications are sent.</p>
+      <p>Questions and replies linked to documents.</p>
       {isSample && (
         <div className="callout">
-          <p>
-            Try a cropped receipt → assigned question → clearer photo → fresh review. All processing
-            replays recorded results.
-          </p>
+          <p>Request a clearer copy of the document, then review the updated details. Processing is simulated.</p>
           <Button
             onClick={async () => {
               try {
@@ -48,13 +48,13 @@ export default function Inbox() {
               }
             }}
           >
-            Start correction scenario
+            Start correction example
           </Button>
           {startError && <p role="alert">{startError}</p>}
         </div>
       )}
       <>
-        <label htmlFor="request-view">Show</label>
+        <label htmlFor="request-view">View requests</label>
         <Select
           id="request-view"
           value={view}
@@ -84,8 +84,24 @@ export default function Inbox() {
           <Button type="submit">Search</Button>
         </form>
         {query.isPending && <p role="status">Loading requests…</p>}
-        {query.error && <p role="alert">{query.error.message}</p>}
-        {query.data?.items.length === 0 && <p>No requests in this view.</p>}
+        {query.error && (
+          <div className="callout callout-error" role="alert">
+            <p>{signedOut ? "Sign in to view requests." : "Requests couldn’t load."}</p>
+            {signedOut ? (
+              <Link className="btn btn-primary" href={loginHref("/requests")}>
+                Sign in
+              </Link>
+            ) : (
+              <Button onClick={() => query.refetch()}>Try again</Button>
+            )}
+          </div>
+        )}
+        {!query.error && query.data?.items.length === 0 && (
+          <div className="empty">
+            <h2>No requests match this view</h2>
+            <p>Try another view or search.</p>
+          </div>
+        )}
         {query.data?.items.map((r) => (
           <article className="panel review-form" key={r.id}>
             <h2>

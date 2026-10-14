@@ -19,7 +19,7 @@ export default function SourceViewer({
       </div>
       <div className="source-stage">
         {failed ? (
-          <p role="alert">The source could not load. Refresh to request a new authorized link.</p>
+          <p role="alert">The source image couldn’t load. Refresh the page to try again.</p>
         ) : (
           <div className="source-image">
             <img

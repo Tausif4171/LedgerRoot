@@ -3,7 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 
 test("request conflict refreshes without navigation or lost drafts", async ({ page }) => {
   await page.goto("/requests");
-  await page.getByRole("button", { name: "Start correction scenario" }).click();
+  await page.getByRole("button", { name: "Start guided example" }).click();
   await page.getByRole("button", { name: "Request information", exact: true }).click();
   await page.getByLabel("Question", { exact: true }).fill("Confirm vendor");
   await page.getByLabel("Assign to", { exact: true }).click();
@@ -11,9 +11,7 @@ test("request conflict refreshes without navigation or lost drafts", async ({ pa
   await page.getByRole("button", { name: "Send request", exact: true }).click();
   await page.getByLabel("Demo actor (simulation only)").click();
   await page.getByRole("option", { name: "Sample teammate", exact: true }).click();
-  await page
-    .getByLabel("Response, follow-up, or cancellation reason")
-    .fill("Confirmed from original");
+  await page.getByLabel("Message", { exact: true }).fill("Confirmed from original");
   const fields = page.getByRole("tab", { name: "Fields", exact: true });
   if (await fields.isVisible()) await fields.click();
   await page.getByLabel("Vendor", { exact: true }).fill("Unsaved vendor correction");
@@ -26,9 +24,7 @@ test("request conflict refreshes without navigation or lost drafts", async ({ pa
   });
   await page.getByRole("button", { name: "Send response", exact: true }).click();
   await expect(page.getByText(/Latest details loaded/)).toBeVisible();
-  await expect(page.getByLabel("Response, follow-up, or cancellation reason")).toHaveValue(
-    "Confirmed from original",
-  );
+  await expect(page.getByLabel("Message", { exact: true })).toHaveValue("Confirmed from original");
   await expect(page.getByLabel("Vendor", { exact: true })).toHaveValue("Unsaved vendor correction");
   await expect(page.getByText("Waiting for response", { exact: false })).toBeVisible();
   await page.getByRole("button", { name: "Send response", exact: true }).click();
@@ -46,7 +42,7 @@ test("correction scenario preserves drafts and images, resolves then approves", 
     if (r.url().includes("/api/v1")) apiCalls.push(r.url());
   });
   await page.goto("/requests");
-  await page.getByRole("button", { name: "Start correction scenario" }).click();
+  await page.getByRole("button", { name: "Start guided example" }).click();
   await expect(page).toHaveURL(/correction-scenario/);
   await page.getByRole("button", { name: "Request information", exact: true }).click();
   await page.getByLabel("Question", { exact: true }).fill("Please provide a clearer total");
@@ -103,7 +99,7 @@ test("correction scenario preserves drafts and images, resolves then approves", 
 
 test("accessibility: requests and correction dialog", async ({ page }) => {
   await page.goto("/requests");
-  await page.getByRole("button", { name: "Start correction scenario" }).click();
+  await page.getByRole("button", { name: "Start guided example" }).click();
   await page.getByRole("button", { name: "Request information", exact: true }).click();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await page.keyboard.press("Escape");

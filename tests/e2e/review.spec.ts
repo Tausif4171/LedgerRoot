@@ -11,7 +11,7 @@ test("sample review edits persist, approval is explicit and reset is isolated", 
   const unknownTypeRow = page
     .locator("tr")
     .filter({ has: page.locator('a[href="/documents/sample-02"]') });
-  await expect(unknownTypeRow).toContainText("Type needs review");
+  await expect(unknownTypeRow).toContainText("Document type needs review");
   await page.locator('a[href="/documents/sample-01"]').first().click();
   await page.getByLabel("Vendor", { exact: true }).fill("Cedar Field Supply");
   await page.getByLabel("Document date", { exact: true }).fill("2026-09-02");
@@ -82,8 +82,7 @@ test("accessibility: documents, review, dialog, quality and narrow reflow", asyn
     if (route === "/quality") {
       await expect(page.getByRole("heading", { name: "Extraction evaluation" })).toBeVisible();
       await expect(page.getByRole("link", { name: "Evaluation", exact: true })).toBeVisible();
-      await expect(page.getByText("Saved test results—not your workspace uploads.")).toBeVisible();
-      await expect(page.getByText(/This recorded run contains 30 test cases/)).toBeVisible();
+      await expect(page.getByText(/Saved results from 30 synthetic test documents/)).toBeVisible();
       await expect(page.locator("th", { hasText: /^Test case$/ })).toHaveCount(1);
     }
     await page.waitForTimeout(500);

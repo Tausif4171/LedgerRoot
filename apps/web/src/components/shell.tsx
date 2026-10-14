@@ -55,34 +55,10 @@ export function Shell({ children }: { children: ReactNode }) {
             Requests {requests.data?.actionable ? `(${requests.data.actionable})` : ""}
           </Link>
         </nav>
-        {isSample && (
-          <div className="sidebar-foot">
-            <Button
-              onClick={async () => {
-                await gateway.reset();
-                await cache.invalidateQueries();
-              }}
-            >
-              <RotateCcw size={15} />
-              Reset samples
-            </Button>
-          </div>
-        )}
       </aside>
       <div className="content">
         <header className="topbar">
-          <span>
-            Workspace{" "}
-            <span className="muted">
-              {" "}
-              /{" "}
-              {pathname === "/quality"
-                ? "Evaluation"
-                : pathname === "/requests"
-                  ? "Requests"
-                  : "Documents"}
-            </span>
-          </span>
+          <span>Workspace</span>
           <div className="topbar-profile">
             {!isSample &&
               identity.error instanceof ApiError &&

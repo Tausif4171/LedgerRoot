@@ -1,6 +1,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { gateway } from "@/adapters/gateway";
+import { Button } from "@/components/ui/button";
 export function Quality() {
   const query = useQuery({ queryKey: ["evaluations"], queryFn: () => gateway.evaluations() });
   const run = query.data?.[0];
@@ -13,34 +14,26 @@ export function Quality() {
       <div className="page-heading">
         <div>
           <h1>Extraction evaluation</h1>
-          <p>Saved test results—not your workspace uploads.</p>
         </div>
       </div>
-      <p className="quality-intro">
-        Recorded extraction results on synthetic test documents with known answers. Uploading,
-        editing or approving workspace documents does not change this report. This is not live
-        service health, a production benchmark or evidence of customer demand.
-      </p>
       {query.isPending ? (
-        <div className="skeleton" />
+        <div className="skeleton" role="status" aria-label="Loading evaluation" aria-busy="true" />
       ) : query.error ? (
         <div role="alert" className="callout callout-error">
-          {query.error.message}
+          <p>The evaluation results couldn’t load.</p>
+          <Button onClick={() => query.refetch()}>Try again</Button>
         </div>
       ) : !run ? (
         <div className="panel empty">
-          <h2>No evaluation recorded yet</h2>
-          <p>
-            Run the local evaluation pipeline to generate real measurements. No accuracy numbers are
-            assumed.
-          </p>
+          <h2>No saved evaluation results yet</h2>
+          <p>Run the evaluation locally to create a report.</p>
         </div>
       ) : (
         <>
           <p className="quality-intro">
-            This recorded run contains {cases.length} test cases. Rows below identify test images,
-            not workspace records, and are read-only. Missing answers and processing failures remain
-            included in the results.
+            Saved results from {cases.length} synthetic test documents with known answers. They are
+            separate from workspace uploads; missing values and processing failures are included.
+            This small test does not measure live service health or production accuracy.
           </p>
           <section className="stats" aria-label="Evaluation summary">
             <div className="stat">
@@ -51,7 +44,7 @@ export function Quality() {
               <p>{percent(sum("correct"), sum("attempted"))} accuracy among suggestions</p>
             </div>
             <div className="stat">
-              <div className="stat-title">Ground-truth fields</div>
+              <div className="stat-title">Known fields</div>
               <div className="stat-value">{sum("expectedCount")}</div>
               <p>
                 {percent(sum("attempted") - sum("unsupported"), sum("expectedCount"))} coverage of
@@ -61,14 +54,14 @@ export function Quality() {
             <div className="stat">
               <div className="stat-title">Unsupported suggestions</div>
               <div className="stat-value">{sum("unsupported")}</div>
-              <p>Suggestions where the label is unknown</p>
+              <p>Suggestions without a known answer</p>
             </div>
           </section>
           <p className="footnote">
-            {cases.length * 7 - sum("attempted")} of {cases.length * 7} candidate fields left empty
-            ({percent(cases.length * 7 - sum("attempted"), cases.length * 7)} abstention, including
-            absent optional fields). {sum("attempted") - sum("correct")} incorrect or unsupported
-            suggestions. {cases.filter((c) => c.error).length} processing errors.
+            Missing: {cases.length * 7 - sum("attempted")} of {cases.length * 7} candidate fields
+            (including optional values). Incorrect or unsupported suggestions:{" "}
+            {sum("attempted") - sum("correct")}. Processing errors:{" "}
+            {cases.filter((c) => c.error).length}.
           </p>
           <div className="panel table-wrap" style={{ marginBottom: 20 }}>
             <table>
@@ -99,65 +92,70 @@ export function Quality() {
               </tbody>
             </table>
           </div>
-          <div className="panel">
-            <div className="quality-meta">
-              <div>
-                <strong>Model</strong>
-                <p>{run.model}</p>
-              </div>
-              <div>
-                <strong>Dataset / prompt</strong>
-                <p>
-                  {run.datasetVersion} / {run.promptVersion}
-                </p>
-              </div>
-              <div>
-                <strong>Run</strong>
-                <p>{new Date(run.createdAt).toLocaleString()}</p>
-              </div>
-            </div>
-            <div className="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Test case</th>
-                    <th>Category / split</th>
-                    <th>Correct / expected</th>
-                    <th>Duration</th>
-                    <th>Outcome</th>
+          <div className="panel table-wrap quality-cases">
+            <table>
+              <thead>
+                <tr>
+                  <th>Test case</th>
+                  <th>Category / split</th>
+                  <th>Correct / expected</th>
+                  <th>Duration</th>
+                  <th>Outcome</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cases.map((c) => (
+                  <tr key={c.id}>
+                    <td className="mono">{c.id}</td>
+                    <td>{c.category}</td>
+                    <td>
+                      {c.correct} / {c.expectedCount}
+                    </td>
+                    <td>{(c.durationMs / 1000).toFixed(1)}s</td>
+                    <td>
+                      {c.error ??
+                        (c.correct === c.expectedCount
+                          ? "Matched labels"
+                          : "Review errors / abstentions")}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {cases.map((c) => (
-                    <tr key={c.id}>
-                      <td className="mono">{c.id}</td>
-                      <td>{c.category}</td>
-                      <td>
-                        {c.correct} / {c.expectedCount}
-                      </td>
-                      <td>{(c.durationMs / 1000).toFixed(1)}s</td>
-                      <td>
-                        {c.error ??
-                          (c.correct === c.expectedCount
-                            ? "Matched labels"
-                            : "Review errors / abstentions")}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <details className="panel quality-run-details">
+            <summary>Run details</summary>
+            <div className="quality-run-content">
+              <div className="quality-meta">
+                <div>
+                  <strong>Model</strong>
+                  <p>{run.model}</p>
+                </div>
+                <div>
+                  <strong>Dataset and prompt</strong>
+                  <p>
+                    {run.datasetVersion} / {run.promptVersion}
+                  </p>
+                </div>
+                <div>
+                  <strong>Run date</strong>
+                  <p>{new Date(run.createdAt).toLocaleString()}</p>
+                </div>
+                <div>
+                  <strong>Hardware</strong>
+                  <p>{run.hardware}</p>
+                </div>
+                <div>
+                  <strong>Model digest</strong>
+                  <p className="mono">{run.modelDigest}</p>
+                </div>
+              </div>
+              <p className="quality-limit">
+                Evidence links are checked separately from value correctness. Confidence scores are
+                not calibrated.
+              </p>
             </div>
-          </div>
-          <div className="footnote">
-            <p>{run.hardware}</p>
-            <p className="mono" style={{ overflowWrap: "anywhere" }}>
-              Model digest: {run.modelDigest}
-            </p>
-            <p>
-              Evidence links are checked separately from value correctness. No calibrated confidence
-              score is claimed.
-            </p>
-          </div>
+          </details>
         </>
       )}
     </>

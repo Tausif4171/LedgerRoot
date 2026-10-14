@@ -26,7 +26,7 @@ test("rejected records remain discoverable and can be reopened", async ({ page }
     .filter({ has: page.locator("summary", { hasText: "View extraction details" }) });
   await expect(details).not.toHaveAttribute("open", "");
   await page.getByText("View extraction details", { exact: true }).click();
-  await expect(page.locator(".rejected-fields")).toContainText("Cedar Field Supply");
+  await expect(page.locator(".field-values-list")).toContainText("Cedar Field Supply");
   await page.getByText("View extraction details", { exact: true }).click();
   await page.screenshot({ path: testInfo.outputPath("rejected-summary.png"), fullPage: true });
   await page.goto("/documents");
