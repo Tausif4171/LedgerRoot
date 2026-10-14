@@ -4,6 +4,10 @@ Receipt and invoice review, with source evidence and a clear path to resolve mis
 
 LedgerRoot helps a bookkeeper review extracted details, ask a teammate for clarification, and review a clearer photo without losing earlier images or saved corrections. AI suggests values; a person decides what to approve.
 
+![Local review screen showing a synthetic invoice, correction request, source evidence, and saved review fields](docs/demo/live-review-current.png)
+
+_Local live mode with a synthetic invoice, source evidence, and saved review history._
+
 [Try the sample demo](https://ledger-root.vercel.app/documents) · [Quick start](#quick-start) · [Workflow](#the-workflow) · [Architecture](#architecture) · [Evaluation](#extraction-evaluation)
 
 The public demo uses synthetic documents and recorded extraction results. Changes stay in your browser tab; no sign-in is required.
@@ -46,7 +50,7 @@ Open [localhost:3100/documents](http://localhost:3100/documents).
 
 Sample mode needs no running database, storage service, or AI model. It uses synthetic documents and recorded model results. Changes stay in the current browser tab; **Reset demo** restores the demo.
 
-For the two-person flow, open **Requests → Start guided example** and switch between the sample bookkeeper and teammate. Actor switching and processing transitions are demo simulations—not real authentication or live inference. Arbitrary uploads are disabled in sample mode.
+For the two-person correction example, open **Requests → Start guided example** and switch between the sample bookkeeper and teammate to follow the request and clearer-photo handoff.
 
 ### Real local processing
 
