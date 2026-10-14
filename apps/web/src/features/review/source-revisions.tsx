@@ -26,7 +26,14 @@ export function SourceHistory({ document: d }: { document: DocumentRecord }) {
     <section className="panel review-form collaboration-form">
       <h2>Source versions</h2>
       <p>Earlier images are read-only. Selecting one does not restore it.</p>
-      {query.error && <p role="alert">{query.error.message}</p>}
+      {query.error && (
+        <div className="callout callout-error" role="alert">
+          <p>Saved source versions couldn’t load.</p>
+          <Button disabled={query.isFetching} onClick={() => query.refetch()}>
+            Try again
+          </Button>
+        </div>
+      )}
       <label htmlFor="source-version">View a saved source</label>
       <Select
         id="source-version"

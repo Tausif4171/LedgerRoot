@@ -96,7 +96,7 @@
 .source-actions {
   margin-bottom: 24px;
 }
-.rejected-fields {
+.field-values-list {
   display: grid;
   gap: 12px;
   margin: 16px 0;
@@ -108,10 +108,10 @@
 .rejected-review > .btn {
   justify-self: start;
 }
-.rejected-fields dt {
+.field-values-list dt {
   font-weight: 600;
 }
-.rejected-fields dd {
+.field-values-list dd {
   margin: 0;
   overflow-wrap: anywhere;
 }
@@ -361,30 +361,8 @@ small {
 .nav a[aria-current="page"] {
   background: color-mix(in srgb, var(--surface) 12%, var(--ink));
 }
-.nav a:focus-visible,
-.sidebar button:focus-visible {
+.nav a:focus-visible {
   outline-color: var(--surface);
-}
-.sidebar-foot {
-  margin-top: auto;
-  display: grid;
-  min-width: 0;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 14px;
-  color: color-mix(in srgb, var(--surface) 78%, var(--ink));
-  font-size: 0.8125rem;
-}
-.sidebar-foot .btn {
-  max-width: 100%;
-  white-space: normal;
-  color: var(--surface);
-  border-color: color-mix(in srgb, var(--surface) 45%, var(--ink));
-  background: transparent;
-}
-.sidebar-foot .btn:hover,
-.sidebar-foot .btn:focus-visible {
-  background: var(--soft);
-  color: var(--ink);
 }
 .demo-controls > summary {
   cursor: pointer;
@@ -1153,15 +1131,32 @@ tbody tr:hover {
   font-size: 0.875rem;
   color: var(--muted);
 }
+.quality-cases {
+  margin-bottom: 20px;
+}
+.quality-run-details > summary {
+  padding: 16px 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.quality-run-content {
+  border-top: 1px solid var(--border);
+}
 .quality-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 16px 20px;
   padding: 20px;
   font-size: 0.8125rem;
 }
-.quality-meta code {
+.quality-meta p {
+  margin-top: 4px;
   overflow-wrap: anywhere;
+}
+.quality-limit {
+  padding: 0 20px 20px;
+  color: var(--muted);
+  font-size: 0.8125rem;
 }
 .mobile-menu {
   display: none;
@@ -1272,8 +1267,7 @@ tbody tr:hover {
   .wordmark {
     font-size: 1.2rem;
   }
-  .workspace-name,
-  .sidebar-foot {
+  .workspace-name {
     display: none;
   }
   .nav {

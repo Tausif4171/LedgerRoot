@@ -27,12 +27,23 @@ export default function Login() {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ email: data.get("email"), password: data.get("password") }),
             });
-            if (!response.ok)
-              throw new Error("Sign-in failed. Check your local account credentials.");
+            if (!response.ok) {
+              throw new Error(
+                response.status === 401
+                  ? "Email or password is incorrect."
+                  : "Could not sign in. Try again or check your email and password.",
+              );
+            }
             await cache.invalidateQueries();
             router.push(loginReturn(new URLSearchParams(window.location.search).get("next")));
           } catch (e) {
-            setError(e instanceof Error ? e.message : "Sign-in failed.");
+            setError(
+              e instanceof TypeError
+                ? "Could not connect. Check your connection and try again."
+                : e instanceof Error
+                  ? e.message
+                  : "Could not sign in. Try again.",
+            );
           } finally {
             setBusy(false);
           }

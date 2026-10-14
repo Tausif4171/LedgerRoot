@@ -42,6 +42,20 @@ const defaults = (f: Fields): Values => ({
   dueDate: f.dueDate ?? "",
   confirmed: false,
 });
+
+function SavedFieldValues({ fields }: { fields: Fields }) {
+  return (
+    <dl className="field-values-list">
+      {Object.entries(fields).map(([key, value]) => (
+        <div key={key}>
+          <dt>{fieldLabels[key as FieldName]}</dt>
+          <dd>{fieldValue(key as FieldName, value)}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 export function ReviewForm({
   document: d,
   onEvidence,
@@ -191,7 +205,7 @@ export function ReviewForm({
           </div>
           <details>
             <summary>View extraction details</summary>
-            <dl className="rejected-fields">
+            <dl className="field-values-list">
               {Object.entries(base.fields).map(([key, value]) => (
                 <div key={key}>
                   <dt>{fieldLabels[key as FieldName]}</dt>
@@ -240,7 +254,7 @@ export function ReviewForm({
   return (
     <section className="panel">
       <div className="panel-heading">
-        <h2>Review extracted fields</h2>
+        <h2>Review document details</h2>
         <span>Revision {base.revision}</span>
       </div>
       <form
@@ -257,7 +271,7 @@ export function ReviewForm({
             </p>
             <details>
               <summary>Latest saved values</summary>
-              <pre style={{ whiteSpace: "pre-wrap" }}>{JSON.stringify(d.fields, null, 2)}</pre>
+              <SavedFieldValues fields={d.fields} />
             </details>
             <div className="conflict-actions">
               <Button
@@ -405,9 +419,7 @@ export function ReviewForm({
             <strong>Your unsaved edits are still here.</strong>
             <details>
               <summary>Compare latest saved fields</summary>
-              <pre style={{ whiteSpace: "pre-wrap" }}>
-                {JSON.stringify(conflict.fields, null, 2)}
-              </pre>
+              <SavedFieldValues fields={conflict.fields} />
             </details>
             <Button
               type="button"

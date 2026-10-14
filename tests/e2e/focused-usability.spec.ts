@@ -38,7 +38,7 @@ test("source placeholder is not an option and missing suggestions cannot erase s
   page,
 }, testInfo) => {
   await page.goto("/requests");
-  await page.getByRole("button", { name: "Start correction scenario" }).click();
+  await page.getByRole("button", { name: "Start guided example" }).click();
   await page.getByLabel("Vendor", { exact: true }).fill("Cedar Field Supply");
   await page.getByRole("button", { name: "Save changes", exact: true }).click();
   await expect(page.getByText("Review saved.", { exact: true })).toBeVisible();
@@ -67,7 +67,7 @@ test("source placeholder is not an option and missing suggestions cannot erase s
 
 test("sample history identifies each request action and actor", async ({ page }) => {
   await page.goto("/requests");
-  await page.getByRole("button", { name: "Start correction scenario" }).click();
+  await page.getByRole("button", { name: "Start guided example" }).click();
   async function create() {
     await page.getByRole("button", { name: "Request information", exact: true }).click();
     await page.getByLabel("Question", { exact: true }).fill("Please confirm vendor");
@@ -80,7 +80,7 @@ test("sample history identifies each request action and actor", async ({ page })
     await page.getByLabel("Demo actor (simulation only)").click();
     await page.getByRole("option", { name, exact: true }).click();
   }
-  const message = page.getByLabel("Response, follow-up, or cancellation reason");
+  const message = page.getByLabel("Message", { exact: true });
   await create();
   await actor("Sample teammate");
   await message.fill("Cedar Field Supply");
@@ -132,7 +132,7 @@ test("demo controls and header remain clear on narrow screens", async ({ page },
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath("header-320.png"), fullPage: true });
   await page.setViewportSize({ width: 1280, height: 900 });
-  const reset = page.getByRole("button", { name: "Reset samples", exact: true });
+  const reset = page.getByRole("button", { name: "Reset demo", exact: true });
   await reset.hover();
   const colors = await reset.evaluate((el) => ({
     color: getComputedStyle(el).color,

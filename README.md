@@ -4,19 +4,13 @@ Receipt and invoice review, with source evidence and a clear path to resolve mis
 
 LedgerRoot helps a bookkeeper review extracted details, ask a teammate for clarification, and review a clearer photo without losing earlier images or saved corrections. AI suggests values; a person decides what to approve.
 
-An independent prototype for receipt and invoice review.
-
 [Try the sample demo](https://ledger-root.vercel.app/documents) · [Quick start](#quick-start) · [Workflow](#the-workflow) · [Architecture](#architecture) · [Evaluation](#extraction-evaluation)
 
 The public demo uses synthetic documents and recorded extraction results. Changes stay in your browser tab; no sign-in is required.
 
-![Local workspace showing a correction request, synthetic receipt, and saved review fields](docs/demo/live-review-current.png)
-
-_Local live mode with a synthetic receipt: an existing correction request, source evidence, and saved review fields—not a sample-mode simulation._
-
 ## The workflow
 
-A receipt arrives with an unreadable total. Instead of starting over or keeping the clarification in a separate conversation:
+When a receipt has an unreadable total, LedgerRoot keeps the original, the question, and the later review together:
 
 1. **Upload:** preserve the original image and process it in the background.
 2. **Review:** compare suggestions with the source and save corrections.
@@ -52,7 +46,7 @@ Open [localhost:3100/documents](http://localhost:3100/documents).
 
 Sample mode needs no running database, storage service, or AI model. It uses synthetic documents and recorded model results. Changes stay in the current browser tab; **Reset demo** restores the demo.
 
-For the two-person flow, open **Requests → Start correction scenario** and switch between the sample bookkeeper and teammate. Actor switching and processing transitions are demo simulations—not real authentication or live inference. Arbitrary uploads are disabled in sample mode.
+For the two-person flow, open **Requests → Start guided example** and switch between the sample bookkeeper and teammate. Actor switching and processing transitions are demo simulations—not real authentication or live inference. Arbitrary uploads are disabled in sample mode.
 
 ### Real local processing
 
@@ -143,8 +137,8 @@ Integration tests require the separate test database described in the [engineeri
 Built for demonstration and local testing, not production accounting.
 
 - JPEG or PNG; English; USD; one document per image; maximum 10 MiB and 24 megapixels per file.
-- No PDF, HEIC, multipage grouping, offline sync, bank connections, ledger entries, or payments.
-- No automatic approval, fuzzy duplicate detection, or automatic verification that replacement photos show the same document.
+- PDF/HEIC and multipage documents, offline sync, bank connections, ledger entries, and payments are not supported.
+- The app does not approve records automatically, match near-duplicates, or verify that a replacement photo shows the same document.
 
 Production use requires further security, reliability, and extraction-quality validation. See the [engineering guide](docs/engineering.md) for operational and dependency-licensing considerations.
 

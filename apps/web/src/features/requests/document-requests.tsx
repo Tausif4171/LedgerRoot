@@ -3,11 +3,22 @@ import { Select } from "@/components/ui/select";
 import { useState } from "react";
 import { useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError, type DocumentRecord, type FieldName } from "@ledgerroot/contracts";
-import { gateway } from "@/adapters/gateway";
+import Link from "next/link";
+import { loginHref } from "@/lib/login-return";
+import { gateway, isSample } from "@/adapters/gateway";
 import { fieldLabels } from "@/lib/field-labels";
 import { collaborationGateway } from "@/adapters/collaboration";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/dialog";
+
+const requestEventLabels: Record<string, string> = {
+  created: "Asked",
+  respond: "Responded",
+  "follow-up": "Asked for more information",
+  resolve: "Resolved",
+  reassign: "Reassigned",
+  cancel: "Canceled",
+};
 
 export default function DocumentRequests({
   document: d,
@@ -70,6 +81,7 @@ export default function DocumentRequests({
   });
   const me = useQuery({ queryKey: ["identity"], queryFn: () => collaborationGateway.identity() });
   const active = query.data?.items.find((r) => ["OPEN", "RESPONDED"].includes(r.state));
+  const signedOut = !isSample && query.error instanceof ApiError && query.error.status === 401;
   const messageIndex = active?.events.findIndex((event) => event.id === oldestMessageId) ?? -1;
   const conversationLimit = Math.max(
     5,
@@ -122,7 +134,21 @@ export default function DocumentRequests({
       </div>
       <div className="review-form collaboration-form">
         <p className="muted">In-app only. No email or push notification is sent.</p>
-        {(error || query.error) && <p role="alert">{error || query.error?.message}</p>}
+        {error && <p role="alert">{error}</p>}
+        {query.error && (
+          <div className="callout callout-error" role="alert">
+            <p>{signedOut ? "Sign in to view requests." : "Requests couldn’t load."}</p>
+            {signedOut ? (
+              <Link className="btn btn-primary" href={loginHref(`/documents/${d.id}`)}>
+                Sign in
+              </Link>
+            ) : (
+              <Button disabled={busy} onClick={() => query.refetch()}>
+                Try again
+              </Button>
+            )}
+          </div>
+        )}
         {refreshFailed && (
           <Button
             disabled={busy}
@@ -150,7 +176,8 @@ export default function DocumentRequests({
             <ul className="request-conversation">
               {active.events.slice(-conversationLimit).map((e) => (
                 <li key={e.id}>
-                  <strong>{e.actorName}</strong> · {e.action.replaceAll("-", " ")}: {e.message}
+                  <strong>{e.actorName}</strong> · {requestEventLabels[e.action] ?? e.action}:{" "}
+                  {e.message}
                   <div className="muted">
                     <time dateTime={e.createdAt}>{new Date(e.createdAt).toLocaleString()}</time>
                   </div>
@@ -178,9 +205,10 @@ export default function DocumentRequests({
                 <p className="muted">
                   Resolve closes this question. The document still needs review.
                 </p>
-                <label htmlFor="request-message">Response, follow-up, or cancellation reason</label>
+                <label htmlFor="request-message">Message</label>
                 <textarea
                   id="request-message"
+                  placeholder="Add a response, follow-up, or cancellation reason…"
                   maxLength={1000}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
@@ -242,24 +270,49 @@ export default function DocumentRequests({
         )}
         <details>
           <summary>Previous requests</summary>
-          {previous.data?.pages
-            .flatMap((page) => page.items)
-            .filter((r) => !["OPEN", "RESPONDED"].includes(r.state))
-            .map((r) => (
-              <div key={r.id}>
-                <h3>
-                  {r.question} · {r.state}
-                </h3>
-                <ul>
-                  {r.events.map((e) => (
-                    <li key={e.id}>
-                      {e.actorName}: {e.message || e.action}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          {previous.hasNextPage && (
+          {previous.isPending ? (
+            <p role="status">Loading previous requests…</p>
+          ) : (
+            <>
+              {previous.error && (
+                <div role="alert">
+                  <p>Previous requests couldn’t load.</p>
+                  <Button disabled={previous.isFetching} onClick={() => previous.refetch()}>
+                    Try again
+                  </Button>
+                </div>
+              )}
+              {previous.data?.pages
+                .flatMap((page) => page.items)
+                .filter((r) => !["OPEN", "RESPONDED"].includes(r.state))
+                .map((r) => (
+                  <div key={r.id}>
+                    <h3>{r.question}</h3>
+                    <p>
+                      Status:{" "}
+                      {r.state
+                        .toLowerCase()
+                        .replaceAll("_", " ")
+                        .replace(/^./, (c) => c.toUpperCase())}
+                    </p>
+                    <ul>
+                      {r.events.map((e) => (
+                        <li key={e.id}>
+                          {e.actorName}: {e.message || e.action.replaceAll("-", " ")}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              {!previous.error &&
+                !previous.data?.pages
+                  .flatMap((page) => page.items)
+                  .some((r) => !["OPEN", "RESPONDED"].includes(r.state)) && (
+                  <p>No previous requests.</p>
+                )}
+            </>
+          )}
+          {previous.hasNextPage && !previous.error && (
             <Button disabled={previous.isFetchingNextPage} onClick={() => previous.fetchNextPage()}>
               Load more requests
             </Button>
@@ -272,7 +325,7 @@ export default function DocumentRequests({
           if (!busy) setOpen(v);
         }}
         title="Request information"
-        description={`Ask a teammate about ${d.filename}. Their response will not change financial fields automatically.`}
+        description="Ask a teammate about this document. Their reply won’t update its fields automatically."
       >
         <form
           className="review-form collaboration-form"

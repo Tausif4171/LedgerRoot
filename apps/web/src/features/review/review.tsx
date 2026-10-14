@@ -5,6 +5,8 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Tabs from "@radix-ui/react-tabs";
 import { ArrowLeft, RotateCcw } from "lucide-react";
+import { ApiError } from "@ledgerroot/contracts";
+import { loginHref } from "@/lib/login-return";
 import { gateway, isSample } from "@/adapters/gateway";
 import { Status } from "@/components/ui/status";
 import { Button } from "@/components/ui/button";
@@ -87,16 +89,38 @@ export function Review({ id }: { id: string }) {
         <div className="panel" style={{ height: 500 }} />
       </div>
     );
-  if (!d)
+  if (!d) {
+    const signedOut = !isSample && query.error instanceof ApiError && query.error.status === 401;
+    const notFound = query.error instanceof ApiError && query.error.status === 404;
     return (
       <div className="empty" role="alert">
-        <h1>Document unavailable</h1>
-        <p>{query.error?.message}</p>
+        <h1>
+          {signedOut
+            ? "Sign in to view this document"
+            : notFound
+              ? "Document not found"
+              : "Document couldn’t load"}
+        </h1>
+        <p>
+          {signedOut
+            ? "Sign in with your workspace account to continue."
+            : notFound
+              ? "Check the link or return to your documents."
+              : "Try loading this document again, or return to your documents."}
+        </p>
+        {signedOut ? (
+          <Link className="btn btn-primary" href={loginHref(`/documents/${id}`)}>
+            Sign in
+          </Link>
+        ) : (
+          query.error && !notFound && <Button onClick={() => query.refetch()}>Try again</Button>
+        )}
         <Link href="/documents" className="btn">
           Back to documents
         </Link>
       </div>
     );
+  }
   return (
     <>
       <Link href="/documents" className="back">
@@ -222,7 +246,7 @@ export function Review({ id }: { id: string }) {
             ) : (
               <div className="panel empty">
                 <h2>Fields will appear here</h2>
-                <p>No financial record is approved while processing is incomplete.</p>
+                <p>No fields are available yet. Check the processing status above.</p>
               </div>
             )}
           </Tabs.Content>

@@ -45,7 +45,6 @@ export function Documents() {
       <div className="page-heading">
         <div>
           <h1>Documents</h1>
-          <p>A clear path from source to reviewed record.</p>
         </div>
         <Button variant="primary" disabled={signedOut} onClick={() => setOpen(true)}>
           <ArrowUpFromLine size={16} />
@@ -59,7 +58,6 @@ export function Documents() {
             In this workspace
           </div>
           <div className="stat-value">{all.data?.total ?? "—"}</div>
-          <p>Originals preserved</p>
         </div>
         <div className="stat">
           <div className="stat-title">
@@ -67,7 +65,6 @@ export function Documents() {
             Needs attention
           </div>
           <div className="stat-value">{all.data?.attention ?? "—"}</div>
-          <p>Your review makes the difference</p>
         </div>
         <div className="stat">
           <div className="stat-title">
@@ -75,7 +72,6 @@ export function Documents() {
             Approved
           </div>
           <div className="stat-value">{all.data?.approved ?? "—"}</div>
-          <p>Reviewed, never auto-posted</p>
         </div>
       </section>
       <div className="toolbar">
@@ -117,7 +113,6 @@ export function Documents() {
         ) : query.error ? (
           <div className="empty" role="alert">
             <h2>{signedOut ? "Sign in to view your documents" : "Documents couldn’t load"}</h2>
-            {!signedOut && <p>{query.error.message}</p>}
             {!signedOut && <Button onClick={() => query.refetch()}>Try again</Button>}
             {signedOut && (
               <Link className="btn btn-primary" href={loginHref("/documents")}>
@@ -128,20 +123,34 @@ export function Documents() {
         ) : !docs.length ? (
           <div className="empty">
             <Files size={32} className="muted" />
-            <h2>{q ? "No matching documents" : "Nothing here yet"}</h2>
+            <h2>
+              {q
+                ? "No matching documents"
+                : status !== "all"
+                  ? "No documents in this view"
+                  : "No documents yet"}
+            </h2>
             <p>
               {q
                 ? "Try another vendor or filename."
-                : "Upload a document or choose another filter to continue."}
+                : status !== "all"
+                  ? "No documents match this status."
+                  : isSample
+                    ? "Sample receipts and invoices are ready to explore."
+                    : "Upload a receipt or invoice to start a review."}
             </p>
-            <Button
-              onClick={() => {
-                setSearch("");
-                setStatus("all");
-              }}
-            >
-              Show all documents
-            </Button>
+            {(q || status !== "all") && (
+              <Button
+                onClick={() => {
+                  setSearch("");
+                  setQ("");
+                  setStatus("all");
+                  setCursor(undefined);
+                }}
+              >
+                Show all documents
+              </Button>
+            )}
           </div>
         ) : (
           <>
@@ -186,7 +195,7 @@ export function Documents() {
                                   ? "Invoice"
                                   : d.fields.documentType === "receipt"
                                     ? "Receipt"
-                                    : "Type needs review"}{" "}
+                                    : "Document type needs review"}{" "}
                                 · {d.fields.invoiceNumber ?? d.filename}
                               </small>
                             </div>
@@ -245,15 +254,11 @@ export function Documents() {
                     Next page
                   </Button>
                 )}
-                {!cursor && !query.data?.nextCursor && <span>Human review required</span>}
               </div>
             </div>
           </>
         )}
       </div>
-      <p className="footnote">
-        Approval stays inside LedgerRoot. No payments, ledger entries, or Ambrook changes are made.
-      </p>
       <UploadDialog open={open} onOpenChange={setOpen} />
     </>
   );
