@@ -9,6 +9,8 @@ import { documentCompleteness } from "./completeness";
 import { gateway, isSample } from "@/adapters/gateway";
 import { Status } from "@/components/ui/status";
 import { Button } from "@/components/ui/button";
+import { PageHeading } from "@/components/ui/page-heading";
+import { LoadingState } from "@/components/ui/loading-state";
 import { UploadDialog } from "@/features/upload/upload-dialog";
 const filters = [
   ["all", "All documents"],
@@ -42,33 +44,33 @@ export function Documents() {
   const signedOut = !isSample && query.error instanceof ApiError && query.error.status === 401;
   return (
     <>
-      <div className="page-heading">
-        <div>
-          <h1>Documents</h1>
-        </div>
-        <Button variant="primary" disabled={signedOut} onClick={() => setOpen(true)}>
-          <ArrowUpFromLine size={16} />
-          {isSample ? "Try a sample" : "Upload"}
-        </Button>
-      </div>
-      <section className="stats" aria-label="Document summary">
+      <PageHeading
+        title="Documents"
+        actions={
+          <Button variant="primary" disabled={signedOut} onClick={() => setOpen(true)}>
+            <ArrowUpFromLine size={16} aria-hidden="true" />
+            {isSample ? "Try a sample" : "Upload"}
+          </Button>
+        }
+      />
+      <section className="stats document-summary" aria-label="Document summary">
         <div className="stat">
           <div className="stat-title">
-            <Files size={16} />
+            <Files size={16} aria-hidden="true" />
             In this workspace
           </div>
           <div className="stat-value">{all.data?.total ?? "—"}</div>
         </div>
         <div className="stat">
           <div className="stat-title">
-            <Clock3 size={16} />
+            <Clock3 size={16} aria-hidden="true" />
             Needs attention
           </div>
           <div className="stat-value">{all.data?.attention ?? "—"}</div>
         </div>
         <div className="stat">
           <div className="stat-title">
-            <CheckCheck size={16} />
+            <CheckCheck size={16} aria-hidden="true" />
             Approved
           </div>
           <div className="stat-value">{all.data?.approved ?? "—"}</div>
@@ -91,10 +93,12 @@ export function Documents() {
           ))}
         </div>
         <label className="search">
-          <Search size={16} className="muted" />
+          <Search size={16} className="muted" aria-hidden="true" />
           <span className="sr-only">Search documents</span>
           <input
             placeholder="Search documents…"
+            name="q"
+            autoComplete="off"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -102,14 +106,7 @@ export function Documents() {
       </div>
       <div className="panel">
         {query.isPending ? (
-          <div aria-label="Loading documents" aria-busy="true">
-            {[0, 1, 2, 3].map((n) => (
-              <div key={n} className="skeleton-row">
-                <div className="skeleton" style={{ width: "45%" }} />
-                <div className="skeleton" style={{ width: "25%" }} />
-              </div>
-            ))}
-          </div>
+          <LoadingState label="Loading documents…" />
         ) : query.error ? (
           <div className="empty" role="alert">
             <h2>{signedOut ? "Sign in to view your documents" : "Documents couldn’t load"}</h2>
@@ -122,7 +119,7 @@ export function Documents() {
           </div>
         ) : !docs.length ? (
           <div className="empty">
-            <Files size={32} className="muted" />
+            <Files size={32} className="muted" aria-hidden="true" />
             <h2>
               {q
                 ? "No matching documents"
@@ -154,7 +151,7 @@ export function Documents() {
           </div>
         ) : (
           <>
-            <div className="table-wrap">
+            <div className="table-wrap documents-table-wrap">
               <table className="documents-table">
                 <thead>
                   <tr>
@@ -180,8 +177,8 @@ export function Documents() {
                                 src={d.thumbnailUrl}
                                 alt=""
                                 loading="lazy"
-                                width={42}
-                                height={54}
+                                width={40}
+                                height={52}
                               />
                             ) : (
                               <Files size={24} aria-hidden="true" />
@@ -204,7 +201,7 @@ export function Documents() {
                         <td>
                           <Status document={d} />
                         </td>
-                        <td style={{ fontVariantNumeric: "tabular-nums" }}>
+                        <td className="document-total numeric">
                           {completeness.total === "Total not extracted" ? (
                             <span>
                               <span className="sr-only">Total not extracted</span>
@@ -230,7 +227,7 @@ export function Documents() {
                             href={`/documents/${d.id}`}
                             aria-label={`Review ${d.fields.vendor ?? d.filename}`}
                           >
-                            <ArrowUpRight size={17} />
+                            <ArrowUpRight size={16} aria-hidden="true" />
                           </Link>
                         </td>
                       </tr>

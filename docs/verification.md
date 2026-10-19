@@ -2,6 +2,37 @@
 
 This file distinguishes completed local checks from release work. It is not a production-readiness certification.
 
+## Consistent light interface — October 16, 2026
+
+- Applied the requested `frontend-design`, `ui-ux-pro-max`, and `web-design-guidelines` skills in that order. The agreed [UI system](ui-ux.md) takes priority over generic generated layouts. Retained the logo, Geist, six base colors, feature folders, Radix controls and existing frontend dependencies.
+- Consolidated sample disclosure, actor selection and one Reset demo action; authenticated live mode has no empty header. Refined document summaries, tables, request toolbars/cards, review comparisons, loading shapes and recovery screens. A neutral example is not presented as a warning.
+- The desktop source is sticky within its own review row. The one review-action footer stays in normal flow: the first sticky-footer trial obscured fields, so it was removed. The review form remains mounted across narrow-screen tab changes.
+- Checked Documents, Review, Requests, Evaluation, sign-in, recovery and not-found layouts at 320, 375, 768, 1024 and 1440px. Inspected sample-picker/request dialogs and request cards at those widths. Evaluation tables scroll within labeled keyboard-focusable regions; the page itself does not overflow. Added a 200% text-size Requests regression; this is a CSS text-resize check, not a native-browser zoom certification.
+- Keyboard, focus return, source-region access, reduced motion and configured axe checks passed. These checks target the relevant [WCAG 2.2 AA criteria](https://www.w3.org/WAI/WCAG22/quickref/); they do not establish complete conformance. **Manual VoiceOver, native-browser zoom and broad physical-device/cross-browser testing were not performed.**
+
+Completed checks on Node 24:
+
+| Check                                    | Result    |
+| ---------------------------------------- | --------- |
+| Lint and shared-package/color boundaries | Passed    |
+| Workspace typecheck                      | Passed    |
+| Unit tests                               | 61 passed |
+| Isolated database integration tests      | 13 passed |
+| Sample browser/accessibility suite       | 54 passed |
+| Mocked live-UI browser suite             | 10 passed |
+| Production API/web build                 | Passed    |
+| Separate live-mode frontend build        | Passed    |
+
+Sample browser checks use `npm run test:e2e:sample-ui` on isolated port 3102; mocked live-UI checks use `npm run test:e2e:live-ui` on port 3103. Coverage includes explicit manual review, field clearing, saved-value preservation, evidence, source replacement/comparison, draft conflicts, request actions, explicit approval, reset and one-event reopening with mouse/Enter/Space. Live-UI responses are intercepted; these tests do not prove live-service extraction or authentication reliability. Integration checks use `ledgerroot_test`, not the live workspace.
+
+Exploratory checks caught an inaccessible source scroll region, sticky-source overlap with history, a mobile Evaluation overflow, summary baseline misalignment and an enlarged-text button overflow; these were fixed before the final passing suites. The new loading assertion initially matched two status regions and was scoped to the skeleton. One default-config browser run was stopped at the first missing sample field before any mutation; the reported results above use the isolated configurations. Development builds also emitted a Fast Refresh full-reload notice during checking; production builds passed.
+
+The [before/after mobile lab report](ui-polish-performance.json) uses the same browser/profile for production sample builds: median Documents LCP 628ms before and 632ms after; measured CLS approximately 0.000064 before and 0 after. Both meet the local targets; the 4ms difference is not a meaningful speed claim. This is not Vercel or field performance data.
+
+Current captures: [local review desktop](demo/local-review-polished-desktop.png), [local review mobile](demo/local-review-polished-mobile.png), [sample Documents desktop](demo/sample-documents-polished-desktop.png) and [sample Documents mobile](demo/sample-documents-polished-mobile.png). The README uses the current local capture of the existing synthetic invoice/correction request, read without document mutations. Historical images and recordings remain unchanged; no fresh real-model extraction run is claimed.
+
+No API, schema, authorization, authentication, extraction, revision/idempotency rules or approval guards changed, and no historical records were rewritten. The user's existing demo session was not reset or migrated. No runtime dependency, commit, push or deployment was added. Older release-status notes below are historical; current sample-deployment documentation is in [the deployment guide](deployment.md).
+
 ## Filename encoding recovery — September 29, 2026
 
 - Confirmed historical UTF-8 narrow-space bytes had been stored as Latin-1 in two local document names and two original source-version names. Current browser filename metadata was already correct; the legacy multipart header fallback now decodes valid UTF-8 without double-decoding explicit metadata.

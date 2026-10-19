@@ -51,7 +51,15 @@ export default function Login() {
       >
         <div className="field">
           <label htmlFor="email">Email</label>
-          <input id="email" name="email" type="email" autoComplete="username" required />
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            required
+          />
         </div>
         <div className="field">
           <label htmlFor="password">Password</label>

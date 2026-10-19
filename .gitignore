@@ -1,9 +1,6 @@
 node_modules/
 .next/
-.next-live/
-.next-completeness/
-.next-conflict-check/
-.next-live-ui-test/
+.next-*/
 dist/
 .env
 .env.*.local

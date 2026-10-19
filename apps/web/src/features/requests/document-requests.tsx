@@ -10,6 +10,7 @@ import { fieldLabels } from "@/lib/field-labels";
 import { collaborationGateway } from "@/adapters/collaboration";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/dialog";
+import { LoadingState } from "@/components/ui/loading-state";
 
 const requestEventLabels: Record<string, string> = {
   created: "Asked",
@@ -128,12 +129,14 @@ export default function DocumentRequests({
     }
   }
   return (
-    <section className="panel" aria-label="Correction requests">
+    <section className="panel request-detail" aria-label="Correction requests">
       <div className="panel-heading">
         <h2>Correction requests</h2>
       </div>
       <div className="review-form collaboration-form">
-        <p className="muted">In-app only. No email or push notification is sent.</p>
+        <p className="muted request-delivery-note">
+          In-app only. No email or push notification is sent.
+        </p>
         {error && <p role="alert">{error}</p>}
         {query.error && (
           <div className="callout callout-error" role="alert">
@@ -165,43 +168,45 @@ export default function DocumentRequests({
           </Button>
         )}
         {query.isPending ? (
-          <p role="status">Loading requests…</p>
+          <LoadingState label="Loading requests…" rows={1} />
         ) : active ? (
-          <>
-            <h3>{active.question}</h3>
-            <p>
-              {active.state === "OPEN" ? "Waiting for response" : "Response needs review"} ·{" "}
-              {members.data?.find((m) => m.id === active.assigneeId)?.name ?? "Assigned teammate"}
-            </p>
-            <ul className="request-conversation">
-              {active.events.slice(-conversationLimit).map((e) => (
-                <li key={e.id}>
-                  <strong>{e.actorName}</strong> · {requestEventLabels[e.action] ?? e.action}:{" "}
-                  {e.message}
-                  <div className="muted">
-                    <time dateTime={e.createdAt}>{new Date(e.createdAt).toLocaleString()}</time>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            {active.events.length > conversationLimit && (
-              <Button
-                onClick={() =>
-                  setOldestMessageId(
-                    active.events[Math.max(0, active.events.length - conversationLimit - 5)]!.id,
-                  )
-                }
-              >
-                Show earlier messages
-              </Button>
-            )}
-            {conversationLimit > 5 && (
-              <Button variant="ghost" onClick={() => setOldestMessageId(null)}>
-                Show fewer messages
-              </Button>
-            )}
+          <div className="request-active-layout">
+            <div className="request-thread">
+              <h3>{active.question}</h3>
+              <p className="request-active-state">
+                {active.state === "OPEN" ? "Waiting for response" : "Response needs review"} ·{" "}
+                {members.data?.find((m) => m.id === active.assigneeId)?.name ?? "Assigned teammate"}
+              </p>
+              <ul className="request-conversation">
+                {active.events.slice(-conversationLimit).map((e) => (
+                  <li key={e.id}>
+                    <strong>{e.actorName}</strong> · {requestEventLabels[e.action] ?? e.action}:{" "}
+                    {e.message}
+                    <div className="muted">
+                      <time dateTime={e.createdAt}>{new Date(e.createdAt).toLocaleString()}</time>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              {active.events.length > conversationLimit && (
+                <Button
+                  onClick={() =>
+                    setOldestMessageId(
+                      active.events[Math.max(0, active.events.length - conversationLimit - 5)]!.id,
+                    )
+                  }
+                >
+                  Show earlier messages
+                </Button>
+              )}
+              {conversationLimit > 5 && (
+                <Button variant="ghost" onClick={() => setOldestMessageId(null)}>
+                  Show fewer messages
+                </Button>
+              )}
+            </div>
             {d.canReview && !refreshFailed && (
-              <>
+              <div className="collaboration-form request-reply">
                 <p className="muted">
                   Resolve closes this question. The document still needs review.
                 </p>
@@ -213,51 +218,67 @@ export default function DocumentRequests({
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
-                {active.state === "OPEN" && me.data?.userId === active.assigneeId && (
-                  <>
-                    <Button disabled={busy || !message.trim()} onClick={() => send("responses")}>
-                      Send response
-                    </Button>
-                    <Button
-                      disabled={busy || !["READY", "FAILED"].includes(d.stage)}
-                      onClick={() => onReplace(active.id, active.version)}
-                    >
-                      Upload clearer photo
-                    </Button>
-                  </>
-                )}
-                {active.state === "RESPONDED" && (
-                  <>
-                    <Button disabled={busy || d.stage !== "READY"} onClick={() => send("resolve")}>
-                      Resolve request
-                    </Button>
-                    <Button disabled={busy || !message.trim()} onClick={() => send("follow-up")}>
-                      Request more information
-                    </Button>
-                  </>
-                )}
-                <label htmlFor="request-reassign">Reassign to</label>
-                <Select
-                  id="request-reassign"
-                  placeholder="Choose teammate"
-                  value={assignee}
-                  onValueChange={(value) => setAssignee(value)}
-                >
-                  {members.data?.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </Select>
-                <Button disabled={busy || !assignee} onClick={() => send("reassign")}>
-                  Reassign request
-                </Button>
-                <Button disabled={busy || !message.trim()} onClick={() => send("cancel")}>
-                  Cancel request
-                </Button>
-              </>
+                <div className="request-action-group">
+                  {active.state === "OPEN" && me.data?.userId === active.assigneeId && (
+                    <>
+                      <Button
+                        variant="primary"
+                        disabled={busy || !message.trim()}
+                        onClick={() => send("responses")}
+                      >
+                        Send response
+                      </Button>
+                      <Button
+                        disabled={busy || !["READY", "FAILED"].includes(d.stage)}
+                        onClick={() => onReplace(active.id, active.version)}
+                      >
+                        Upload clearer photo
+                      </Button>
+                    </>
+                  )}
+                  {active.state === "RESPONDED" && (
+                    <>
+                      <Button
+                        variant="primary"
+                        disabled={busy || d.stage !== "READY"}
+                        onClick={() => send("resolve")}
+                      >
+                        Resolve request
+                      </Button>
+                      <Button disabled={busy || !message.trim()} onClick={() => send("follow-up")}>
+                        Request more information
+                      </Button>
+                    </>
+                  )}
+                </div>
+                <div className="collaboration-form request-management">
+                  <label htmlFor="request-reassign">Reassign to</label>
+                  <Select
+                    id="request-reassign"
+                    placeholder="Choose teammate"
+                    value={assignee}
+                    onValueChange={(value) => setAssignee(value)}
+                  >
+                    {members.data?.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}
+                      </option>
+                    ))}
+                  </Select>
+                  <Button disabled={busy || !assignee} onClick={() => send("reassign")}>
+                    Reassign request
+                  </Button>
+                  <Button
+                    variant="danger"
+                    disabled={busy || !message.trim()}
+                    onClick={() => send("cancel")}
+                  >
+                    Cancel request
+                  </Button>
+                </div>
+              </div>
             )}
-          </>
+          </div>
         ) : (
           <>
             <p>No active request.</p>
@@ -339,6 +360,8 @@ export default function DocumentRequests({
               src={d.thumbnailUrl ?? d.sourceUrl}
               alt="Document for this question"
               loading="lazy"
+              width={64}
+              height={88}
             />
             <span>
               {d.filename}

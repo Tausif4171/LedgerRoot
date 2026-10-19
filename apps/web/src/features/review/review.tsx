@@ -14,15 +14,10 @@ import { ReviewForm } from "./review-form";
 import { Button as ActionButton } from "@/components/ui/button";
 import { Modal } from "@/components/ui/dialog";
 import { ReplaceSource } from "./source-revisions";
+import SourceViewer from "./source-viewer";
+import { LoadingState } from "@/components/ui/loading-state";
 const SourceHistory = dynamic(() => import("./source-revisions").then((m) => m.SourceHistory));
 const DocumentRequests = dynamic(() => import("@/features/requests/document-requests"));
-const SourceViewer = dynamic(() => import("./source-viewer"), {
-  loading: () => (
-    <div className="panel" aria-busy="true" style={{ height: 600, padding: 30 }}>
-      <div className="skeleton" />
-    </div>
-  ),
-});
 const History = dynamic(() => import("@/features/history/history"));
 export function Review({ id }: { id: string }) {
   const cache = useQueryClient();
@@ -82,13 +77,7 @@ export function Review({ id }: { id: string }) {
       setBusy(false);
     }
   }
-  if (query.isPending)
-    return (
-      <div aria-busy="true" aria-label="Loading document">
-        <div className="skeleton" style={{ height: 40, width: "60%" }} />
-        <div className="panel" style={{ height: 500 }} />
-      </div>
-    );
+  if (query.isPending) return <LoadingState label="Loading document…" kind="review" />;
   if (!d) {
     const signedOut = !isSample && query.error instanceof ApiError && query.error.status === 401;
     const notFound = query.error instanceof ApiError && query.error.status === 404;
@@ -124,7 +113,7 @@ export function Review({ id }: { id: string }) {
   return (
     <>
       <Link href="/documents" className="back">
-        <ArrowLeft size={16} />
+        <ArrowLeft size={16} aria-hidden="true" />
         All documents
       </Link>
       <div className="review-top">
@@ -207,7 +196,7 @@ export function Review({ id }: { id: string }) {
           </p>
           {d.stage === "FAILED" && d.canReview && (
             <Button onClick={retry} disabled={busy}>
-              <RotateCcw size={15} />
+              <RotateCcw size={16} aria-hidden="true" />
               {busy ? "Retrying…" : isSample ? "Replay simulated retry" : "Retry processing"}
             </Button>
           )}
@@ -220,7 +209,7 @@ export function Review({ id }: { id: string }) {
           <Tabs.Trigger value="history">History</Tabs.Trigger>
         </Tabs.List>
         <div className="review-grid">
-          <Tabs.Content value="source" forceMount className="tab-pane">
+          <Tabs.Content value="source" forceMount className="tab-pane source-pane">
             <SourceViewer
               key={d.runId}
               document={d}

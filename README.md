@@ -4,9 +4,9 @@ Receipt and invoice review, with source evidence and a clear path to resolve mis
 
 LedgerRoot helps a bookkeeper review extracted details, ask a teammate for clarification, and review a clearer photo without losing earlier images or saved corrections. AI suggests values; a person decides what to approve.
 
-![Local review screen showing a synthetic invoice, correction request, source evidence, and saved review fields](docs/demo/live-review-current.png)
+![Local review screen showing a synthetic invoice, correction request, source evidence, and saved review fields](docs/demo/local-review-polished-desktop.png)
 
-_Local live mode with a synthetic invoice, source evidence, and saved review history._
+_Local live mode with a synthetic invoice, an active correction request, source evidence, and saved review history._
 
 [Try the sample demo](https://ledger-root.vercel.app/documents) · [Quick start](#quick-start) · [Workflow](#the-workflow) · [Architecture](#architecture) · [Evaluation](#extraction-evaluation)
 

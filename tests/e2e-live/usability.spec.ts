@@ -1,6 +1,64 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
+test("supporting screens and loading skeletons reflow at the agreed widths", async ({
+  page,
+}, info) => {
+  await page.route("**/api/v1/**", (route) =>
+    route.fulfill({
+      status: 503,
+      json: { error: { code: "UNAVAILABLE", message: "Service temporarily unavailable." } },
+    }),
+  );
+  for (const width of [320, 375, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/login");
+    await expect(page.getByRole("heading", { name: "Sign in to your workspace" })).toBeVisible();
+    await expect(page.locator("header")).toHaveCount(0);
+    await page.getByLabel("Email", { exact: true }).focus();
+    await expect(page.getByLabel("Email", { exact: true })).toBeFocused();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.screenshot({ path: info.outputPath(`login-${width}.png`), fullPage: true });
+    await page.goto("/documents");
+    await expect(page.getByRole("heading", { name: "Documents couldn’t load" })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.screenshot({ path: info.outputPath(`recovery-${width}.png`), fullPage: true });
+  }
+  await page.unroute("**/api/v1/**");
+  let release!: () => void;
+  const hold = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/api/v1/**", async (route) => {
+    await hold;
+    await route.fulfill({
+      status: 503,
+      json: { error: { code: "UNAVAILABLE", message: "Unavailable." } },
+    });
+  });
+  try {
+    await page.goto("/documents");
+    await expect(page.locator(".loading-state[role='status']")).toContainText("Loading documents…");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    expect(
+      await page
+        .locator(".skeleton")
+        .first()
+        .evaluate((el) => getComputedStyle(el).animationName),
+    ).toBe("none");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.screenshot({ path: info.outputPath("loading-1440.png"), fullPage: true });
+  } finally {
+    release();
+  }
+});
+
 test("signed-out Documents has one primary recovery action", async ({ page }) => {
   await page.route("**/api/v1/**", (route) =>
     route.fulfill({

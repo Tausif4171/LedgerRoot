@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-16",
+  "target": "Documents page, local production sample builds",
+  "baselineCommit": "65c9cc7",
+  "browser": "153.0.8010.12",
+  "profile": "390x844; 4x CPU slowdown; 150ms network latency; 1.6Mbps down / 0.75Mbps up; disabled browser cache; 3 new contexts per build",
+  "before": {
+    "at": "2026-10-16T06:54:02.089Z",
+    "runs": [
+      { "run": 1, "lcpMs": 636, "cls": 0.00006356467601143569 },
+      { "run": 2, "lcpMs": 624, "cls": 0.00006356467601143569 },
+      { "run": 3, "lcpMs": 628, "cls": 0.00006356467601143569 }
+    ],
+    "medianLcpMs": 628
+  },
+  "after": {
+    "at": "2026-10-16T07:19:52.045Z",
+    "runs": [
+      { "run": 1, "lcpMs": 648, "cls": 0 },
+      { "run": 2, "lcpMs": 624, "cls": 0 },
+      { "run": 3, "lcpMs": 632, "cls": 0 }
+    ],
+    "medianLcpMs": 632
+  },
+  "targets": { "lcpMs": 2500, "cls": 0.1 },
+  "interpretation": "Both builds meet the local lab targets. The 4ms median LCP difference is not evidence of a meaningful speed change.",
+  "limitations": "Local loopback server, not remote Vercel latency, a physical-device benchmark, or field Core Web Vitals. CLS is summed no-input layout shifts during a five-second observation window, not a full-session field score. Only the Documents route was timed. No production-performance guarantee is implied."
+}

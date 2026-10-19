@@ -5,7 +5,7 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, ExternalLink, Save } from "lucide-react";
+import { Check, ScanLine, Save } from "lucide-react";
 import {
   ApiError,
   fieldsSchema,
@@ -170,7 +170,7 @@ export function ReviewForm({
     ) : ids.length ? (
       <>
         <button type="button" className="evidence-button" onClick={() => onEvidence(ids)}>
-          <ExternalLink size={12} />
+          <ScanLine size={14} aria-hidden="true" />
           {base.fields[name] === null ? "View source text" : "Source found"}
         </button>
         {base.fields[name] === null && !finalized && (
@@ -252,7 +252,7 @@ export function ReviewForm({
     );
   }
   return (
-    <section className="panel">
+    <section className="panel review-panel">
       <div className="panel-heading">
         <h2>Review document details</h2>
         <span>Revision {base.revision}</span>
@@ -605,63 +605,65 @@ export function ReviewForm({
             </label>
           )}
         </fieldset>
-        <div className="review-actions" hidden={emptyReview}>
-          {!locked ? (
-            <>
-              <Button key="save" type="submit" disabled={busy}>
-                <Save size={15} />
-                Save changes
-              </Button>
+        <div className="review-action-footer" hidden={emptyReview}>
+          <div className="review-actions">
+            {!locked ? (
+              <>
+                <Button key="save" type="submit" disabled={busy}>
+                  <Save size={16} aria-hidden="true" />
+                  Save changes
+                </Button>
+                <Button
+                  type="button"
+                  variant="primary"
+                  disabled={busy || changedRemotely || !!d.hasActiveRequest}
+                  onClick={() => submit("approve")}
+                >
+                  <Check size={16} aria-hidden="true" />
+                  Approve record
+                </Button>
+              </>
+            ) : (
+              d.canReview &&
+              d.stage === "READY" &&
+              ["APPROVED", "REJECTED", "NEEDS_INFORMATION"].includes(d.reviewStatus) && (
+                <Button
+                  key="reopen"
+                  type="button"
+                  disabled={busy}
+                  onClick={(event) => {
+                    // Reopening can render the save button before this click's default action.
+                    // Never let that activation become a form submission.
+                    event.preventDefault();
+                    submit("reopen");
+                  }}
+                >
+                  Reopen for review
+                </Button>
+              )
+            )}
+          </div>
+          {!locked && !emptyReview && (
+            <div className="secondary-actions">
               <Button
                 type="button"
-                variant="primary"
-                disabled={busy || changedRemotely || !!d.hasActiveRequest}
-                onClick={() => submit("approve")}
-              >
-                <Check size={16} />
-                Approve record
-              </Button>
-            </>
-          ) : (
-            d.canReview &&
-            d.stage === "READY" &&
-            ["APPROVED", "REJECTED", "NEEDS_INFORMATION"].includes(d.reviewStatus) && (
-              <Button
-                key="reopen"
-                type="button"
+                variant="ghost"
                 disabled={busy}
-                onClick={(event) => {
-                  // Reopening can render the save button before this click's default action.
-                  // Never let that activation become a form submission.
-                  event.preventDefault();
-                  submit("reopen");
-                }}
+                onClick={() => setReasonAction("needs-information")}
               >
-                Reopen for review
+                Needs information
               </Button>
-            )
+              <Button
+                type="button"
+                variant="danger"
+                disabled={busy}
+                onClick={() => setReasonAction("reject")}
+              >
+                Reject document
+              </Button>
+            </div>
           )}
         </div>
-        {!locked && !emptyReview && (
-          <div className="secondary-actions">
-            <Button
-              type="button"
-              variant="ghost"
-              disabled={busy}
-              onClick={() => setReasonAction("needs-information")}
-            >
-              Needs information
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              disabled={busy}
-              onClick={() => setReasonAction("reject")}
-            >
-              Reject document
-            </Button>
-          </div>
-        )}
         <div aria-live="polite">
           {busy ? <p className="legal-note">Saving your review…</p> : null}
         </div>

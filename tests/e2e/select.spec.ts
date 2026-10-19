@@ -47,7 +47,7 @@ test("custom dropdown supports keyboard, clearing, dialog focus and narrow reflo
   await expect(currency).toContainText("Confirm currency");
 
   await page.goto("/requests");
-  await page.getByRole("button", { name: "Start guided example" }).click();
+  await page.getByRole("button", { name: "Start correction example" }).click();
   await page.getByRole("button", { name: "Request information", exact: true }).click();
   const assignee = page.getByRole("combobox", { name: "Assign to", exact: true });
   await assignee.click();

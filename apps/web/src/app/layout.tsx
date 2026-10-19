@@ -6,7 +6,7 @@ import "@/styles/globals.css";
 export const metadata: Metadata = {
   title: { default: "LedgerRoot — Document review", template: "%s · LedgerRoot" },
   description:
-    "An independent prototype for evidence-linked receipt review. Synthetic sample documents; human approval required.",
+    "Receipt and invoice review with source evidence, correction requests, and preserved document history. Human approval required.",
 };
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

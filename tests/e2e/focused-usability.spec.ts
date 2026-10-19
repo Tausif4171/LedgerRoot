@@ -38,7 +38,7 @@ test("source placeholder is not an option and missing suggestions cannot erase s
   page,
 }, testInfo) => {
   await page.goto("/requests");
-  await page.getByRole("button", { name: "Start guided example" }).click();
+  await page.getByRole("button", { name: "Start correction example" }).click();
   await page.getByLabel("Vendor", { exact: true }).fill("Cedar Field Supply");
   await page.getByRole("button", { name: "Save changes", exact: true }).click();
   await expect(page.getByText("Review saved.", { exact: true })).toBeVisible();
@@ -67,7 +67,7 @@ test("source placeholder is not an option and missing suggestions cannot erase s
 
 test("sample history identifies each request action and actor", async ({ page }) => {
   await page.goto("/requests");
-  await page.getByRole("button", { name: "Start guided example" }).click();
+  await page.getByRole("button", { name: "Start correction example" }).click();
   async function create() {
     await page.getByRole("button", { name: "Request information", exact: true }).click();
     await page.getByLabel("Question", { exact: true }).fill("Please confirm vendor");

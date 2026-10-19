@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import type { DocumentRecord } from "@ledgerroot/contracts";
-import { ScanLine } from "lucide-react";
 export default function SourceViewer({
   document: d,
   selected,
@@ -12,18 +11,20 @@ export default function SourceViewer({
   const [failed, setFailed] = useState(false);
   const spans = d.extraction?.spans.filter((s) => selected.includes(s.id)) ?? [];
   return (
-    <section className="panel" aria-label="Source document">
+    <section className="panel source-panel" aria-label="Source document">
       <div className="panel-heading">
         <h2>Source document</h2>
-        <ScanLine size={18} className="muted" />
       </div>
-      <div className="source-stage">
+      <div className="source-stage" role="region" aria-label="Source image" tabIndex={0}>
         {failed ? (
           <p role="alert">The source image couldn’t load. Refresh the page to try again.</p>
         ) : (
           <div className="source-image">
             <img
               src={d.sourceUrl}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
               alt={`Source ${d.fields.documentType ?? "document"} from ${d.fields.vendor ?? d.filename}`}
               onError={() => setFailed(true)}
             />

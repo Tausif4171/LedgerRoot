@@ -24,6 +24,11 @@ export function Shell({ children }: { children: ReactNode }) {
     refetchInterval: (q) => Math.min(60000, 15000 * 2 ** Math.min(q.state.fetchFailureCount, 2)),
     refetchIntervalInBackground: false,
   });
+  const showSignIn =
+    !isSample &&
+    identity.error instanceof ApiError &&
+    identity.error.status === 401 &&
+    pathname !== "/login";
   return (
     <div className="shell">
       <a href="#main" className="skip">
@@ -31,7 +36,7 @@ export function Shell({ children }: { children: ReactNode }) {
       </a>
       <aside className="sidebar">
         <Link className="wordmark" href="/documents" aria-label="LedgerRoot documents">
-          <GitBranch size={25} strokeWidth={1.5} />
+          <GitBranch size={25} strokeWidth={1.5} aria-hidden="true" />
           LedgerRoot
         </Link>
         <div className="workspace-name">
@@ -43,71 +48,71 @@ export function Shell({ children }: { children: ReactNode }) {
             href="/documents"
             aria-current={pathname.startsWith("/documents") ? "page" : undefined}
           >
-            <Files size={18} />
+            <Files size={18} aria-hidden="true" />
             Documents
           </Link>
           <Link href="/quality" aria-current={pathname === "/quality" ? "page" : undefined}>
-            <ChartNoAxesCombined size={18} />
+            <ChartNoAxesCombined size={18} aria-hidden="true" />
             Evaluation
           </Link>
           <Link href="/requests" aria-current={pathname === "/requests" ? "page" : undefined}>
-            <Info size={18} />
+            <Info size={18} aria-hidden="true" />
             Requests {requests.data?.actionable ? `(${requests.data.actionable})` : ""}
           </Link>
         </nav>
       </aside>
       <div className="content">
-        <header className="topbar">
-          <span>Workspace</span>
-          <div className="topbar-profile">
-            {!isSample &&
-              identity.error instanceof ApiError &&
-              identity.error.status === 401 &&
-              pathname !== "/login" && (
+        {(isSample || showSignIn) && (
+          <header className={`topbar ${isSample ? "sample-header" : "auth-header"}`}>
+            {isSample && (
+              <div className="sample-notice">
+                <Info size={16} aria-hidden="true" />
+                <span>Sample mode · Synthetic documents. Changes stay in this browser tab.</span>
+              </div>
+            )}
+            <div className="topbar-profile">
+              {showSignIn && (
                 <Link className="header-sign-in" href={loginHref(pathname)}>
                   Sign in
                 </Link>
               )}
-            {isSample && (
-              <label className="demo-actor">
-                Demo actor{" "}
-                <Select
-                  aria-label="Demo actor (simulation only)"
-                  value={identity.data?.userId ?? samplePeople[0]!.id}
-                  onValueChange={async (value) => {
-                    sampleCollaboration.switchActor(value);
-                    await cache.invalidateQueries();
-                  }}
-                >
-                  {samplePeople.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </Select>
-              </label>
-            )}
-          </div>
-        </header>
-        <main id="main" className="main">
-          {isSample && (
-            <div className="sample-notice">
-              <Info size={16} />
-              <span>Sample mode · Synthetic documents. Changes stay in this browser tab.</span>
-              <Button
-                size="small"
-                variant="ghost"
-                aria-label="Reset demo"
-                onClick={async () => {
-                  await gateway.reset();
-                  await cache.invalidateQueries();
-                }}
-              >
-                <RotateCcw size={14} />
-                Reset demo
-              </Button>
+              {isSample && (
+                <>
+                  <label className="demo-actor">
+                    Demo actor{" "}
+                    <Select
+                      aria-label="Demo actor (simulation only)"
+                      value={identity.data?.userId ?? samplePeople[0]!.id}
+                      onValueChange={async (value) => {
+                        sampleCollaboration.switchActor(value);
+                        await cache.invalidateQueries();
+                      }}
+                    >
+                      {samplePeople.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </label>
+                  <Button
+                    size="small"
+                    variant="ghost"
+                    aria-label="Reset demo"
+                    onClick={async () => {
+                      await gateway.reset();
+                      await cache.invalidateQueries();
+                    }}
+                  >
+                    <RotateCcw size={16} aria-hidden="true" />
+                    Reset demo
+                  </Button>
+                </>
+              )}
             </div>
-          )}
+          </header>
+        )}
+        <main id="main" className="main">
           {children}
         </main>
       </div>

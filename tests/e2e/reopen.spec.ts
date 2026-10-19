@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 for (const activation of ["click", "Enter", "Space"] as const) {
   test(`approved source revision reopens once with ${activation}`, async ({ page }) => {
     await page.goto("/requests");
-    await page.getByRole("button", { name: "Start guided example" }).click();
+    await page.getByRole("button", { name: "Start correction example" }).click();
     await page.getByRole("button", { name: "Upload clearer photo", exact: true }).click();
     await page.getByLabel("What is clearer?").fill("Full receipt visible");
     await page.getByRole("dialog").getByRole("checkbox").check();

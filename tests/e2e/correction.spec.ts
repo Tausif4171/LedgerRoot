@@ -3,7 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 
 test("request conflict refreshes without navigation or lost drafts", async ({ page }) => {
   await page.goto("/requests");
-  await page.getByRole("button", { name: "Start guided example" }).click();
+  await page.getByRole("button", { name: "Start correction example" }).click();
   await page.getByRole("button", { name: "Request information", exact: true }).click();
   await page.getByLabel("Question", { exact: true }).fill("Confirm vendor");
   await page.getByLabel("Assign to", { exact: true }).click();
@@ -42,7 +42,7 @@ test("correction scenario preserves drafts and images, resolves then approves", 
     if (r.url().includes("/api/v1")) apiCalls.push(r.url());
   });
   await page.goto("/requests");
-  await page.getByRole("button", { name: "Start guided example" }).click();
+  await page.getByRole("button", { name: "Start correction example" }).click();
   await expect(page).toHaveURL(/correction-scenario/);
   await page.getByRole("button", { name: "Request information", exact: true }).click();
   await page.getByLabel("Question", { exact: true }).fill("Please provide a clearer total");
@@ -99,7 +99,7 @@ test("correction scenario preserves drafts and images, resolves then approves", 
 
 test("accessibility: requests and correction dialog", async ({ page }) => {
   await page.goto("/requests");
-  await page.getByRole("button", { name: "Start guided example" }).click();
+  await page.getByRole("button", { name: "Start correction example" }).click();
   await page.getByRole("button", { name: "Request information", exact: true }).click();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await page.keyboard.press("Escape");

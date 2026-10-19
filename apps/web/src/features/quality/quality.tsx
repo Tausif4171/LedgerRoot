@@ -2,6 +2,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { gateway } from "@/adapters/gateway";
 import { Button } from "@/components/ui/button";
+import { PageHeading } from "@/components/ui/page-heading";
+import { LoadingState } from "@/components/ui/loading-state";
 export function Quality() {
   const query = useQuery({ queryKey: ["evaluations"], queryFn: () => gateway.evaluations() });
   const run = query.data?.[0];
@@ -11,13 +13,9 @@ export function Quality() {
   const percent = (n: number, d: number) => (d ? `${((100 * n) / d).toFixed(1)}%` : "Not measured");
   return (
     <>
-      <div className="page-heading">
-        <div>
-          <h1>Extraction evaluation</h1>
-        </div>
-      </div>
+      <PageHeading title="Extraction evaluation" />
       {query.isPending ? (
-        <div className="skeleton" role="status" aria-label="Loading evaluation" aria-busy="true" />
+        <LoadingState label="Loading evaluation…" kind="metrics" />
       ) : query.error ? (
         <div role="alert" className="callout callout-error">
           <p>The evaluation results couldn’t load.</p>
@@ -35,7 +33,7 @@ export function Quality() {
             separate from workspace uploads; missing values and processing failures are included.
             This small test does not measure live service health or production accuracy.
           </p>
-          <section className="stats" aria-label="Evaluation summary">
+          <section className="stats evaluation-summary" aria-label="Evaluation summary">
             <div className="stat">
               <div className="stat-title">Correct / attempted</div>
               <div className="stat-value">
@@ -57,14 +55,19 @@ export function Quality() {
               <p>Suggestions without a known answer</p>
             </div>
           </section>
-          <p className="footnote">
+          <p className="quality-footnote">
             Missing: {cases.length * 7 - sum("attempted")} of {cases.length * 7} candidate fields
             (including optional values). Incorrect or unsupported suggestions:{" "}
             {sum("attempted") - sum("correct")}. Processing errors:{" "}
             {cases.filter((c) => c.error).length}.
           </p>
-          <div className="panel table-wrap" style={{ marginBottom: 20 }}>
-            <table>
+          <div
+            className="panel table-wrap quality-splits"
+            role="region"
+            aria-label="Results by dataset split"
+            tabIndex={0}
+          >
+            <table className="evaluation-table">
               <caption className="sr-only">Results separated by dataset split</caption>
               <thead>
                 <tr>
@@ -92,8 +95,13 @@ export function Quality() {
               </tbody>
             </table>
           </div>
-          <div className="panel table-wrap quality-cases">
-            <table>
+          <div
+            className="panel table-wrap quality-cases"
+            role="region"
+            aria-label="Results by test case"
+            tabIndex={0}
+          >
+            <table className="evaluation-table">
               <thead>
                 <tr>
                   <th>Test case</th>

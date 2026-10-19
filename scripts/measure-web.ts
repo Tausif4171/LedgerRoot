@@ -1,8 +1,21 @@
 import { chromium } from "@playwright/test";
 import { writeFile, mkdir } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { parseArgs } from "node:util";
+const { values } = parseArgs({
+  options: {
+    "base-url": { type: "string", default: "http://127.0.0.1:3100" },
+    output: { type: "string", default: "docs/performance.json" },
+    "screenshots-dir": { type: "string", default: "docs/demo" },
+  },
+});
+const baseUrl = values["base-url"]!;
+const output = values.output!;
+const screenshots = values["screenshots-dir"]!;
 const browser = await chromium.launch();
 const reports = [];
-await mkdir("docs/demo", { recursive: true });
+await mkdir(screenshots, { recursive: true });
+await mkdir(dirname(output), { recursive: true });
 try {
   for (let run = 1; run <= 3; run++) {
     const context = await browser.newContext({
@@ -35,7 +48,7 @@ try {
       uploadThroughput: 750_000 / 8,
     });
     await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
-    await page.goto("http://127.0.0.1:3100/documents");
+    await page.goto(new URL("/documents", baseUrl).href);
     await page.locator('a[href="/documents/sample-01"]').first().waitFor();
     await page.waitForTimeout(5000);
     reports.push({
@@ -45,9 +58,9 @@ try {
       )),
     });
     if (run === 1) {
-      await page.screenshot({ path: "docs/demo/sample-mobile.png", fullPage: true });
+      await page.screenshot({ path: join(screenshots, "sample-mobile.png"), fullPage: true });
       await page.setViewportSize({ width: 1440, height: 1000 });
-      await page.screenshot({ path: "docs/demo/sample-desktop.png", fullPage: true });
+      await page.screenshot({ path: join(screenshots, "sample-desktop.png"), fullPage: true });
     }
     await context.close();
   }
@@ -55,13 +68,14 @@ try {
     at: new Date().toISOString(),
     browser: browser.version(),
     target: "local production sample build /documents",
+    baseUrl,
     profile:
       "390x844; 4x CPU slowdown; 150ms network latency; 1.6Mbps down / 0.75Mbps up; disabled browser cache; 3 new contexts",
     limitations:
       "Local loopback server; not real-device field data or remote Vercel latency. CLS is summed no-input shifts during the sampled window, not a full-session field score.",
     runs: reports,
   };
-  await writeFile("docs/performance.json", JSON.stringify(result, null, 2));
+  await writeFile(output, JSON.stringify(result, null, 2) + "\n");
   console.log(JSON.stringify(result));
 } finally {
   await browser.close();
