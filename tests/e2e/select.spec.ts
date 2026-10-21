@@ -7,7 +7,7 @@ test("custom dropdown supports keyboard, clearing, dialog focus and narrow reflo
   await page.goto("/documents/sample-01");
   await expect(
     page
-      .getByRole("combobox", { name: "Demo actor (simulation only)" })
+      .getByRole("combobox", { name: "Demo user" })
       .getByText("Sample bookkeeper", { exact: true }),
   ).toBeVisible();
   const type = page.getByRole("combobox", { name: "Document type", exact: true });

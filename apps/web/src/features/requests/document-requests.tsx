@@ -1,6 +1,6 @@
 "use client";
 import { Select } from "@/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError, type DocumentRecord, type FieldName } from "@ledgerroot/contracts";
 import Link from "next/link";
@@ -33,11 +33,17 @@ function requestStateLabel(state: string) {
 export default function DocumentRequests({
   document: d,
   onReplace,
+  onRequestPhotoActionChange,
   open,
   setOpen,
 }: {
   document: DocumentRecord;
-  onReplace: (requestId: string, version: number) => void;
+  onReplace: (requestId?: string, version?: number) => void;
+  onRequestPhotoActionChange: (state: {
+    documentId: string;
+    revision: number;
+    available: boolean;
+  }) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
 }) {
@@ -92,6 +98,27 @@ export default function DocumentRequests({
   });
   const me = useQuery({ queryKey: ["identity"], queryFn: () => collaborationGateway.identity() });
   const active = query.data?.items.find((r) => ["OPEN", "RESPONDED"].includes(r.state));
+  const canUploadAsRequestResponse =
+    d.canReview &&
+    !refreshFailed &&
+    active?.state === "OPEN" &&
+    me.data?.userId === active.assigneeId;
+  useEffect(() => {
+    if (!query.isPending && !me.isPending) {
+      onRequestPhotoActionChange({
+        documentId: d.id,
+        revision: d.revision,
+        available: canUploadAsRequestResponse,
+      });
+    }
+  }, [
+    canUploadAsRequestResponse,
+    d.id,
+    d.revision,
+    me.isPending,
+    onRequestPhotoActionChange,
+    query.isPending,
+  ]);
   const previousRequests =
     previous.data?.pages
       .flatMap((page) => page.items)

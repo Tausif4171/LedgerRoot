@@ -22,7 +22,7 @@ test("empty extraction requires intentional manual review and keeps saved values
   await page.getByRole("button", { name: "Review manually", exact: true }).click();
   await expect(page.getByRole("combobox", { name: "Document type", exact: true })).toBeFocused();
   await page.getByLabel("Vendor", { exact: true }).fill("Verified vendor");
-  await page.getByLabel("Demo actor (simulation only)").click();
+  await page.getByLabel("Demo user").click();
   await page.getByRole("option", { name: "Sample teammate", exact: true }).click();
   await expect(page.getByLabel("Vendor", { exact: true })).toHaveValue("Verified vendor");
   await page.getByRole("button", { name: "Approve record", exact: true }).click();
@@ -79,7 +79,7 @@ test("sample history identifies each request action and actor", async ({ page })
     await expect(page.getByRole("dialog")).not.toBeVisible();
   }
   async function actor(name: string) {
-    await page.getByLabel("Demo actor (simulation only)").click();
+    await page.getByLabel("Demo user").click();
     await page.getByRole("option", { name, exact: true }).click();
   }
   const message = page.getByLabel("Message", { exact: true });
@@ -149,11 +149,11 @@ test("demo controls and header remain clear on narrow screens", async ({ page },
     page.getByRole("button", { name: "Simulate a processing failure", exact: true }),
   ).not.toBeVisible();
   await page.setViewportSize({ width: 320, height: 760 });
-  await expect(page.getByRole("combobox", { name: "Demo actor (simulation only)" })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Demo user" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath("header-320.png"), fullPage: true });
   await page.setViewportSize({ width: 1280, height: 900 });
-  const reset = page.getByRole("button", { name: "Reset demo", exact: true });
+  const reset = page.getByRole("button", { name: "Reset sample data", exact: true });
   await reset.hover();
   const colors = await reset.evaluate((el) => ({
     color: getComputedStyle(el).color,

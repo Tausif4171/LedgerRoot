@@ -67,7 +67,7 @@ export function Shell({ children }: { children: ReactNode }) {
             {isSample && (
               <div className="sample-notice">
                 <Info size={16} aria-hidden="true" />
-                <span>Sample mode · Synthetic documents. Changes stay in this browser tab.</span>
+                <span>Sample workspace. Documents are examples; changes stay in this tab.</span>
               </div>
             )}
             <div className="topbar-profile">
@@ -78,10 +78,10 @@ export function Shell({ children }: { children: ReactNode }) {
               )}
               {isSample && (
                 <>
-                  <label className="demo-actor">
-                    Demo actor{" "}
+                  <label className="sample-user">
+                    Demo user{" "}
                     <Select
-                      aria-label="Demo actor (simulation only)"
+                      aria-label="Demo user"
                       value={identity.data?.userId ?? samplePeople[0]!.id}
                       onValueChange={async (value) => {
                         sampleCollaboration.switchActor(value);
@@ -98,14 +98,14 @@ export function Shell({ children }: { children: ReactNode }) {
                   <Button
                     size="small"
                     variant="ghost"
-                    aria-label="Reset demo"
+                    aria-label="Reset sample data"
                     onClick={async () => {
                       await gateway.reset();
                       await cache.invalidateQueries();
                     }}
                   >
                     <RotateCcw size={16} aria-hidden="true" />
-                    Reset demo
+                    Reset sample data
                   </Button>
                 </>
               )}

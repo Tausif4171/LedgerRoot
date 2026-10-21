@@ -54,7 +54,7 @@ test("sample review edits persist, approval is explicit and reset is isolated", 
   await page.getByRole("button", { name: "Source found", exact: true }).first().click();
   await expect(page.locator(".evidence-highlight").first()).toBeVisible();
   await page.goto("/documents");
-  await page.getByRole("button", { name: "Reset demo", exact: true }).click();
+  await page.getByRole("button", { name: "Reset sample data", exact: true }).click();
   await page.locator('a[href="/documents/sample-01"]').first().click();
   await expect(page.getByLabel("Total amount (USD)")).toHaveValue("148.50");
   expect(apiCalls).toEqual([]);

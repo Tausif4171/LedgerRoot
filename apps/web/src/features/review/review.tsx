@@ -30,6 +30,11 @@ export function Review({ id }: { id: string }) {
   const [busy, setBusy] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
+  const [requestPhotoAction, setRequestPhotoAction] = useState<{
+    documentId: string;
+    revision: number;
+    available: boolean;
+  } | null>(null);
   const [replacement, setReplacement] = useState<{ id?: string; version?: number } | null>(null);
   const [pendingReplacement, setPendingReplacement] = useState<{
     id?: string;
@@ -136,11 +141,15 @@ export function Review({ id }: { id: string }) {
             <DocumentRequests
               document={d}
               onReplace={beginReplacement}
+              onRequestPhotoActionChange={setRequestPhotoAction}
               open={requestOpen}
               setOpen={setRequestOpen}
             />
           </div>
-          {d.canReview &&
+          {requestPhotoAction?.documentId === d.id &&
+            requestPhotoAction.revision === d.revision &&
+            !requestPhotoAction.available &&
+            d.canReview &&
             ["READY", "FAILED"].includes(d.stage) &&
             !["APPROVED", "REJECTED"].includes(d.reviewStatus) && (
               <div className="source-actions">

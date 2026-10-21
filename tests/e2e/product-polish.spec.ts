@@ -7,15 +7,19 @@ test("compact sample controls and page tools reflow at the supported widths", as
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/requests");
     await expect(
-      page.locator("header").getByText(/Sample mode · Synthetic documents/),
+      page.locator("header").getByText(/Sample workspace\. Documents are examples/),
     ).toBeVisible();
-    await expect(page.getByRole("button", { name: "Reset demo", exact: true })).toHaveCount(1);
+    await expect(page.getByRole("button", { name: "Reset sample data", exact: true })).toHaveCount(
+      1,
+    );
     await expect(page.getByRole("combobox", { name: "View requests" })).toBeVisible();
     await expect(page.getByRole("textbox", { name: "Search questions" })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
     if (width === 1440) {
+      const noticeText = page.locator(".sample-notice > span");
+      expect(await noticeText.evaluate((el) => el.getBoundingClientRect().height)).toBeLessThan(24);
       const filter = await page.getByRole("combobox", { name: "View requests" }).boundingBox();
       const search = await page.getByRole("textbox", { name: "Search questions" }).boundingBox();
       expect(Math.abs(filter!.y - search!.y)).toBeLessThan(2);

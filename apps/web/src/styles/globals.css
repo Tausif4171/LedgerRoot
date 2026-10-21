@@ -499,33 +499,33 @@ small {
   max-width: 100%;
   min-width: 0;
 }
-.topbar-profile .demo-actor {
+.topbar-profile .sample-user {
   flex-wrap: nowrap;
 }
-.demo-actor .select-trigger {
-  width: 200px;
+.sample-user .select-trigger {
+  width: 190px;
 }
 @media (max-width: 640px) {
-  .topbar:has(.demo-actor) {
+  .topbar:has(.sample-user) {
     height: auto;
     min-height: 0;
     flex-wrap: wrap;
     padding-top: 12px;
     padding-bottom: 12px;
   }
-  .topbar-profile:has(.demo-actor) {
+  .topbar-profile:has(.sample-user) {
     width: 100%;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: end;
   }
-  .topbar-profile .demo-actor {
+  .topbar-profile .sample-user {
     display: grid;
     gap: var(--space-1);
     min-width: 0;
-    font-size: 0.8125rem;
+    font-size: 1rem;
   }
-  .demo-actor .select-trigger {
+  .sample-user .select-trigger {
     flex: 1;
     width: auto;
   }
@@ -543,9 +543,13 @@ small {
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
-  font-size: 0.8125rem;
-  max-width: 45ch;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.875rem;
   color: var(--muted);
+}
+.sample-notice > span {
+  min-width: 0;
 }
 .sample-notice svg {
   flex-shrink: 0;
@@ -553,7 +557,7 @@ small {
 }
 @media (max-width: 640px) {
   .sample-notice {
-    max-width: none;
+    font-size: 1rem;
   }
 }
 .page-heading {
