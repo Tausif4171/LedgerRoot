@@ -1264,16 +1264,27 @@ tbody tr:hover {
   margin-block: var(--space-3) 0;
   padding: var(--space-4) var(--space-5);
 }
-.example-callout p {
+.example-callout-copy {
+  flex: 1;
+  min-width: 0;
+}
+.example-callout-copy > p {
   max-width: 65ch;
+  margin: 0;
+}
+.example-callout-copy > .example-callout-note {
+  margin-top: var(--space-1);
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+.example-callout-copy > [role="alert"] {
+  margin-top: var(--space-2);
+  color: var(--danger);
 }
 .example-callout > .btn {
   flex-shrink: 0;
   max-width: 100%;
   white-space: normal;
-}
-.example-callout [role="alert"] {
-  color: var(--danger);
 }
 .callout-error {
   border-left-color: var(--danger);

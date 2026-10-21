@@ -37,10 +37,11 @@ export default function Inbox() {
       <PageHeading title="Requests" description="Questions and replies linked to documents." />
       {isSample && (
         <div className="callout callout-info example-callout">
-          <p>
-            Request a clearer copy of the document, then review the updated details. Processing is
-            simulated.
-          </p>
+          <div className="example-callout-copy">
+            <p>Request a clearer copy of the document, then review the updated details.</p>
+            <p className="example-callout-note">Processing is simulated.</p>
+            {startError && <p role="alert">{startError}</p>}
+          </div>
           <Button
             onClick={async () => {
               try {
@@ -56,7 +57,6 @@ export default function Inbox() {
           >
             Start correction example
           </Button>
-          {startError && <p role="alert">{startError}</p>}
         </div>
       )}
       <>
