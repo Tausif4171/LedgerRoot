@@ -1,7 +1,8 @@
 "use client";
 import { Select } from "@/components/ui/select";
+import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { MAX_BYTES, type DocumentRecord, type FieldName } from "@ledgerroot/contracts";
 import { fieldLabels, fieldValue } from "@/lib/field-labels";
@@ -84,6 +85,7 @@ export function SourceHistory({ document: d }: { document: DocumentRecord }) {
                   {fieldLabels[field as FieldName]}: {fieldValue(field as FieldName, value)}{" "}
                   <Button
                     variant="ghost"
+                    className="source-inspect"
                     onClick={() =>
                       setEvidence(
                         source.extraction?.evidence[
@@ -118,16 +120,29 @@ export function ReplaceSource({
   const [confirmed, setConfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [progressVisible, setProgressVisible] = useState(false);
   const [error, setError] = useState("");
   const [duplicate, setDuplicate] = useState<{ id: string; version: number } | null>(null);
+  const progressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (progressTimer.current) clearTimeout(progressTimer.current);
+    },
+    [],
+  );
   // Capture the reviewed base at dialog open; never silently adopt newer polling data.
   const [base] = useState(d);
   async function submit() {
     if ((!file && !isSample) || !confirmed) return;
     setBusy(true);
+    setProgressVisible(false);
+    setProgress(0);
     setError("");
     try {
       if (file && file.size > MAX_BYTES) throw new Error("Choose an image up to 10 MiB.");
+      if (file) {
+        progressTimer.current = setTimeout(() => setProgressVisible(true), 180);
+      }
       const result = isSample
         ? (await sampleCollaboration.replace(base, reason, request),
           { duplicate: false, id: d.id, version: 2 })
@@ -144,7 +159,14 @@ export function ReplaceSource({
                 ? { requestId: request.id, expectedRequestVersion: request.version }
                 : {}),
             },
-            setProgress,
+            (value) => {
+              setProgress(value);
+              if (value >= 100) {
+                if (progressTimer.current) clearTimeout(progressTimer.current);
+                progressTimer.current = null;
+                setProgressVisible(false);
+              }
+            },
             crypto.randomUUID(),
           );
       await cache.invalidateQueries({ queryKey: ["document", d.id] });
@@ -155,6 +177,9 @@ export function ReplaceSource({
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed.");
     } finally {
+      if (progressTimer.current) clearTimeout(progressTimer.current);
+      progressTimer.current = null;
+      setProgressVisible(false);
       setBusy(false);
     }
   }
@@ -164,8 +189,12 @@ export function ReplaceSource({
       onOpenChange={(v) => {
         if (!v && !busy) onClose();
       }}
-      title="Upload clearer photo"
-      description="Same document only. Earlier images and saved values are preserved; fresh review is required."
+      title={isSample ? "Try the clearer photo example" : "Upload a clearer photo"}
+      description={
+        isSample
+          ? "This uses a supplied sample image and saved extraction results; no file is uploaded and no new extraction runs."
+          : "Upload a clearer photo of the same receipt or invoice. The earlier photo and saved values stay in history; review the new extraction before approval."
+      }
     >
       <form
         className="review-form collaboration-form"
@@ -174,13 +203,13 @@ export function ReplaceSource({
           void submit();
         }}
       >
-        <p>JPEG/PNG · English · USD · one document per image · up to 10 MiB and 24 megapixels.</p>
-        {isSample ? (
-          <p className="callout">
-            Uses the supplied clearer synthetic image and saved real-model output. No file is
-            uploaded and no inference runs.
+        {!isSample && (
+          <p>
+            Upload one JPEG or PNG of an English-language receipt or invoice in USD (up to 10 MiB
+            and 24 megapixels).
           </p>
-        ) : (
+        )}
+        {!isSample && (
           <>
             <label htmlFor="clearer-file">Clearer photo</label>
             <input
@@ -193,9 +222,13 @@ export function ReplaceSource({
             />
           </>
         )}
-        <label htmlFor="replacement-reason">What is clearer?</label>
+        <label htmlFor="replacement-reason">What was hard to read in the previous photo?</label>
+        <p id="replacement-reason-hint" className="field-hint">
+          For example, the total or vendor name was blurry.
+        </p>
         <textarea
           id="replacement-reason"
+          aria-describedby="replacement-reason-hint"
           required
           maxLength={1000}
           value={reason}
@@ -208,34 +241,44 @@ export function ReplaceSource({
             checked={confirmed}
             onChange={(e) => setConfirmed(e.target.checked)}
           />{" "}
-          This is a clearer photo of the same receipt or invoice, not a changed bill.
+          I confirm this is a clearer photo of the same receipt or invoice, not a different or
+          updated document.
         </label>
-        {busy && (
-          <div role="status">
-            {isSample ? (
-              "Preparing supplied sample…"
-            ) : progress === 100 ? (
-              "Saving safely…"
-            ) : (
-              <>
-                <progress aria-label="Upload progress" max={100} value={progress} /> Uploading ·{" "}
-                {progress}%
-              </>
-            )}
-          </div>
-        )}
+        {busy &&
+          (isSample ? (
+            <div role="status">Applying sample…</div>
+          ) : progress === 100 ? (
+            <div role="status">Saving the new version…</div>
+          ) : progressVisible ? (
+            <div role="status">
+              <progress aria-label="Upload progress" max={100} value={progress} /> Uploading ·{" "}
+              {progress}%
+            </div>
+          ) : null)}
         {error && <p role="alert">{error}</p>}
         {duplicate && (
           <p role="status">
-            This image already exists as version {duplicate.version}. Nothing was replaced.{" "}
-            <a href={`/documents/${duplicate.id}`}>View document</a>
+            {duplicate.id === d.id
+              ? `This image is already saved as version ${duplicate.version} of this document. No new source version was added.`
+              : "This image already belongs to another document. No changes were made here."}{" "}
+            {duplicate.id !== d.id && (
+              <Link href={`/documents/${duplicate.id}`}>Open existing document</Link>
+            )}
           </p>
         )}
         <Button
           disabled={busy || (!file && !isSample) || !confirmed || !reason.trim()}
           type="submit"
         >
-          {busy ? "Saving…" : isSample ? "Use supplied clearer photo" : "Upload clearer photo"}
+          {busy
+            ? isSample
+              ? "Applying sample…"
+              : progress === 100
+                ? "Saving…"
+                : "Uploading…"
+            : isSample
+              ? "Use the clearer sample photo"
+              : "Upload a clearer photo"}
         </Button>
       </form>
     </Modal>

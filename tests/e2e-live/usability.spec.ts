@@ -161,3 +161,41 @@ test("upload shows queued completion rather than an extraction progress bar", as
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath("upload-complete.png"), fullPage: true });
 });
+
+test("duplicate upload links to the existing document without creating another", async ({
+  page,
+}) => {
+  let uploads = 0;
+  await page.route("**/api/v1/**", async (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    if (request.method() === "POST") {
+      uploads += 1;
+      return route.fulfill({ status: 200, json: { id: "existing-document", duplicate: true } });
+    }
+    return route.fulfill({
+      json: path.endsWith("/me")
+        ? { userId: "test", role: "OWNER" }
+        : path.endsWith("/documents-summary")
+          ? { total: 0, attention: 0, approved: 0 }
+          : path.endsWith("/requests-summary")
+            ? { actionable: 0 }
+            : { items: [], nextCursor: null },
+    });
+  });
+  await page.goto("/documents");
+  await page.getByRole("button", { name: "Upload", exact: true }).click();
+  await page.locator("#upload-files").setInputFiles({
+    name: "existing-receipt.png",
+    mimeType: "image/png",
+    buffer: Buffer.from("duplicate UI test image"),
+  });
+  await expect(
+    page.getByText("Already in this workspace. No new document was created.", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Open existing document", exact: true }),
+  ).toHaveAttribute("href", "/documents/existing-document");
+  await expect(page.getByRole("progressbar")).toHaveCount(0);
+  expect(uploads).toBe(1);
+});

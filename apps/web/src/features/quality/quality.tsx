@@ -29,9 +29,9 @@ export function Quality() {
       ) : (
         <>
           <p className="quality-intro">
-            Saved results from {cases.length} synthetic test documents with known answers. They are
-            separate from workspace uploads; missing values and processing failures are included.
-            This small test does not measure live service health or production accuracy.
+            Saved evaluation results from {cases.length} synthetic test documents with expected
+            values. They are separate from workspace uploads and do not measure live service health
+            or production accuracy.
           </p>
           <section className="stats evaluation-summary" aria-label="Evaluation summary">
             <div className="stat">
@@ -55,26 +55,38 @@ export function Quality() {
               <p>Suggestions without a known answer</p>
             </div>
           </section>
-          <p className="quality-footnote">
-            Missing: {cases.length * 7 - sum("attempted")} of {cases.length * 7} candidate fields
-            (including optional values). Incorrect or unsupported suggestions:{" "}
-            {sum("attempted") - sum("correct")}. Processing errors:{" "}
-            {cases.filter((c) => c.error).length}.
-          </p>
+          <section className="quality-metrics" aria-label="Additional evaluation metrics">
+            <dl className="quality-metrics-list">
+              <div className="quality-metric-row">
+                <dt>Unfilled candidate fields, including optional values</dt>
+                <dd className="quality-number">
+                  {cases.length * 7 - sum("attempted")} / {cases.length * 7}
+                </dd>
+              </div>
+              <div className="quality-metric-row">
+                <dt>Incorrect or unsupported suggestions</dt>
+                <dd className="quality-number">{sum("attempted") - sum("correct")}</dd>
+              </div>
+              <div className="quality-metric-row">
+                <dt>Processing errors</dt>
+                <dd className="quality-number">{cases.filter((c) => c.error).length}</dd>
+              </div>
+            </dl>
+          </section>
           <div
-            className="panel table-wrap quality-splits"
+            className="panel table-wrap quality-split quality-splits"
             role="region"
             aria-label="Results by dataset split"
             tabIndex={0}
           >
-            <table className="evaluation-table">
+            <table className="quality-table">
               <caption className="sr-only">Results separated by dataset split</caption>
               <thead>
                 <tr>
                   <th>Split</th>
-                  <th>Cases</th>
-                  <th>Correct / attempted</th>
-                  <th>Known fields</th>
+                  <th className="quality-number">Cases</th>
+                  <th className="quality-number">Correct / attempted</th>
+                  <th className="quality-number">Known fields</th>
                 </tr>
               </thead>
               <tbody>
@@ -83,12 +95,14 @@ export function Quality() {
                   return (
                     <tr key={split}>
                       <td>{split}</td>
-                      <td>{rows.length}</td>
-                      <td>
+                      <td className="quality-number">{rows.length}</td>
+                      <td className="quality-number">
                         {rows.reduce((n, c) => n + c.correct, 0)} /{" "}
                         {rows.reduce((n, c) => n + c.attempted, 0)}
                       </td>
-                      <td>{rows.reduce((n, c) => n + c.expectedCount, 0)}</td>
+                      <td className="quality-number">
+                        {rows.reduce((n, c) => n + c.expectedCount, 0)}
+                      </td>
                     </tr>
                   );
                 })}
@@ -98,16 +112,16 @@ export function Quality() {
           <div
             className="panel table-wrap quality-cases"
             role="region"
-            aria-label="Results by test case"
+            aria-label="Evaluation test cases"
             tabIndex={0}
           >
-            <table className="evaluation-table">
+            <table className="quality-table">
               <thead>
                 <tr>
                   <th>Test case</th>
                   <th>Category / split</th>
-                  <th>Correct / expected</th>
-                  <th>Duration</th>
+                  <th className="quality-number">Correct / expected</th>
+                  <th className="quality-number">Duration</th>
                   <th>Outcome</th>
                 </tr>
               </thead>
@@ -116,10 +130,10 @@ export function Quality() {
                   <tr key={c.id}>
                     <td className="mono">{c.id}</td>
                     <td>{c.category}</td>
-                    <td>
+                    <td className="quality-number">
                       {c.correct} / {c.expectedCount}
                     </td>
-                    <td>{(c.durationMs / 1000).toFixed(1)}s</td>
+                    <td className="quality-number">{(c.durationMs / 1000).toFixed(1)}s</td>
                     <td>
                       {c.error ??
                         (c.correct === c.expectedCount

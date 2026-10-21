@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/dialog";
 import { LoadingState } from "@/components/ui/loading-state";
 
+const previousRequestBatchSize = 5;
+
 const requestEventLabels: Record<string, string> = {
   created: "Asked",
   respond: "Responded",
@@ -20,6 +22,13 @@ const requestEventLabels: Record<string, string> = {
   reassign: "Reassigned",
   cancel: "Canceled",
 };
+
+function requestStateLabel(state: string) {
+  return state
+    .toLowerCase()
+    .replaceAll("_", " ")
+    .replace(/^./, (letter) => letter.toUpperCase());
+}
 
 export default function DocumentRequests({
   document: d,
@@ -40,6 +49,7 @@ export default function DocumentRequests({
   const [busy, setBusy] = useState(false);
   const [refreshFailed, setRefreshFailed] = useState(false);
   const [oldestMessageId, setOldestMessageId] = useState<string | null>(null);
+  const [visiblePreviousCount, setVisiblePreviousCount] = useState(previousRequestBatchSize);
   async function refreshLatest() {
     setRefreshFailed(false);
     try {
@@ -82,6 +92,14 @@ export default function DocumentRequests({
   });
   const me = useQuery({ queryKey: ["identity"], queryFn: () => collaborationGateway.identity() });
   const active = query.data?.items.find((r) => ["OPEN", "RESPONDED"].includes(r.state));
+  const previousRequests =
+    previous.data?.pages
+      .flatMap((page) => page.items)
+      .filter((r) => !["OPEN", "RESPONDED"].includes(r.state)) ?? [];
+  const orderedPreviousRequests = [...previousRequests].sort(
+    (a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt),
+  );
+  const visiblePreviousRequests = orderedPreviousRequests.slice(0, visiblePreviousCount);
   const signedOut = !isSample && query.error instanceof ApiError && query.error.status === 401;
   const messageIndex = active?.events.findIndex((event) => event.id === oldestMessageId) ?? -1;
   const conversationLimit = Math.max(
@@ -232,7 +250,7 @@ export default function DocumentRequests({
                         disabled={busy || !["READY", "FAILED"].includes(d.stage)}
                         onClick={() => onReplace(active.id, active.version)}
                       >
-                        Upload clearer photo
+                        Upload a clearer photo
                       </Button>
                     </>
                   )}
@@ -289,8 +307,13 @@ export default function DocumentRequests({
               )}
           </>
         )}
-        <details>
-          <summary>Previous requests</summary>
+        <details className="previous-requests">
+          <summary>
+            Previous requests
+            {previousRequests.length > 0
+              ? ` (${previousRequests.length}${previous.hasNextPage ? "+" : ""})`
+              : ""}
+          </summary>
           {previous.isPending ? (
             <p role="status">Loading previous requests…</p>
           ) : (
@@ -303,41 +326,81 @@ export default function DocumentRequests({
                   </Button>
                 </div>
               )}
-              {previous.data?.pages
-                .flatMap((page) => page.items)
-                .filter((r) => !["OPEN", "RESPONDED"].includes(r.state))
-                .map((r) => (
-                  <div key={r.id}>
-                    <h3>{r.question}</h3>
-                    <p>
-                      Status:{" "}
-                      {r.state
-                        .toLowerCase()
-                        .replaceAll("_", " ")
-                        .replace(/^./, (c) => c.toUpperCase())}
-                    </p>
-                    <ul>
-                      {r.events.map((e) => (
-                        <li key={e.id}>
-                          {e.actorName}: {e.message || e.action.replaceAll("-", " ")}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              {!previous.error &&
-                !previous.data?.pages
-                  .flatMap((page) => page.items)
-                  .some((r) => !["OPEN", "RESPONDED"].includes(r.state)) && (
-                  <p>No previous requests.</p>
-                )}
+              {orderedPreviousRequests.length > 0 ? (
+                <div className="previous-request-list">
+                  {visiblePreviousRequests.map((r) => {
+                    const lastEvent = r.events.at(-1);
+                    return (
+                      <details className="previous-request" key={r.id}>
+                        <summary>
+                          <span className="previous-request-question">{r.question}</span>
+                          <span className="previous-request-meta">
+                            {requestStateLabel(r.state)}
+                            {lastEvent &&
+                              ` · ${new Intl.DateTimeFormat(undefined, {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                                hour: "numeric",
+                                minute: "2-digit",
+                              }).format(new Date(lastEvent.createdAt))}`}
+                          </span>
+                        </summary>
+                        <ul className="request-conversation">
+                          {r.events.map((e) => (
+                            <li key={e.id}>
+                              <strong>{e.actorName}</strong> ·{" "}
+                              {requestEventLabels[e.action] ?? e.action}:{" "}
+                              {e.message || "No message recorded."}
+                              <div className="muted">
+                                <time dateTime={e.createdAt}>
+                                  {new Date(e.createdAt).toLocaleString()}
+                                </time>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                    );
+                  })}
+                </div>
+              ) : (
+                !previous.error && <p>No previous requests.</p>
+              )}
             </>
           )}
-          {previous.hasNextPage && !previous.error && (
-            <Button disabled={previous.isFetchingNextPage} onClick={() => previous.fetchNextPage()}>
-              Load more requests
+          {orderedPreviousRequests.length > visiblePreviousCount && (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                setVisiblePreviousCount((count) =>
+                  Math.min(count + previousRequestBatchSize, orderedPreviousRequests.length),
+                )
+              }
+            >
+              Show{" "}
+              {Math.min(
+                previousRequestBatchSize,
+                orderedPreviousRequests.length - visiblePreviousCount,
+              )}
+              {orderedPreviousRequests.length - visiblePreviousCount === 1
+                ? " older request"
+                : " older requests"}
             </Button>
           )}
+          {previous.hasNextPage &&
+            !previous.error &&
+            orderedPreviousRequests.length <= visiblePreviousCount && (
+              <Button
+                disabled={previous.isFetchingNextPage}
+                onClick={async () => {
+                  await previous.fetchNextPage();
+                  setVisiblePreviousCount((count) => count + previousRequestBatchSize);
+                }}
+              >
+                Load more requests
+              </Button>
+            )}
         </details>
       </div>
       <Modal

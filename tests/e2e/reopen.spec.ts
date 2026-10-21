@@ -4,10 +4,12 @@ for (const activation of ["click", "Enter", "Space"] as const) {
   test(`approved source revision reopens once with ${activation}`, async ({ page }) => {
     await page.goto("/requests");
     await page.getByRole("button", { name: "Start correction example" }).click();
-    await page.getByRole("button", { name: "Upload clearer photo", exact: true }).click();
-    await page.getByLabel("What is clearer?").fill("Full receipt visible");
+    await page.getByRole("button", { name: "Upload a clearer photo", exact: true }).click();
+    await page
+      .getByLabel("What was hard to read in the previous photo?")
+      .fill("Full receipt visible");
     await page.getByRole("dialog").getByRole("checkbox").check();
-    await page.getByRole("button", { name: "Use supplied clearer photo" }).click();
+    await page.getByRole("button", { name: "Use the clearer sample photo" }).click();
     await expect(page.getByRole("dialog")).not.toBeVisible();
     await page.getByRole("button", { name: "Discard draft and load saved values" }).click();
     await page.getByLabel("Vendor", { exact: true }).fill("Cedar Field Supply");

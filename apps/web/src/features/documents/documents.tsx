@@ -118,24 +118,26 @@ export function Documents() {
             )}
           </div>
         ) : !docs.length ? (
-          <div className="empty">
+          <div className={q || status !== "all" ? "empty empty-filter" : "empty"}>
             <Files size={32} className="muted" aria-hidden="true" />
             <h2>
               {q
                 ? "No matching documents"
                 : status !== "all"
-                  ? "No documents in this view"
+                  ? status === "review"
+                    ? "No documents need review"
+                    : `No ${status} documents`
                   : "No documents yet"}
             </h2>
-            <p>
-              {q
-                ? "Try another vendor or filename."
-                : status !== "all"
-                  ? "No documents match this status."
+            {(q || status === "all") && (
+              <p>
+                {q
+                  ? "Try another vendor or filename."
                   : isSample
                     ? "Sample receipts and invoices are ready to explore."
                     : "Upload a receipt or invoice to start a review."}
-            </p>
+              </p>
+            )}
             {(q || status !== "all") && (
               <Button
                 onClick={() => {

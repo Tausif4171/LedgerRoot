@@ -144,7 +144,9 @@ export function Review({ id }: { id: string }) {
             ["READY", "FAILED"].includes(d.stage) &&
             !["APPROVED", "REJECTED"].includes(d.reviewStatus) && (
               <div className="source-actions">
-                <ActionButton onClick={() => beginReplacement()}>Upload clearer photo</ActionButton>
+                <ActionButton onClick={() => beginReplacement()}>
+                  Upload a clearer photo
+                </ActionButton>
               </div>
             )}
           {replacement && (

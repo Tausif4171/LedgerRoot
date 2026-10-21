@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Upload, ArrowUpRight } from "lucide-react";
@@ -12,6 +12,7 @@ type Item = {
   progress: number;
   status: string;
   transferring?: boolean;
+  progressVisible?: boolean;
   id?: string;
   duplicate?: boolean;
 };
@@ -32,6 +33,14 @@ export function UploadDialog({
   const [items, setItems] = useState<Item[]>([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const progressTimers = useRef(new Map<number, ReturnType<typeof setTimeout>>());
+  useEffect(
+    () => () => {
+      for (const timer of progressTimers.current.values()) clearTimeout(timer);
+      progressTimers.current.clear();
+    },
+    [],
+  );
   async function upload(files: FileList | null) {
     if (!files) return;
     const selected = Array.from(files);
@@ -44,6 +53,8 @@ export function UploadDialog({
     }
     setError("");
     setBusy(true);
+    for (const timer of progressTimers.current.values()) clearTimeout(timer);
+    progressTimers.current.clear();
     setItems(selected.map((f) => ({ name: f.name, progress: 0, status: "Waiting" })));
     let cursor = 0;
     const update = (index: number, patch: Partial<Item>) =>
@@ -53,27 +64,47 @@ export function UploadDialog({
         const i = cursor++;
         const file = selected[i]!;
         try {
-          update(i, { status: "Uploading", transferring: true });
-          const result = await gateway.upload(file, (p) =>
-            update(i, {
-              progress: p,
-              transferring: p < 100,
-              status: p === 100 ? "Saving original" : "Uploading",
-            }),
+          update(i, { status: "Uploading…", transferring: true, progressVisible: false });
+          progressTimers.current.set(
+            i,
+            setTimeout(() => update(i, { progressVisible: true }), 180),
           );
+          const result = await gateway.upload(file, (p) => {
+            if (p >= 100) {
+              const timer = progressTimers.current.get(i);
+              if (timer) clearTimeout(timer);
+              progressTimers.current.delete(i);
+              update(i, {
+                progress: p,
+                transferring: false,
+                progressVisible: false,
+                status: "Saving original…",
+              });
+            } else {
+              update(i, { progress: p, transferring: true, status: "Uploading…" });
+            }
+          });
+          const timer = progressTimers.current.get(i);
+          if (timer) clearTimeout(timer);
+          progressTimers.current.delete(i);
           update(i, {
             id: result.id,
             duplicate: result.duplicate,
             status: result.duplicate
-              ? "Duplicate · existing record preserved"
+              ? "Already in this workspace. No new document was created."
               : "Uploaded · processing queued",
             transferring: false,
+            progressVisible: false,
             progress: 100,
           });
         } catch (e) {
+          const timer = progressTimers.current.get(i);
+          if (timer) clearTimeout(timer);
+          progressTimers.current.delete(i);
           update(i, {
             status: e instanceof Error ? e.message : "Upload failed",
             transferring: false,
+            progressVisible: false,
           });
         }
       }
@@ -150,11 +181,11 @@ export function UploadDialog({
                     href={`/documents/${item.id}`}
                     onClick={() => onOpenChange(false)}
                   >
-                    {item.duplicate ? "Open existing record" : "Open document"}
+                    {item.duplicate ? "Open existing document" : "Open document"}
                     <ArrowUpRight size={16} />
                   </Link>
                 )}
-                {item.transferring && (
+                {item.transferring && item.progressVisible && (
                   <progress
                     aria-label={`${item.name} upload progress`}
                     value={item.progress}

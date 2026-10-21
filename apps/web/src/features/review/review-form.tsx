@@ -163,21 +163,33 @@ export function ReviewForm({
       return (
         <span className="field-origin">Previous source values · reconcile with the new source</span>
       );
-    const ids = d.extraction?.evidence[name] ?? [];
-    const edited = base.fields[name] !== d.extraction?.fields[name];
-    return edited ? (
-      <span className="field-origin">Human correction · original extraction retained</span>
-    ) : ids.length ? (
-      <>
-        <button type="button" className="evidence-button" onClick={() => onEvidence(ids)}>
-          <ScanLine size={14} aria-hidden="true" />
-          {base.fields[name] === null ? "View source text" : "Source found"}
-        </button>
-        {base.fields[name] === null && !finalized && (
-          <span className="field-origin">No value supplied—confirm from the document.</span>
-        )}
-      </>
-    ) : (
+    const extraction = d.extraction;
+    const ids = extraction?.evidence[name] ?? [];
+    if (extraction && base.fields[name] !== extraction.fields[name]) {
+      const suggestion = extraction.fields[name];
+      return (
+        <span className="field-origin">
+          {suggestion === null
+            ? "No value was extracted. The saved value was entered manually."
+            : base.fields[name] === null
+              ? `No value is saved. Original suggestion: ${fieldValue(name, suggestion)}.`
+              : `Original suggestion: ${fieldValue(name, suggestion)}.`}
+        </span>
+      );
+    }
+    if (ids.length)
+      return (
+        <>
+          <button type="button" className="evidence-button" onClick={() => onEvidence(ids)}>
+            <ScanLine size={14} aria-hidden="true" />
+            {base.fields[name] === null ? "View source text" : "Source found"}
+          </button>
+          {base.fields[name] === null && !finalized && (
+            <span className="field-origin">No value supplied—confirm from the document.</span>
+          )}
+        </>
+      );
+    return (
       <span className="field-origin">
         {name === "invoiceNumber" || name === "dueDate"
           ? "Not supplied · optional"
@@ -225,17 +237,6 @@ export function ReviewForm({
                 </ul>
               </details>
             )}
-            <details className="extraction-provenance">
-              <summary>Extraction provenance</summary>
-              <p>
-                {d.extraction?.provenance === "live"
-                  ? "Recorded real model output"
-                  : "Authored fixture — no real model output"}
-              </p>
-              <p>
-                {d.extraction?.model} · {d.extraction?.modelDigest} · {d.extraction?.promptVersion}
-              </p>
-            </details>
           </details>
           {error && (
             <p className="callout callout-error" role="alert">
@@ -644,6 +645,12 @@ export function ReviewForm({
             )}
           </div>
           {!locked && !emptyReview && (
+            <p className="legal-note">
+              Approval records your review in LedgerRoot. It does not create an accounting entry or
+              send a payment.
+            </p>
+          )}
+          {!locked && !emptyReview && (
             <div className="secondary-actions">
               <Button
                 type="button"
@@ -667,25 +674,30 @@ export function ReviewForm({
         <div aria-live="polite">
           {busy ? <p className="legal-note">Saving your review…</p> : null}
         </div>
-        <p className="legal-note">
-          Approval records your review only. It does not create accounting entries, send payments or
-          verify tax treatment.
-        </p>
-        <details style={{ marginTop: 16, fontSize: 12 }}>
-          <summary>Extraction provenance</summary>
-          <p>
-            {d.extraction?.provenance === "live"
-              ? "Recorded real model output"
-              : "Authored fixture — no real model output"}
-          </p>
-          <p className="mono" style={{ overflowWrap: "anywhere" }}>
-            {d.extraction?.model}
-            <br />
-            {d.extraction?.modelDigest}
-            <br />
-            {d.extraction?.promptVersion}
-          </p>
-        </details>
+        {d.extraction && (
+          <details className="extraction-provenance">
+            <summary>Technical details</summary>
+            <p>
+              {d.extraction.provenance === "live"
+                ? "Recorded model output"
+                : "Authored fixture — no real model output"}
+            </p>
+            <dl className="provenance-list">
+              <div>
+                <dt>Model</dt>
+                <dd>{d.extraction.model}</dd>
+              </div>
+              <div>
+                <dt>Model digest</dt>
+                <dd className="mono">{d.extraction.modelDigest}</dd>
+              </div>
+              <div>
+                <dt>Prompt version</dt>
+                <dd>{d.extraction.promptVersion}</dd>
+              </div>
+            </dl>
+          </details>
+        )}
       </form>
       <Modal
         open={reasonAction !== null}

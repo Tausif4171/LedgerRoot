@@ -32,6 +32,17 @@ test("request conflict refreshes without navigation or lost drafts", async ({ pa
   await page.getByRole("button", { name: "Resolve request", exact: true }).click();
   await expect(page.getByText("No active request.")).toBeVisible();
   await expect(page.getByLabel("Vendor", { exact: true })).toHaveValue("Unsaved vendor correction");
+  const previous = page.locator("details.previous-requests");
+  await previous.locator(":scope > summary").click();
+  const priorRequest = previous.locator("details.previous-request");
+  await expect(priorRequest).toHaveCount(1);
+  await expect(priorRequest).not.toHaveAttribute("open", "");
+  await expect(priorRequest.locator("summary")).toContainText("Confirm vendor");
+  await expect(priorRequest.locator("summary")).toContainText("Resolved");
+  await priorRequest.locator("summary").click();
+  await expect(priorRequest.locator(".request-conversation li")).toHaveCount(3);
+  await expect(priorRequest.locator(".request-conversation time")).toHaveCount(3);
+  await expect(page.getByLabel("Vendor", { exact: true })).toHaveValue("Unsaved vendor correction");
 });
 
 test("correction scenario preserves drafts and images, resolves then approves", async ({
@@ -54,10 +65,12 @@ test("correction scenario preserves drafts and images, resolves then approves", 
   await page.getByLabel("Demo actor (simulation only)").click();
   await page.getByRole("option", { name: "Sample teammate", exact: true }).click();
   await expect(page.getByRole("button", { name: "Send response", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Upload clearer photo", exact: true }).first().click();
-  await page.getByLabel("What is clearer?").fill("The total is now visible");
+  await page.getByRole("button", { name: "Upload a clearer photo", exact: true }).first().click();
+  await page
+    .getByLabel("What was hard to read in the previous photo?")
+    .fill("The total is now visible");
   await page.getByRole("dialog").getByRole("checkbox").check();
-  await page.getByRole("button", { name: "Use supplied clearer photo" }).click();
+  await page.getByRole("button", { name: "Use the clearer sample photo" }).click();
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page.getByText("Response needs review", { exact: false })).toBeVisible();
   await page.getByLabel("Demo actor (simulation only)").click();
@@ -73,7 +86,7 @@ test("correction scenario preserves drafts and images, resolves then approves", 
   await page.getByLabel("Document type", { exact: true }).click();
   await page.getByRole("option", { name: "Receipt", exact: true }).click();
   await page.getByLabel("Total amount (USD)").fill("148.50");
-  await page.getByRole("button", { name: "Upload clearer photo", exact: true }).click();
+  await page.getByRole("button", { name: "Upload a clearer photo", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "You have unsaved changes" })).toBeVisible();
   await page.getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(page.getByLabel("Total amount (USD)")).toHaveValue("148.50");

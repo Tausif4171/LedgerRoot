@@ -49,10 +49,12 @@ test("source placeholder is not an option and missing suggestions cannot erase s
   await page.getByRole("option", { name: "Version 1 · current · Ready" }).click();
   const fieldsTab = page.getByRole("tab", { name: "Fields", exact: true });
   if (await fieldsTab.isVisible()) await fieldsTab.click();
-  await page.getByRole("button", { name: "Upload clearer photo", exact: true }).click();
-  await page.getByLabel("What is clearer?").fill("The full total is visible");
+  await page.getByRole("button", { name: "Upload a clearer photo", exact: true }).click();
+  await page
+    .getByLabel("What was hard to read in the previous photo?")
+    .fill("The full total is visible");
   await page.getByRole("dialog").getByRole("checkbox").check();
-  await page.getByRole("button", { name: "Use supplied clearer photo" }).click();
+  await page.getByRole("button", { name: "Use the clearer sample photo" }).click();
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await page.getByRole("button", { name: "Discard draft and load saved values" }).click();
   await page.getByText("Compare saved values with new suggestions", { exact: false }).click();
@@ -120,6 +122,25 @@ test("sample history identifies each request action and actor", async ({ page })
   expect(events.at(-1)).toMatchObject({ actor: "Sample bookkeeper", action: "Request cancel" });
   expect(events.at(-1).note).toContain("No longer needed");
   expect(events.some((e: { action: string }) => e.action === "Sample request updated")).toBe(false);
+
+  for (let index = 0; index < 4; index++) {
+    await create();
+    await actor("Sample teammate");
+    await message.fill(`Confirmed ${index + 1}`);
+    await page.getByRole("button", { name: "Send response", exact: true }).click();
+    await actor("Sample bookkeeper");
+    await page.getByRole("button", { name: "Resolve request", exact: true }).click();
+    await expect(page.getByText("No active request.")).toBeVisible();
+  }
+
+  const previous = page.locator("details.previous-requests");
+  await previous.locator(":scope > summary").click();
+  const priorRequests = previous.locator("details.previous-request");
+  await expect(priorRequests).toHaveCount(5);
+  await expect(previous.getByRole("button", { name: "Show 1 older request" })).toBeVisible();
+  await previous.getByRole("button", { name: "Show 1 older request" }).click();
+  await expect(priorRequests).toHaveCount(6);
+  await expect(previous.locator("details.previous-request[open]")).toHaveCount(0);
 });
 
 test("demo controls and header remain clear on narrow screens", async ({ page }, testInfo) => {
