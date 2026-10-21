@@ -201,7 +201,7 @@ export function Documents() {
                           </div>
                         </td>
                         <td>
-                          <Status document={d} />
+                          <Status document={d} sample={isSample} />
                         </td>
                         <td className="document-total numeric">
                           {completeness.total === "Total not extracted" ? (

@@ -101,6 +101,27 @@ export const gateway = {
     if (!d) throw new ApiError("NOT_FOUND", "Document not found.", 404);
     return d;
   },
+  async simulateFailure(id: string) {
+    if (!isSample) throw new Error("Sample only");
+    const data = await readSamples();
+    const d = data.find((d) => d.id === id);
+    if (!d) throw new ApiError("NOT_FOUND", "Document not found.", 404);
+    d.stage = "FAILED";
+    d.reviewStatus = "NOT_READY";
+    d.revision++;
+    d.failure =
+      "This sample shows a timeout. Restore the saved results to continue; no live processing runs.";
+    d.history.push({
+      id: crypto.randomUUID(),
+      at: new Date().toISOString(),
+      actor: "Sample scenario",
+      action: "Timeout example shown",
+      note: d.failure,
+      before: null,
+      after: null,
+    });
+    persist(data);
+  },
   async mutate(id: string, action: ReviewAction, input: Mutation, key: string) {
     if (!isSample)
       return documentSchema.parse(
@@ -155,28 +176,6 @@ export const gateway = {
       sessionStorage.removeItem("ledgerroot-collaboration-v1");
     } catch {
       /* No persistent browser state. */
-    }
-  },
-  async simulateFailure(id: string) {
-    if (!isSample) throw new Error("Sample only");
-    const data = await readSamples();
-    const d = data.find((d) => d.id === id);
-    if (d) {
-      d.stage = "FAILED";
-      d.reviewStatus = "NOT_READY";
-      d.revision++;
-      d.failure =
-        "Simulated model timeout. Retry replays the previously saved extraction; no inference runs.";
-      d.history.push({
-        id: crypto.randomUUID(),
-        at: new Date().toISOString(),
-        actor: "Sample simulation",
-        action: "Simulated processing failure",
-        note: d.failure,
-        before: null,
-        after: null,
-      });
-      persist(data);
     }
   },
   async evaluations() {

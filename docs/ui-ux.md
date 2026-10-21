@@ -21,7 +21,7 @@ Spacing uses 4/8/12/16/20/24/32px steps. Controls have a 44px minimum target; te
 Desktop structure:
 
 ```text
-Sidebar | Compact sample disclosure + actor + Reset demo
+Sample toolbar | Sample status + demo user + contextual failure example + Reset demo
         | Page heading / primary action
         | Compact summary / filter toolbar / document list
 
@@ -31,6 +31,6 @@ Review  | Request status and actions, when applicable
         | History and earlier sources
 ```
 
-Below 1101px the existing Source/Fields/History tabs remain; the form stays mounted. Mobile navigation and sample controls wrap rather than creating hidden menus. Review actions stay in normal flow at every size: an early sticky-footer trial obscured fields. Only the desktop source pane is sticky, and it must not obscure focus or feedback.
+Below 1101px the existing Source/Fields/History tabs remain; the form stays mounted. Mobile navigation and sample controls wrap rather than creating hidden menus. The simulated processing-failure example appears only in the sample toolbar for a ready sample document; it changes no live service, and retry restores the saved sample results without reprocessing. The failure message and retry action say this plainly and remain visually grouped. Review actions stay in normal flow at every size: an early sticky-footer trial obscured fields. Only the desktop source pane is sticky, and it must not obscure focus or feedback.
 
 The three requested skills were installed and read on October 16, 2026: `frontend-design`, `ui-ux-pro-max`, and `web-design-guidelines`. Their guidance supports this project specification; it does not override server guards, sample disclosures, existing input restrictions, or the explicit light-only scope. UI UX Pro Max's generated marketing layouts did not fit this workspace; its accessibility and interaction references informed the refinement instead. Automated and manual verification results belong in `docs/verification.md`.

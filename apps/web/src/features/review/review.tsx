@@ -128,7 +128,7 @@ export function Review({ id }: { id: string }) {
             {d.filename}
           </p>
         </div>
-        <Status document={d} />
+        <Status document={d} sample={isSample} />
       </div>
       {error && (
         <div className="callout callout-error" role="alert">
@@ -196,10 +196,15 @@ export function Review({ id }: { id: string }) {
         </>
       )}
       {d.stage !== "READY" && (
-        <div className="callout" aria-live="polite">
+        <div
+          className={`callout processing-callout ${d.stage === "FAILED" ? "callout-failed" : ""}`}
+          aria-live="polite"
+        >
           <h2>
             {d.stage === "FAILED"
-              ? "Processing needs attention"
+              ? isSample
+                ? "Processing timed out"
+                : "Processing failed"
               : "Your document is being processed"}
           </h2>
           <p>
@@ -208,7 +213,13 @@ export function Review({ id }: { id: string }) {
           {d.stage === "FAILED" && d.canReview && (
             <Button onClick={retry} disabled={busy}>
               <RotateCcw size={16} aria-hidden="true" />
-              {busy ? "Retrying…" : isSample ? "Replay simulated retry" : "Retry processing"}
+              {busy
+                ? isSample
+                  ? "Restoring saved results…"
+                  : "Retrying…"
+                : isSample
+                  ? "Restore saved results"
+                  : "Retry processing"}
             </Button>
           )}
         </div>
@@ -258,22 +269,6 @@ export function Review({ id }: { id: string }) {
           </Tabs.Content>
         </div>
       </Tabs.Root>
-      {isSample && d.stage === "READY" && (
-        <details className="footnote demo-controls">
-          <summary>Demo controls</summary>
-          <Button
-            variant="ghost"
-            onClick={async () => {
-              await gateway.simulateFailure(id);
-              await cache.invalidateQueries({ queryKey: ["document", id] });
-              await cache.invalidateQueries({ queryKey: ["documents"] });
-            }}
-          >
-            Simulate a processing failure
-          </Button>
-          <p>Simulated failure—no live AI service is affected.</p>
-        </details>
-      )}
     </>
   );
 }

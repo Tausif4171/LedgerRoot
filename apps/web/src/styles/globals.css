@@ -414,10 +414,6 @@ small {
 .nav a:focus-visible {
   outline-color: var(--surface);
 }
-.demo-controls > summary {
-  cursor: pointer;
-  margin-bottom: 12px;
-}
 .comparison-list {
   list-style: none;
   padding: 0;
@@ -505,6 +501,11 @@ small {
 .sample-user .select-trigger {
   width: 190px;
 }
+.sample-scenario-error {
+  flex-basis: 100%;
+  color: var(--danger);
+  font-size: 0.8125rem;
+}
 @media (max-width: 640px) {
   .topbar:has(.sample-user) {
     height: auto;
@@ -515,13 +516,14 @@ small {
   }
   .topbar-profile:has(.sample-user) {
     width: 100%;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    display: flex;
+    flex-wrap: wrap;
     align-items: end;
   }
   .topbar-profile .sample-user {
     display: grid;
     gap: var(--space-1);
+    flex: 1 1 100%;
     min-width: 0;
     font-size: 1rem;
   }
@@ -1254,6 +1256,16 @@ tbody tr:hover {
 .callout-info {
   border-left-color: var(--brand);
   background: var(--surface);
+}
+.callout-failed {
+  border-left-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 4%, var(--canvas));
+}
+.processing-callout > h2 + p {
+  margin-top: var(--space-1);
+}
+.processing-callout > p + .btn {
+  margin-top: var(--space-3);
 }
 .example-callout {
   border-left-color: var(--control-border);

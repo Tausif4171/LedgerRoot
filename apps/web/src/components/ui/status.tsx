@@ -1,7 +1,18 @@
 import type { DocumentRecord } from "@ledgerroot/contracts";
 import { reviewLabels, stageLabels } from "@ledgerroot/domain";
-export function Status({ document: d }: { document: DocumentRecord }) {
-  const text = d.stage === "READY" ? reviewLabels[d.reviewStatus] : stageLabels[d.stage];
+export function Status({
+  document: d,
+  sample = false,
+}: {
+  document: DocumentRecord;
+  sample?: boolean;
+}) {
+  const text =
+    d.stage === "READY"
+      ? reviewLabels[d.reviewStatus]
+      : d.stage === "FAILED" && sample
+        ? "Sample timeout"
+        : stageLabels[d.stage];
   const tone =
     d.stage === "FAILED" || d.reviewStatus === "REJECTED"
       ? "danger"

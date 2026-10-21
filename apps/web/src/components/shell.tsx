@@ -4,8 +4,8 @@ import Link from "next/link";
 import { ApiError } from "@ledgerroot/contracts";
 import { loginHref } from "@/lib/login-return";
 import { usePathname } from "next/navigation";
-import { Files, ChartNoAxesCombined, GitBranch, Info, RotateCcw } from "lucide-react";
-import type { ReactNode } from "react";
+import { Files, ChartNoAxesCombined, GitBranch, Info, RotateCcw, Timer } from "lucide-react";
+import { useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { collaborationGateway } from "@/adapters/collaboration";
 import { sampleCollaboration, samplePeople } from "@/adapters/sample-collaboration";
@@ -14,6 +14,14 @@ import { gateway, isSample } from "@/adapters/gateway";
 export function Shell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const cache = useQueryClient();
+  const [scenarioBusy, setScenarioBusy] = useState(false);
+  const [scenarioError, setScenarioError] = useState("");
+  const sampleReviewId = isSample ? pathname.match(/^\/documents\/([^/]+)$/)?.[1] : undefined;
+  const sampleDocument = useQuery({
+    queryKey: ["document", sampleReviewId],
+    queryFn: () => gateway.get(sampleReviewId!),
+    enabled: Boolean(sampleReviewId),
+  });
   const identity = useQuery({
     queryKey: ["identity"],
     queryFn: () => collaborationGateway.identity(),
@@ -29,6 +37,23 @@ export function Shell({ children }: { children: ReactNode }) {
     identity.error instanceof ApiError &&
     identity.error.status === 401 &&
     pathname !== "/login";
+  async function showTimeoutExample() {
+    if (!sampleReviewId || scenarioBusy) return;
+    setScenarioBusy(true);
+    setScenarioError("");
+    try {
+      await gateway.simulateFailure(sampleReviewId);
+      await Promise.all([
+        cache.invalidateQueries({ queryKey: ["document", sampleReviewId] }),
+        cache.invalidateQueries({ queryKey: ["documents"] }),
+        cache.invalidateQueries({ queryKey: ["documents", "counts"] }),
+      ]);
+    } catch (error) {
+      setScenarioError(error instanceof Error ? error.message : "Could not show the example.");
+    } finally {
+      setScenarioBusy(false);
+    }
+  }
   return (
     <div className="shell">
       <a href="#main" className="skip">
@@ -95,6 +120,19 @@ export function Shell({ children }: { children: ReactNode }) {
                       ))}
                     </Select>
                   </label>
+                  {sampleReviewId && sampleDocument.data?.stage === "READY" && (
+                    <Button
+                      size="small"
+                      variant="ghost"
+                      aria-label="Show a timeout example for this sample document"
+                      title="Changes only this sample document; no live processing runs."
+                      disabled={scenarioBusy}
+                      onClick={showTimeoutExample}
+                    >
+                      <Timer size={16} aria-hidden="true" />
+                      {scenarioBusy ? "Showing timeout example…" : "Show timeout example"}
+                    </Button>
+                  )}
                   <Button
                     size="small"
                     variant="ghost"
@@ -107,6 +145,11 @@ export function Shell({ children }: { children: ReactNode }) {
                     <RotateCcw size={16} aria-hidden="true" />
                     Reset sample data
                   </Button>
+                  {scenarioError && (
+                    <span role="alert" className="sample-scenario-error">
+                      {scenarioError}
+                    </span>
+                  )}
                 </>
               )}
             </div>
